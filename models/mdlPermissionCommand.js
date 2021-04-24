@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 const mongoose = require('mongoose');
 
@@ -14,4 +14,4 @@ const PermissionCommandModel = new mongoose.Schema({
     creationDate: {type: Date, default: Date.now},
 });
 
-module.exports = mongoose.model('PermissionCommand', PermissionCommandModel);
+module.exports = mongoose.models.PermissionCommand || mongoose.model("PermissionCommand", PermissionCommandModel);
