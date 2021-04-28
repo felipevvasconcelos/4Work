@@ -52,7 +52,7 @@ export default function User({ data }) {
 			<Head>
 				<title>{siteTittle}</title>
 			</Head>
-			<CardPanel title="Usuários" subtitle="Lista de usuários cadastrados" color="primary" footer="Exibição de todos usuários">
+			<CardPanel title="Usuários" subtitle="Lista de usuários cadastrados" color="primary">
 				<div>
 					<Container maxWidth="xl">
 						<div className={classes.root}>

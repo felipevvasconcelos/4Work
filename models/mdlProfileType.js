@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const ProfileTypeModel = new mongoose.Schema({
 	name: { type: String, required: true, trim: true, unique: true },
-	status: { type: Boolean, required: true, default: true },
+	active: { type: Boolean, required: true, default: true },
 	creationDate: { type: Date, default: Date.now },
 });
 

@@ -16,7 +16,8 @@ import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { Copyright } from "@material-ui/icons";
+import { Build, Cast, Copyright, Dashboard, Timeline } from "@material-ui/icons";
+import Loading from "../Loading";
 
 // //ISSO AQUI SERVE PARA GERAR AS PAGINAS ESTATICAS
 // //FAZENDO ASSIM UMA REQUISIÇÃO INSTATANEA
@@ -123,6 +124,9 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: "start",
 		justifyContent: "flex-end",
 	},
+	avatar: {
+		marginLeft: "-19px",
+	},
 }));
 
 export default function Layout(props) {
@@ -153,7 +157,7 @@ export default function Layout(props) {
 			router.push("/auth/signin");
 		}
 	}, [session, loading]);
-	if (!session) return <CircularProgress></CircularProgress>;
+	if (!session) return <Loading></Loading>;
 
 	//Start Sidebar User
 	const drawerTasks = (
@@ -201,7 +205,7 @@ export default function Layout(props) {
 				<ListItem>
 					<Link href="/">
 						<Button>
-							<Avatar alt="Logo" variant="square" src="/images/logo.png" />
+							<Avatar className={classes.avatar} alt="Logo" variant="square" src="/images/logo.png" />
 							{/* <Typography variant="h6" className={styles.h6} noWrap> 4Work </Typography> */}
 						</Button>
 					</Link>
@@ -210,8 +214,15 @@ export default function Layout(props) {
 			<List>
 				<ListItem button>
 					<ListItemIcon>
-						{" "}
-						<AssignmentIcon />{" "}
+						<Dashboard />
+					</ListItemIcon>
+					<Link href="/dashboard">
+						<ListItemText primary="Dashboard" />
+					</Link>
+				</ListItem>
+				<ListItem button>
+					<ListItemIcon>
+						<AssignmentIcon />
 					</ListItemIcon>
 					<Link href="/call">
 						<ListItemText primary="Chamados" />
@@ -219,8 +230,7 @@ export default function Layout(props) {
 				</ListItem>
 				<ListItem button>
 					<ListItemIcon>
-						{" "}
-						<FolderSpecialIcon />{" "}
+						<FolderSpecialIcon />
 					</ListItemIcon>
 					<Link href="/improvement">
 						<ListItemText primary="Melhorias" />
@@ -228,11 +238,18 @@ export default function Layout(props) {
 				</ListItem>
 				<ListItem button>
 					<ListItemIcon>
-						{" "}
-						<DynamicFeedIcon />{" "}
+						<DynamicFeedIcon />
 					</ListItemIcon>
 					<Link href="/task">
 						<ListItemText primary="Tarefas" />
+					</Link>
+				</ListItem>
+				<ListItem button>
+					<ListItemIcon>
+						<Cast />
+					</ListItemIcon>
+					<Link href="/room">
+						<ListItemText primary="Quadro" />
 					</Link>
 				</ListItem>
 			</List>
@@ -240,8 +257,7 @@ export default function Layout(props) {
 			<List>
 				<ListItem button>
 					<ListItemIcon>
-						{" "}
-						<GroupIcon />{" "}
+						<GroupIcon />
 					</ListItemIcon>
 					<Link href="/user">
 						<ListItemText primary="Usuários" />
@@ -249,11 +265,18 @@ export default function Layout(props) {
 				</ListItem>
 				<ListItem button>
 					<ListItemIcon>
-						{" "}
-						<LocationCityIcon />{" "}
+						<LocationCityIcon />
 					</ListItemIcon>
 					<Link href="/company">
 						<ListItemText primary="Empresas" />
+					</Link>
+				</ListItem>
+				<ListItem button>
+					<ListItemIcon>
+						<Build />
+					</ListItemIcon>
+					<Link href="/admin">
+						<ListItemText primary="Configurações" />
 					</Link>
 				</ListItem>
 			</List>

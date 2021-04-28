@@ -8,7 +8,7 @@ export default function Company() {
 			<Head>
 				<title>{siteTittle}</title>
 			</Head>
-			<h1>This is Companies</h1>
+			<h1>This is Permissions</h1>
 		</Layout>
 	);
 }

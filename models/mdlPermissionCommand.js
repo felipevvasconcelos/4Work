@@ -10,7 +10,7 @@ const PermissionCommandModel = new mongoose.Schema({
         required: true
     },
     allow: {type: Boolean, required: true, default: true},
-    status: {type: Boolean, required: true, default: true},
+    active: {type: Boolean, required: true, default: true},
     creationDate: {type: Date, default: Date.now},
 });
 
