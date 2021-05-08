@@ -5,8 +5,8 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import theme from "../src/theme";
 import { Provider } from "next-auth/client";
-import { Slide, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@material-ui/core";
-import { SnackbarProvider, useSnackbar } from "notistack";
+import { Slide } from "@material-ui/core";
+import { SnackbarProvider } from "notistack";
 import ConfirmDialog from "../classes/ConfirmDialog";
 //import '../styles/global.css';
 
