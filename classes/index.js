@@ -1,2 +1,3 @@
-export { default as UserClass } from "./User";
-export { default as GlobalClass } from "./Global";
+export { default as UserClass } from "./UserClass";
+export { default as ProfileTypeClass } from "./ProfileTypeClass";
+export * from "./GlobalClass";

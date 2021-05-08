@@ -47,6 +47,8 @@ const useStyles = makeStyles(styles);
 export default function User({ data }) {
 	const classes = useStyles();
 
+	
+
 	return (
 		<Layout>
 			<Head>

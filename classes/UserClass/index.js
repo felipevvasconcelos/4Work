@@ -1,5 +1,6 @@
 import { User } from "../../models";
 import dbConnect from "../../src/dbConfig";
+import { jsonify } from "../index";
 
 export default class UserClass {
 	constructor() {
@@ -7,6 +8,7 @@ export default class UserClass {
 	}
 
 	async getUserById(id) {
+		await dbConnect();
 		if (id) {
 			return jsonify(await this.User.findById(id));
 		} else {
@@ -18,8 +20,4 @@ export default class UserClass {
 		await dbConnect();
 		return jsonify(await this.User.find({}));
 	}
-}
-
-function jsonify(obj) {
-	return JSON.parse(JSON.stringify(obj));
 }

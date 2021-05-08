@@ -71,7 +71,7 @@ export default function Call() {
 			<Head>
 				<title>{siteTittle}</title>
 			</Head>
-			<CardPanel title="Chamados" subtitle="Lista de chamados cadastrados" color="primary" footer="Exibição de todos os chamados">
+			<CardPanel title="Chamados" subtitle="Lista de chamados cadastrados" color="primary">
 				<div>
 					<Container maxWidth="xl">
 						<div className={classes.root}>

@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { makeStyles, useTheme, Drawer, AppBar, CssBaseline, Toolbar, List, ListItem, ListItemIcon, ListItemText, Button, Avatar, IconButton, Hidden, Box, SwipeableDrawer, Divider, CircularProgress, Typography, Grid } from "@material-ui/core";
+import { makeStyles, useTheme, Drawer, AppBar, CssBaseline, Toolbar, List, ListItem, ListItemIcon, ListItemText, Button, Avatar, IconButton, Hidden, Box, SwipeableDrawer, Divider, CircularProgress, Typography, Grid, Grow } from "@material-ui/core";
 import GroupIcon from "@material-ui/icons/Group";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import Link from "next/link";
@@ -16,8 +16,9 @@ import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { Build, Cast, Copyright, Dashboard, Timeline } from "@material-ui/icons";
+import { Build, Cast, Copyright, Dashboard, ExpandLess, ExpandMore, LockOpen, Settings, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import Loading from "../Loading";
+import { Collapse } from "@material-ui/core";
 
 // //ISSO AQUI SERVE PARA GERAR AS PAGINAS ESTATICAS
 // //FAZENDO ASSIM UMA REQUISIÇÃO INSTATANEA
@@ -127,6 +128,9 @@ const useStyles = makeStyles((theme) => ({
 	avatar: {
 		marginLeft: "-19px",
 	},
+	nested: {
+		paddingLeft: theme.spacing(4),
+	},
 }));
 
 export default function Layout(props) {
@@ -140,6 +144,7 @@ export default function Layout(props) {
 	const [openDrawer, setOpenDrawer] = React.useState(false);
 	const [openDrawerTask, setOpenDrawerTask] = React.useState(false);
 	const [openDrawerTaskMobile, setOpenDrawerTaskMobile] = React.useState(false);
+	const [openCollapseListConfig, setOpenCollapseLisConfig] = React.useState(false);
 	const handleDrawerToggle = () => {
 		setOpenDrawer(!openDrawer);
 	};
@@ -149,6 +154,10 @@ export default function Layout(props) {
 	const handleDrawerTasksMobileToggle = () => {
 		setOpenDrawerTaskMobile(!openDrawerTaskMobile);
 	};
+	const handleClickCollapseLisConfig = () => {
+		setOpenCollapseLisConfig(!openCollapseListConfig);
+	};
+
 	const container = window !== undefined ? () => window().document.body : undefined;
 
 	//Validação de Sessão
@@ -271,14 +280,41 @@ export default function Layout(props) {
 						<ListItemText primary="Empresas" />
 					</Link>
 				</ListItem>
-				<ListItem button>
+				<ListItem button onClick={handleClickCollapseLisConfig}>
 					<ListItemIcon>
-						<Build />
+						<Settings />
 					</ListItemIcon>
-					<Link href="/admin">
-						<ListItemText primary="Configurações" />
-					</Link>
+					<ListItemText primary="Configurações" />
+					{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
 				</ListItem>
+				<Collapse in={openCollapseListConfig}>
+					<List component="div" disablePadding>
+						<Link href="/admin/profile">
+							<ListItem button className={classes.nested}>
+								<ListItemIcon>
+									<SupervisedUserCircle />
+								</ListItemIcon>
+								<ListItemText primary="Perfis" />
+							</ListItem>
+						</Link>
+						<Link href="/admin/screen">
+							<ListItem button className={classes.nested}>
+								<ListItemIcon>
+									<WebAsset />
+								</ListItemIcon>
+								<ListItemText primary="Telas" />
+							</ListItem>
+						</Link>
+						<Link href="/admin/permission">
+							<ListItem button className={classes.nested}>
+								<ListItemIcon>
+									<LockOpen />
+								</ListItemIcon>
+								<ListItemText primary="Permissões" />
+							</ListItem>
+						</Link>
+					</List>
+				</Collapse>
 			</List>
 		</div>
 	);
