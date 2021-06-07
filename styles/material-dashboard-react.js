@@ -38,13 +38,7 @@ const hexToRgb = (input) => {
 	let first = input[0] + input[1];
 	let second = input[2] + input[3];
 	let last = input[4] + input[5];
-	return (
-		parseInt(first, 16) +
-		", " +
-		parseInt(second, 16) +
-		", " +
-		parseInt(last, 16)
-	);
+	return parseInt(first, 16) + ", " + parseInt(second, 16) + ", " + parseInt(last, 16);
 };
 
 // ##############################
@@ -70,117 +64,61 @@ const defaultFont = {
 	lineHeight: "1.5em",
 };
 
-const primaryColor = ["#3c7a64", "#3c7a64", "#3c7a64", "#3c7a64"];
+const primaryColor = ["#f5a471", "#f09359", "#f58a47", "#c76f38"];
 const warningColor = ["#c08a3e", "#c08a3e", "#c08a3e", "#c08a3e"];
 const dangerColor = ["#ae423f", "#ae423f", "#ae423f", "#ae423f"];
 const successColor = ["#66d393", "#66d393", "#66d393", "#66d393"];
 const infoColor = ["#27435c", "#27435c", "#27435c", "#27435c"];
 const roseColor = ["#dba3ac", "#dba3ac", "#dba3ac", "#dba3ac"];
-const grayColor = [
-	"#999",
-	"#777",
-	"#3C4858",
-	"#AAAAAA",
-	"#D2D2D2",
-	"#DDD",
-	"#b4b4b4",
-	"#555555",
-	"#333",
-	"#a9afbb",
-	"#eee",
-	"#e7e7e7",
-];
+const grayColor = ["#999", "#777", "#3C4858", "#AAAAAA", "#D2D2D2", "#DDD", "#b4b4b4", "#555555", "#333", "#a9afbb", "#eee", "#e7e7e7"];
 const blackColor = "#000";
 const whiteColor = "#FFF";
 
 const boxShadow = {
-	boxShadow:
-		"0 10px 30px -12px rgba(" +
-		hexToRgb(blackColor) +
-		", 0.42), 0 4px 25px 0px rgba(" +
-		hexToRgb(blackColor) +
-		", 0.12), 0 8px 10px -5px rgba(" +
-		hexToRgb(blackColor) +
-		", 0.2)",
+	boxShadow: "0 10px 30px -12px rgba(" + hexToRgb(blackColor) + ", 0.42), 0 4px 25px 0px rgba(" + hexToRgb(blackColor) + ", 0.12), 0 8px 10px -5px rgba(" + hexToRgb(blackColor) + ", 0.2)",
 };
 
 const primaryBoxShadow = {
-	boxShadow:
-		"0 4px 20px 0 rgba(" +
-		hexToRgb(blackColor) +
-		",.14), 0 7px 10px -5px rgba(" +
-		hexToRgb(primaryColor[0]) +
-		",.4)",
+	boxShadow: "0 4px 20px 0 rgba(" + hexToRgb(blackColor) + ",.14), 0 7px 10px -5px rgba(" + hexToRgb(primaryColor[0]) + ",.4)",
 };
 const infoBoxShadow = {
-	boxShadow:
-		"0 4px 20px 0 rgba(" +
-		hexToRgb(blackColor) +
-		",.14), 0 7px 10px -5px rgba(" +
-		hexToRgb(infoColor[0]) +
-		",.4)",
+	boxShadow: "0 4px 20px 0 rgba(" + hexToRgb(blackColor) + ",.14), 0 7px 10px -5px rgba(" + hexToRgb(infoColor[0]) + ",.4)",
 };
 const successBoxShadow = {
-	boxShadow:
-		"0 4px 20px 0 rgba(" +
-		hexToRgb(blackColor) +
-		",.14), 0 7px 10px -5px rgba(" +
-		hexToRgb(successColor[0]) +
-		",.4)",
+	boxShadow: "0 4px 20px 0 rgba(" + hexToRgb(blackColor) + ",.14), 0 7px 10px -5px rgba(" + hexToRgb(successColor[0]) + ",.4)",
 };
 const warningBoxShadow = {
-	boxShadow:
-		"0 4px 20px 0 rgba(" +
-		hexToRgb(blackColor) +
-		",.14), 0 7px 10px -5px rgba(" +
-		hexToRgb(warningColor[0]) +
-		",.4)",
+	boxShadow: "0 4px 20px 0 rgba(" + hexToRgb(blackColor) + ",.14), 0 7px 10px -5px rgba(" + hexToRgb(warningColor[0]) + ",.4)",
 };
 const dangerBoxShadow = {
-	boxShadow:
-		"0 4px 20px 0 rgba(" +
-		hexToRgb(blackColor) +
-		",.14), 0 7px 10px -5px rgba(" +
-		hexToRgb(dangerColor[0]) +
-		",.4)",
+	boxShadow: "0 4px 20px 0 rgba(" + hexToRgb(blackColor) + ",.14), 0 7px 10px -5px rgba(" + hexToRgb(dangerColor[0]) + ",.4)",
 };
 const roseBoxShadow = {
-	boxShadow:
-		"0 4px 20px 0 rgba(" +
-		hexToRgb(blackColor) +
-		",.14), 0 7px 10px -5px rgba(" +
-		hexToRgb(roseColor[0]) +
-		",.4)",
+	boxShadow: "0 4px 20px 0 rgba(" + hexToRgb(blackColor) + ",.14), 0 7px 10px -5px rgba(" + hexToRgb(roseColor[0]) + ",.4)",
 };
 
 const warningCardHeader = {
-	background:
-		"linear-gradient(60deg, " + warningColor[1] + ", " + warningColor[2] + ")",
+	background: "linear-gradient(60deg, " + warningColor[1] + ", " + warningColor[2] + ")",
 	...warningBoxShadow,
 };
 const successCardHeader = {
-	background:
-		"linear-gradient(60deg, " + successColor[1] + ", " + successColor[2] + ")",
+	background: "linear-gradient(60deg, " + successColor[1] + ", " + successColor[2] + ")",
 	...successBoxShadow,
 };
 const dangerCardHeader = {
-	background:
-		"linear-gradient(60deg, " + dangerColor[1] + ", " + dangerColor[2] + ")",
+	background: "linear-gradient(60deg, " + dangerColor[1] + ", " + dangerColor[2] + ")",
 	...dangerBoxShadow,
 };
 const infoCardHeader = {
-	background:
-		"linear-gradient(60deg, " + infoColor[1] + ", " + infoColor[2] + ")",
+	background: "linear-gradient(60deg, " + infoColor[1] + ", " + infoColor[2] + ")",
 	...infoBoxShadow,
 };
 const primaryCardHeader = {
-	background:
-		"linear-gradient(60deg, " + primaryColor[1] + ", " + primaryColor[2] + ")",
+	background: "linear-gradient(60deg, " + primaryColor[1] + ", " + primaryColor[2] + ")",
 	...primaryBoxShadow,
 };
 const roseCardHeader = {
-	background:
-		"linear-gradient(60deg, " + roseColor[1] + ", " + roseColor[2] + ")",
+	background: "linear-gradient(60deg, " + roseColor[1] + ", " + roseColor[2] + ")",
 	...roseBoxShadow,
 };
 
@@ -212,14 +150,7 @@ const card = {
 const defaultBoxShadow = {
 	border: "0",
 	borderRadius: "3px",
-	boxShadow:
-		"0 10px 20px -12px rgba(" +
-		hexToRgb(blackColor) +
-		", 0.42), 0 3px 20px 0px rgba(" +
-		hexToRgb(blackColor) +
-		", 0.12), 0 8px 10px -5px rgba(" +
-		hexToRgb(blackColor) +
-		", 0.2)",
+	boxShadow: "0 10px 20px -12px rgba(" + hexToRgb(blackColor) + ", 0.42), 0 3px 20px 0px rgba(" + hexToRgb(blackColor) + ", 0.12), 0 8px 10px -5px rgba(" + hexToRgb(blackColor) + ", 0.2)",
 	padding: "10px 0",
 	transition: "all 150ms ease 0s",
 };

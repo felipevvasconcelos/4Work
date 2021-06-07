@@ -1,14 +1,26 @@
-// "use strict";
+//"use strict";
 const mongoose = require("mongoose");
 
 const CompanyModel = new mongoose.Schema({
 	name: { type: String, required: true, trim: true },
 	companyName: { type: String, required: true, trim: true },
-	document: { type: String, required: true, trim: true, unique: true },
+	document: { type: String, required: true, trim: true, unique: true, index: true },
+	logo: {
+		name: { type: String, trim: true },
+		image: { type: String },
+	},
+	slas: [
+		{
+			_id: { type: mongoose.Schema.Types.ObjectId, ref: "TypeCall", required: true },
+			slaValue: { type: Number },
+		},
+	],
 	address: {
 		address: { type: String, required: true, trim: true },
-		number: { type: Number, required: true, trim: true },
+		number: { type: Number, trim: true },
 		postalCode: { type: String, required: true, trim: true },
+		district: { type: String, required: true, trim: true },
+		complement: { type: String, trim: true },
 		city: { type: String, required: true, trim: true },
 		state: { type: String, required: true, trim: true },
 	},

@@ -1,25 +1,9 @@
-import {
-	Button,
-	Checkbox,
-	Container,
-	Divider,
-	FormControlLabel,
-	Grid,
-	IconButton,
-	TextField,
-	Tooltip,
-	Typography,
-} from "@material-ui/core";
+import { Button, Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, TextField, Tooltip, Typography } from "@material-ui/core";
 import { csrfToken, getSession, providers, signIn } from "next-auth/client";
 import { makeStyles } from "@material-ui/core/styles";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-	faApple,
-	faFacebook,
-	faGoogle,
-	faWindows,
-} from "@fortawesome/free-brands-svg-icons";
+import { faApple, faFacebook, faGoogle, faWindows } from "@fortawesome/free-brands-svg-icons";
 import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
 
 const styledBy = (property, mapping) => (props) => mapping[props[property]];
@@ -109,47 +93,15 @@ export default function SignIn({ providers, csrfToken }) {
 	return (
 		<Grid container component="main">
 			<Container maxWidth="xs" className={classes.paper}>
-				<Image alt="Logo" src="/images/logo.png" width={100} height={100} />
+				<Image alt="Logo" src="/images/logo.png" width={350} height={100} />
 
 				<div className={classes.section1}>
-					<form
-						className={classes.form}
-						noValidate
-						action="/api/auth/callback/credentials"
-						method="POST"
-					>
+					<form className={classes.form} noValidate action="/api/auth/callback/credentials" method="POST">
 						<input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-						<TextField
-							variant="outlined"
-							margin="normal"
-							required
-							fullWidth
-							label="E-mail"
-							name="username"
-							autoComplete="email"
-							autoFocus
-						/>
-						<TextField
-							variant="outlined"
-							margin="normal"
-							required
-							fullWidth
-							name="password"
-							label="Senha"
-							type="password"
-							autoComplete="current-password"
-						/>
-						<FormControlLabel
-							control={<Checkbox value="remember" color="primary" />}
-							label="Lembrar-me"
-						/>
-						<Button
-							type="submit"
-							fullWidth
-							variant="contained"
-							color="primary"
-							className={classes.submit}
-						>
+						<TextField variant="outlined" margin="normal" required fullWidth label="E-mail" name="username" autoComplete="email" autoFocus />
+						<TextField variant="outlined" margin="normal" required fullWidth name="password" label="Senha" type="password" autoComplete="current-password" />
+						<FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Lembrar-me" />
+						<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
 							Entrar
 						</Button>
 					</form>
@@ -192,12 +144,7 @@ export default function SignIn({ providers, csrfToken }) {
 						return (
 							<div key={provider.name} className={classes.divForm}>
 								<Tooltip title={`Entrar com ${provider.name}`}>
-									<IconButton
-										onClick={() => signIn(provider.id)}
-										type="submit"
-										variant="outlined"
-										className={colorButton}
-									>
+									<IconButton onClick={() => signIn(provider.id)} type="submit" variant="outlined" className={colorButton}>
 										{icon}
 									</IconButton>
 								</Tooltip>

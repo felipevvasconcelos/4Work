@@ -16,7 +16,7 @@ import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { Build, Cast, Copyright, Dashboard, ExpandLess, ExpandMore, LockOpen, Settings, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
+import { Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, ExpandLess, ExpandMore, LockOpen, Settings, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import Loading from "../Loading";
 import { Collapse } from "@material-ui/core";
 
@@ -39,7 +39,6 @@ import { Collapse } from "@material-ui/core";
 // }
 
 const drawerWidth = 240;
-const siteTittle = "4work";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -56,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
 	appBar: {
 		zIndex: theme.zIndex.drawer + 1,
 		//background: 'radial-gradient(circle, rgba(228,13,104,1) 0%, rgba(247,8,69,1) 35%, rgba(18,0,2,1) 100%);' meu estilo
-		background: "linear-gradient(90deg, rgba(51,101,82,1) 0%, rgba(32,82,62,1) 35%, rgba(13,64,45,1) 100%)",
+		background: "linear-gradient(90deg, rgba(230, 136, 76,1) 0%, rgba(204, 104, 40,1) 35%, rgba(212, 92, 15,1) 100%)",
 		transition: theme.transitions.create(["margin", "width"], {
 			easing: theme.transitions.easing.sharp,
 			duration: theme.transitions.duration.leavingScreen,
@@ -127,6 +126,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	avatar: {
 		marginLeft: "-19px",
+		width: "150px",
 	},
 	nested: {
 		paddingLeft: theme.spacing(4),
@@ -221,12 +221,20 @@ export default function Layout(props) {
 				</ListItem>
 			</Hidden>
 			<List>
-				<ListItem button>
+				<ListItem disabled button>
 					<ListItemIcon>
 						<Dashboard />
 					</ListItemIcon>
 					<Link href="/dashboard">
 						<ListItemText primary="Dashboard" />
+					</Link>
+				</ListItem>
+				<ListItem button>
+					<ListItemIcon>
+						<BusinessCenter />
+					</ListItemIcon>
+					<Link href="/project">
+						<ListItemText primary="Projetos" />
 					</Link>
 				</ListItem>
 				<ListItem button>
@@ -245,7 +253,7 @@ export default function Layout(props) {
 						<ListItemText primary="Melhorias" />
 					</Link>
 				</ListItem>
-				<ListItem button>
+				<ListItem disabled button>
 					<ListItemIcon>
 						<DynamicFeedIcon />
 					</ListItemIcon>
@@ -253,7 +261,7 @@ export default function Layout(props) {
 						<ListItemText primary="Tarefas" />
 					</Link>
 				</ListItem>
-				<ListItem button>
+				<ListItem disabled button>
 					<ListItemIcon>
 						<Cast />
 					</ListItemIcon>
@@ -313,6 +321,14 @@ export default function Layout(props) {
 								<ListItemText primary="Permissões" />
 							</ListItem>
 						</Link>
+						<Link href="/admin/typeCall">
+							<ListItem button className={classes.nested}>
+								<ListItemIcon>
+									<CallSplit />
+								</ListItemIcon>
+								<ListItemText primary="Tipo Chamado" />
+							</ListItem>
+						</Link>
 					</List>
 				</Collapse>
 			</List>
@@ -337,7 +353,7 @@ export default function Layout(props) {
 					<Hidden xsDown implementation="css">
 						<Link href="/">
 							<Button>
-								<Avatar alt="Logo" variant="square" src="/images/logo.png" />
+								<Avatar className={classes.avatar} alt="Logo" variant="square" src="/images/logoWhite.png" />
 								{/* <Typography variant="h6" className={styles.h6} noWrap> 4Work </Typography> */}
 							</Button>
 						</Link>

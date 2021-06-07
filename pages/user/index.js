@@ -47,8 +47,6 @@ const useStyles = makeStyles(styles);
 export default function User({ data }) {
 	const classes = useStyles();
 
-	
-
 	return (
 		<Layout>
 			<Head>
@@ -78,15 +76,7 @@ export async function getServerSideProps(context) {
 	//ASSIM EFETUAR AS CHAMADAS DAS CLASSES NOS COMPONENTE E NA API
 	//const res = await fetch(`${process.env.NEXTAUTH_URL}/api/users`, context.req);
 	//const data = await res.json();
-
-	const user = new UserClass();
-	const data = await user.getUsers();
-
-	if (!data) {
-		return {
-			notFound: true,
-		};
-	}
+	const data = await new UserClass().getAll();
 
 	return {
 		props: { data },

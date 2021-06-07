@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { Button, Container, Grid, IconButton, makeStyles, Paper, Switch, TextField, Tooltip } from "@material-ui/core";
 import { AddToQueue, Delete } from "@material-ui/icons";
 import Head from "next/head";
-import ViewClass from "../../classes/ViewClass";
 import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../components";
 import moment from "moment";
 import { useSnackbar } from "notistack";
 import { FormControlLabel } from "@material-ui/core";
+import { TypeCallClass } from "../../classes";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -16,17 +16,20 @@ const useStyles = makeStyles((theme) => ({
 		padding: "20px",
 		width: "100%",
 	},
+	paddingBtn: {
+		padding: "10px",
+	},
 }));
 
-export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDialogClose }) {
+export default function TypeCall({ data, handleConfirmDialogOpen, handleConfirmDialogClose }) {
 	const { enqueueSnackbar } = useSnackbar();
 	const classes = useStyles();
 	const [loading, setLoading] = useState(false);
 	const [dataTable, setDataTable] = useState(data);
-	const [name, setName] = useState("");
+	const [stateTypeCall, setTypeCall] = useState({ name: "", slaDefault: "" });
 
-	const handleName = (e) => {
-		setName(e.target.value);
+	const handleTypeCall = (e) => {
+		setTypeCall({ ...stateTypeCall, [e.target.name]: e.target.value });
 	};
 
 	async function handleSubmit(e) {
@@ -34,44 +37,44 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 
 		try {
 			setLoading(true);
-			const body = { name: e.currentTarget.name.value };
-			const res = await fetch("/api/screen", {
+
+			const res = await fetch("/api/typeCall", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(body),
+				body: JSON.stringify(stateTypeCall),
 			});
 
 			if (res.status === 200) {
-				const newView = await res.json();
-				setDataTable([...dataTable, newView]);
-				setName("");
-				enqueueSnackbar("Tela Cadastrada", { variant: "success" });
+				const newType = await res.json();
+				setDataTable([...dataTable, newType]);
+				setTypeCall({ name: "", slaDefault: "" });
+				enqueueSnackbar("Tipo de Chamado Cadastrado", { variant: "success" });
 			} else {
-				throw "Erro ao cadastrar a tela.";
+				throw "Erro ao cadastrar o tipo de chamado.";
 			}
 			setLoading(false);
 		} catch (e) {
-			enqueueSnackbar(e.message, { variant: "error" });
+			enqueueSnackbar(e, { variant: "error" });
 			setLoading(false);
 		}
 	}
 
-	const handleDelete = async (view) => {
+	const handleDelete = async (type) => {
 		handleConfirmDialogClose();
 		try {
 			setLoading(true);
-			const res = await fetch(`/api/screen/${view.id}`, { method: "DELETE", headers: { "Content-Type": "application/json" } });
+			const res = await fetch(`/api/typeCall/${type.id}`, { method: "DELETE", headers: { "Content-Type": "application/json" } });
 
 			if (res.status === 200) {
-				const deletedView = await res.json();
+				const deletedType = await res.json();
 				setDataTable(
 					dataTable.filter(function (p) {
-						return p._id != deletedView._id;
+						return p._id != deletedType._id;
 					})
 				);
-				enqueueSnackbar(`Tela ${deletedView.name} deletada`, { variant: "success" });
+				enqueueSnackbar(`Tipo de Chamado ${deletedType.name} deletada`, { variant: "success" });
 			} else {
-				throw "Erro ao deletar a tela";
+				throw "Erro ao deletar o tipo de chamado";
 			}
 
 			setLoading(false);
@@ -83,15 +86,15 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 
 	const handleUpdate = async (id, active) => {
 		try {
-			const resView = await fetch(`/api/screen/${id}`, { method: "GET", headers: { "Content-Type": "application/json" } });
-			if (resView.status === 200) {
-				const view = await resView.json();
-				view.active = active;
-				const res = await fetch(`/api/screen/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(view) });
-				if (!res.status === 200) throw "Erro ao atualizar a tela";
-			} else {
-				throw "Erro ao atualizar a tela";
-			}
+			const resType = await fetch(`/api/typeCall/${id}`, { method: "GET", headers: { "Content-Type": "application/json" } });
+
+			if (resType.status != 200) throw "Erro ao atualizar o tipo de chamado";
+
+			const type = await resType.json();
+			type.active = active;
+			const res = await fetch(`/api/typeCall/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(type) });
+
+			if (res.status != 200) throw "Erro ao atualizar o tipo de chamado";
 		} catch (error) {
 			enqueueSnackbar(error, { variant: "error" });
 			setLoading(false);
@@ -99,7 +102,8 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 	};
 
 	const columns = [
-		{ name: "name", label: "Tela", options: { filter: false } },
+		{ name: "name", label: "Tipo de Chamado", options: { filter: false } },
+		{ name: "slaDefault", label: "SLA Padrão", options: { filter: false } },
 		{
 			name: "creationDate",
 			label: "Data Criação",
@@ -121,7 +125,7 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 							control={<Switch size="small" color="primary" checked={value} value={value ? "Sim" : "Não"} />}
 							onChange={(event) => {
 								updateValue(event.target.value === "Sim" ? false : true);
-								handleUpdate(tableMeta.rowData[3], event.target.value === "Sim" ? false : true);
+								handleUpdate(tableMeta.rowData[4], event.target.value === "Sim" ? false : true);
 							}}
 						/>
 					);
@@ -137,7 +141,7 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 				customBodyRender: (value, tableMeta) => {
 					return (
 						<Tooltip title={"Deletar"}>
-							<IconButton size="small" style={{ color: "#be6765" }} onClick={() => handleConfirmDialogOpen("Deletar Tela", `Deseja realmente deletar a tela ${tableMeta.rowData[0]}?`, handleDelete, { id: value })}>
+							<IconButton size="small" style={{ color: "#be6765" }} onClick={() => handleConfirmDialogOpen("Deletar Tipo", `Deseja realmente deletar o tipo de chamado ${tableMeta.rowData[0]}?`, handleDelete, { id: value })}>
 								<Delete />
 							</IconButton>
 						</Tooltip>
@@ -158,10 +162,16 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 					<Grid container spacing={3} xs={12} direction="row">
 						<Grid xs={12} md={6} direction="row" spacing={3} className={classes.padding}>
 							<form onSubmit={handleSubmit}>
-								<Grid xs="12">
-									<TextField id="name" margin="normal" value={name} onChange={handleName} fullWidth label="Nome da Tela" />
+								<Grid container spacing={3} xs={12}>
+									<Grid xs="8" md="9" lg="10">
+										<TextField required id="name" name="name" margin="normal" value={stateTypeCall.name} onChange={handleTypeCall} fullWidth label="Tipo de Chamado" />
+									</Grid>
+									<Grid xs="4" md="3" lg="2">
+										<TextField required id="slaDefault" name="slaDefault" type="number" margin="normal" value={stateTypeCall.slaDefault} onChange={handleTypeCall} fullWidth label="SLA Padrão" />
+									</Grid>
 								</Grid>
-								<Grid xs="12" container justify="flex-end">
+
+								<Grid xs="12" container justify="flex-end" className={classes.paddingBtn}>
 									<Button color="primary" variant="outlined" type="submit" startIcon={<AddToQueue />}>
 										Adicionar
 									</Button>
@@ -181,7 +191,6 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 }
 
 export async function getServerSideProps(context) {
-	const view = new ViewClass();
-	const data = await view.getAll();
+	const data = await new TypeCallClass().getAll();
 	return { props: { data } };
 }

@@ -32,7 +32,7 @@ export default function Loading() {
 		<Backdrop className={classes.backdrop} open={true}>
 			<div className={classes.root}>
 				<div className={classes.wrapper}>
-					<Avatar size={68} alt="Logo" className={classes.avatar} variant="circular" src="/images/logo.png"></Avatar>
+					<Avatar size={68} alt="Logo" className={classes.avatar} variant="circular" src="/images/logoOnly.png"></Avatar>
 					<CircularProgress size={68} className={classes.fabProgress} />
 				</div>
 			</div>

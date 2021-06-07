@@ -1,6 +1,4 @@
-import { TextField } from "@material-ui/core";
-import { Checkbox } from "@material-ui/core";
-import { Hidden, IconButton, Container, Grid, Button, Paper, makeStyles } from "@material-ui/core";
+import { IconButton, Container, Grid, Button, Paper, makeStyles, Tooltip, FormControlLabel, Switch, TextField } from "@material-ui/core";
 import { Delete, PersonAdd } from "@material-ui/icons";
 import Head from "next/head";
 import React, { useState } from "react";
@@ -8,9 +6,6 @@ import { ProfileTypeClass } from "../../classes";
 import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../components";
 import moment from "moment";
 import { useSnackbar } from "notistack";
-import { Tooltip } from "@material-ui/core";
-import { FormControlLabel } from "@material-ui/core";
-import { Switch } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -167,15 +162,14 @@ export default function Profile({ data, handleConfirmDialogOpen, handleConfirmDi
 									<TextField id="nameProfile" margin="normal" value={nameProfile} onChange={handleNameProfile} fullWidth label="Nome do Perfil" />
 								</Grid>
 								<Grid xs="12" container justify="flex-end">
-									<Button color="primary" type="submit" startIcon={<PersonAdd />}>
+									<Button color="primary" variant="outlined" type="submit" startIcon={<PersonAdd />}>
 										Adicionar
 									</Button>
 								</Grid>
 							</form>
 						</Grid>
-
 						<Grid container xs={12} md={6}>
-							<Paper elevation={3} className={classes.padding}>
+							<Paper elevation={1} className={classes.padding}>
 								<CustomDataTable data={dataTable} columns={columns}></CustomDataTable>
 							</Paper>
 						</Grid>
