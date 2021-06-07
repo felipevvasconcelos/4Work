@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import React from 'react'
-import Layout, {siteTittle} from '../../components/layout'
+import {Layout, siteTittle} from '../../components'
 import { useRouter } from 'next/router'
 
 
