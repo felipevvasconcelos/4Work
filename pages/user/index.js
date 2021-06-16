@@ -1,5 +1,7 @@
 import { Container, Grid, IconButton, makeStyles, Tooltip } from "@material-ui/core";
+import { Assignment, Edit, Group } from "@material-ui/icons";
 import QueueIcon from "@material-ui/icons/Queue";
+import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
 import React from "react";
@@ -17,11 +19,55 @@ const styles = {
 };
 
 const columns = [
-	{ name: "_id", label: "ID" },
 	{ name: "name", label: "Nome" },
 	{ name: "email", label: "E-mail" },
-	{ name: "createdAt", label: "Data Criação" },
-	{ name: "updatedAt", label: "Última Alteração" },
+	{ name: "profile", label: "Perfil", options: { customBodyRender: (value) => value.name } },
+	{ name: "company", label: "Empresa", options: { customBodyRender: (value) => value.name } },
+	{
+		name: "createdAt",
+		label: "Data Criação",
+		options: {
+			filter: false,
+			customBodyRender: (value) => moment(new Date(value)).format("DD/MM/YYYY HH:mm"),
+		},
+	},
+	{
+		name: "active",
+		label: "Ativo",
+		options: {
+			filter: false,
+			customBodyRender: (value) => (value ? "Sim" : "Não"),
+		},
+	},
+	{
+		name: "_id",
+		label: "Ações",
+		options: {
+			sort: false,
+			print: false,
+			filter: false,
+			customBodyRender: (value, tableMeta) => {
+				return (
+					<div>
+						<Link href={`/user/${value}`}>
+							<Tooltip title={"Editar"}>
+								<IconButton size="small" style={{ color: "#2E8BC0" }}>
+									<Edit />
+								</IconButton>
+							</Tooltip>
+						</Link>
+						<Link href={`/call?idUser=${value}`}>
+							<Tooltip title={"Chamados"}>
+								<IconButton size="small" color="primary">
+									<Assignment />
+								</IconButton>
+							</Tooltip>
+						</Link>
+					</div>
+				);
+			},
+		},
+	},
 ];
 
 const customToolbar = (
@@ -76,7 +122,14 @@ export async function getServerSideProps(context) {
 	//ASSIM EFETUAR AS CHAMADAS DAS CLASSES NOS COMPONENTE E NA API
 	//const res = await fetch(`${process.env.NEXTAUTH_URL}/api/users`, context.req);
 	//const data = await res.json();
-	const data = await new UserClass().getAll();
+	var data = "";
+	const userClass = new UserClass();
+
+	if (context.query.idCompany) {
+		data = await userClass.getByFilter({ company: context.query.idCompany });
+	} else {
+		data = await userClass.getAll();
+	}
 
 	return {
 		props: { data },

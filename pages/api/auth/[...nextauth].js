@@ -1,6 +1,10 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
+import { UserClass } from "../../../classes";
 import jwt from "next-auth/jwt";
+import md5 from "md5";
+
+const hash = process.env.MD5HASH;
 
 export default NextAuth({
 	providers: [
@@ -14,12 +18,14 @@ export default NextAuth({
 			async authorize(credentials) {
 				//Pegar o user no bd, precisa das informações de id, name, entre outras para gravar na token de sessão
 
-				const user = {
-					id: "1",
-					name: "Felipe",
-					email: credentials.username,
-					password: credentials.password,
-				};
+				const user = await new UserClass().getByFilter({ email: credentials.username, password: md5(credentials.password + hash) });
+
+				// const user = {
+				// 	id: "1",
+				// 	name: "Felipe",
+				// 	email: credentials.username,
+				// 	password: credentials.password,
+				// };
 
 				if (user) {
 					// Any object returned will be saved in `user` property of the JWT
@@ -63,6 +69,7 @@ export default NextAuth({
 	],
 	pages: {
 		signIn: "/auth/signin",
+		error: "/auth/signin?error=invalidLogin",
 		// newUser: '/login' // If set, new users will be directed here on first sign in
 	},
 	site: process.env.NEXTAUTH_URL,
@@ -82,7 +89,7 @@ export default NextAuth({
 			const res = await fetch(`${process.env.NEXTAUTH_URL}/api/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email: user.email }),
+				body: JSON.stringify({ email: profile.username, password: profile.password }),
 			});
 
 			if (!res.ok) {

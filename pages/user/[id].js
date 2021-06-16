@@ -56,7 +56,7 @@ export default function UserById({ data, profiles, companies }) {
 	const [imgSrc, setImgSrc] = useState(data.logo.image);
 	const [loading, setLoading] = useState(false);
 	const [stateUser, setStateUser] = useState(data);
-	const [confirmPass, setConfirmPass] = useState("");
+	const [confirmPass, setConfirmPass] = useState(route.query.id == "new" ? "" : stateUser.password);
 	const [confirmPassError, setConfirmPassError] = useState(false);
 	const [confirmPassErrorText, setConfirmPassErrorText] = useState("");
 	const [openCollapseImage, setOpenCollapseImage] = useState(false);
@@ -124,7 +124,7 @@ export default function UserById({ data, profiles, companies }) {
 				route.push("/user");
 			} else {
 				var body = await res.json();
-				
+
 				if (body.error.hasOwnProperty("code")) {
 					if (body.error.code == 11000) {
 						enqueueSnackbar("Já existe um usuário com este e-mail", { variant: "error" });
@@ -254,7 +254,7 @@ export default function UserById({ data, profiles, companies }) {
 										</Grid>
 										<Grid container xs={12} direction="row" spacing={1}>
 											<Grid item xs={12} sm={6} direction="row">
-												<TextField required id="password" helperText="Senha deve conter mínimo de oito caracteres, pelo menos uma letra maiúscula, uma letra minúscula e um número" name="password" type="password" margin="normal" value={stateUser.password} fullWidth label="Senha" onChange={handleChangeCompany} />
+												<TextField required id="password" name="password" type="password" margin="normal" value={stateUser.password} fullWidth label="Senha" onChange={handleChangeCompany} helperText="Senha deve conter mínimo de oito caracteres, pelo menos uma letra maiúscula, uma letra minúscula e um número" />
 											</Grid>
 											<Grid item xs={12} sm={6} direction="row">
 												<TextField required error={confirmPassError} helperText={confirmPassErrorText} id="confirmPassword" name="confirmPassword" type="password" margin="normal" fullWidth label="Confirme a Senha" value={confirmPass} onChange={handleConfirmPass} />
@@ -306,6 +306,7 @@ export async function getServerSideProps(context) {
 			};
 		} else {
 			const data = await new UserClass().get(context.query.id);
+			console.log(data);
 			return { props: { data, profiles, companies } };
 		}
 	} catch (error) {

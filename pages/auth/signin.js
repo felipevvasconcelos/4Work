@@ -1,7 +1,8 @@
+import Image from "next/image";
+import { useSnackbar } from "notistack";
 import { Button, Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, TextField, Tooltip, Typography } from "@material-ui/core";
 import { csrfToken, getSession, providers, signIn } from "next-auth/client";
 import { makeStyles } from "@material-ui/core/styles";
-import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faApple, faFacebook, faGoogle, faWindows } from "@fortawesome/free-brands-svg-icons";
 import { faEnvelope } from "@fortawesome/free-regular-svg-icons";
@@ -87,8 +88,11 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function SignIn({ providers, csrfToken }) {
+export default function SignIn({ providers, csrfToken, error }) {
 	const classes = useStyles();
+	const { enqueueSnackbar } = useSnackbar();
+
+	if (error) enqueueSnackbar("Credenciais Inválidas", { variant: "error" });
 
 	return (
 		<Grid container component="main">
@@ -96,10 +100,10 @@ export default function SignIn({ providers, csrfToken }) {
 				<Image alt="Logo" src="/images/logo.png" width={350} height={100} />
 
 				<div className={classes.section1}>
-					<form className={classes.form} noValidate action="/api/auth/callback/credentials" method="POST">
+					<form className={classes.form} action="/api/auth/callback/credentials" method="POST">
 						<input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-						<TextField variant="outlined" margin="normal" required fullWidth label="E-mail" name="username" autoComplete="email" autoFocus />
-						<TextField variant="outlined" margin="normal" required fullWidth name="password" label="Senha" type="password" autoComplete="current-password" />
+						<TextField required variant="outlined" margin="normal" fullWidth label="E-mail" name="username" type="email" autoComplete="email" autoFocus />
+						<TextField required variant="outlined" margin="normal" fullWidth name="password" label="Senha" type="password" autoComplete="current-password" />
 						<FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Lembrar-me" />
 						<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
 							Entrar
@@ -173,5 +177,6 @@ SignIn.getInitialProps = async (context) => {
 		session: undefined,
 		providers: await providers(context),
 		csrfToken: await csrfToken(context),
+		error: context.query.error,
 	};
 };

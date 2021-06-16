@@ -145,6 +145,13 @@ export default function Layout(props) {
 	const [openDrawerTask, setOpenDrawerTask] = React.useState(false);
 	const [openDrawerTaskMobile, setOpenDrawerTaskMobile] = React.useState(false);
 	const [openCollapseListConfig, setOpenCollapseLisConfig] = React.useState(false);
+	const [loadingComponent, setLoadingComponent] = React.useState(false);
+
+	const handleLoading = (e) => {
+		console.log(e);
+		e != router.pathname && setLoadingComponent(!loadingComponent);
+	};
+
 	const handleDrawerToggle = () => {
 		setOpenDrawer(!openDrawer);
 	};
@@ -221,73 +228,73 @@ export default function Layout(props) {
 				</ListItem>
 			</Hidden>
 			<List>
-				<ListItem disabled button>
-					<ListItemIcon>
-						<Dashboard />
-					</ListItemIcon>
-					<Link href="/dashboard">
+				<Link href="/dashboard">
+					<ListItem disabled button onClick={() => handleLoading("/dashboard")}>
+						<ListItemIcon>
+							<Dashboard />
+						</ListItemIcon>
 						<ListItemText primary="Dashboard" />
-					</Link>
-				</ListItem>
-				<ListItem button>
-					<ListItemIcon>
-						<BusinessCenter />
-					</ListItemIcon>
-					<Link href="/project">
+					</ListItem>
+				</Link>
+				<Link href="/project">
+					<ListItem button onClick={() => handleLoading("/project")}>
+						<ListItemIcon>
+							<BusinessCenter />
+						</ListItemIcon>
 						<ListItemText primary="Projetos" />
-					</Link>
-				</ListItem>
-				<ListItem button>
-					<ListItemIcon>
-						<AssignmentIcon />
-					</ListItemIcon>
-					<Link href="/call">
+					</ListItem>
+				</Link>
+				<Link href="/call">
+					<ListItem button onClick={() => handleLoading("/call")}>
+						<ListItemIcon>
+							<AssignmentIcon />
+						</ListItemIcon>
 						<ListItemText primary="Chamados" />
-					</Link>
-				</ListItem>
-				<ListItem button>
-					<ListItemIcon>
-						<FolderSpecialIcon />
-					</ListItemIcon>
-					<Link href="/improvement">
+					</ListItem>
+				</Link>
+				<Link href="/improvement">
+					<ListItem button onClick={() => handleLoading("/improvement")}>
+						<ListItemIcon>
+							<FolderSpecialIcon />
+						</ListItemIcon>
 						<ListItemText primary="Melhorias" />
-					</Link>
-				</ListItem>
-				<ListItem disabled button>
-					<ListItemIcon>
-						<DynamicFeedIcon />
-					</ListItemIcon>
-					<Link href="/task">
+					</ListItem>
+				</Link>
+				<Link href="/task">
+					<ListItem disabled button onClick={() => handleLoading("/task")}>
+						<ListItemIcon>
+							<DynamicFeedIcon />
+						</ListItemIcon>
 						<ListItemText primary="Tarefas" />
-					</Link>
-				</ListItem>
-				<ListItem disabled button>
-					<ListItemIcon>
-						<Cast />
-					</ListItemIcon>
-					<Link href="/room">
+					</ListItem>
+				</Link>
+				<Link href="/room">
+					<ListItem disabled button onClick={() => handleLoading("/room")}>
+						<ListItemIcon>
+							<Cast />
+						</ListItemIcon>
 						<ListItemText primary="Quadro" />
-					</Link>
-				</ListItem>
+					</ListItem>
+				</Link>
 			</List>
 			<Divider variant="middle" />
 			<List>
-				<ListItem button>
-					<ListItemIcon>
-						<GroupIcon />
-					</ListItemIcon>
-					<Link href="/user">
+				<Link href="/user">
+					<ListItem button onClick={() => handleLoading("/user")}>
+						<ListItemIcon>
+							<GroupIcon />
+						</ListItemIcon>
 						<ListItemText primary="Usuários" />
-					</Link>
-				</ListItem>
-				<ListItem button>
-					<ListItemIcon>
-						<LocationCityIcon />
-					</ListItemIcon>
-					<Link href="/company">
+					</ListItem>
+				</Link>
+				<Link href="/company">
+					<ListItem button onClick={() => handleLoading("/company")}>
+						<ListItemIcon>
+							<LocationCityIcon />
+						</ListItemIcon>
 						<ListItemText primary="Empresas" />
-					</Link>
-				</ListItem>
+					</ListItem>
+				</Link>
 				<ListItem button onClick={handleClickCollapseLisConfig}>
 					<ListItemIcon>
 						<Settings />
@@ -298,7 +305,7 @@ export default function Layout(props) {
 				<Collapse in={openCollapseListConfig}>
 					<List component="div" disablePadding>
 						<Link href="/admin/profile">
-							<ListItem button className={classes.nested}>
+							<ListItem button className={classes.nested} onClick={() => handleLoading("/admin/profile")}>
 								<ListItemIcon>
 									<SupervisedUserCircle />
 								</ListItemIcon>
@@ -306,7 +313,7 @@ export default function Layout(props) {
 							</ListItem>
 						</Link>
 						<Link href="/admin/screen">
-							<ListItem button className={classes.nested}>
+							<ListItem button className={classes.nested} onClick={() => handleLoading("/admin/screen")}>
 								<ListItemIcon>
 									<WebAsset />
 								</ListItemIcon>
@@ -314,7 +321,7 @@ export default function Layout(props) {
 							</ListItem>
 						</Link>
 						<Link href="/admin/permission">
-							<ListItem button className={classes.nested}>
+							<ListItem button className={classes.nested} onClick={() => handleLoading("/admin/permission")}>
 								<ListItemIcon>
 									<LockOpen />
 								</ListItemIcon>
@@ -322,7 +329,7 @@ export default function Layout(props) {
 							</ListItem>
 						</Link>
 						<Link href="/admin/typeCall">
-							<ListItem button className={classes.nested}>
+							<ListItem button className={classes.nested} onClick={() => handleLoading("/admin/typeCall")}>
 								<ListItemIcon>
 									<CallSplit />
 								</ListItemIcon>
@@ -337,6 +344,7 @@ export default function Layout(props) {
 
 	return (
 		<div className={classes.root}>
+			{loadingComponent && <Loading></Loading>}
 			<CssBaseline />
 
 			{/* Start Header */}

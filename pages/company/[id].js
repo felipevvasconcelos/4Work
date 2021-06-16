@@ -4,7 +4,6 @@ import { Business, Save, ViewList } from "@material-ui/icons";
 import fetchJsonp from "fetch-jsonp";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 import { CompanyClass } from "../../classes";
