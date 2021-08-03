@@ -16,26 +16,12 @@ export default NextAuth({
 			},
 
 			async authorize(credentials) {
-				//Pegar o user no bd, precisa das informações de id, name, entre outras para gravar na token de sessão
-
-				const user = await new UserClass().getByFilter({ email: credentials.username, password: md5(credentials.password + hash) });
-
-				// const user = {
-				// 	id: "1",
-				// 	name: "Felipe",
-				// 	email: credentials.username,
-				// 	password: credentials.password,
-				// };
+				const user = await new UserClass().getByFilter({ email: credentials.username, password: md5(credentials.password + hash), active: true });
 
 				if (user) {
-					// Any object returned will be saved in `user` property of the JWT
-					return user;
+					return Promise.resolve(user[0]);
 				} else {
-					// If you return null or false then the credentials will be rejected
-					return null;
-					// You can also Reject this callback with an Error or with a URL:
-					// throw new Error('error message') // Redirect to error page
-					// throw '/path/to/redirect'        // Redirect to a URL
+					return Promise.resolve(null);
 				}
 			},
 		}),
@@ -72,17 +58,13 @@ export default NextAuth({
 		error: "/auth/signin?error=invalidLogin",
 		// newUser: '/login' // If set, new users will be directed here on first sign in
 	},
+	database: process.env.CONNECTION_STRING,
 	site: process.env.NEXTAUTH_URL,
-
 	session: { jwt: true },
-
 	jwt: {
 		secret: process.env.JWT_SECRET,
 		encryption: true,
 	},
-
-	database: process.env.CONNECTION_STRING,
-
 	callbacks: {
 		async signIn(user, account, profile) {
 			//Valida e-mail que esta tentando logar
@@ -95,6 +77,24 @@ export default NextAuth({
 			if (!res.ok) {
 				return false;
 			}
+		},
+		async session(session, token) {
+			session.accessToken = token.accessToken;
+			return session;
+		},
+		jwt: async (token, user, account, profile, isNewUser) => {
+			if (user) {
+				token.user = {
+					_id: user._id,
+					name: user.name,
+					username: user.email,
+				};
+			}
+			return Promise.resolve(token);
+		},
+		session: async (session, user, sessionToken) => {
+			session.user = user.user;
+			return Promise.resolve(session);
 		},
 	},
 });

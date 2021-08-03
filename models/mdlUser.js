@@ -11,6 +11,7 @@ const UserModel = new mongoose.Schema(
 		password: { type: String, required: true, trim: true },
 		active: { type: Boolean, required: true, default: true },
 		creationDate: { type: Date, default: Date.now },
+		priceHour: { type: Number, required: true },
 		logo: {
 			name: { type: String, trim: true },
 			image: { type: String },
@@ -23,6 +24,11 @@ const UserModel = new mongoose.Schema(
 		profile: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "ProfileType",
+			required: true,
+		},
+		position: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Position",
 			required: true,
 		},
 	},

@@ -1,9 +1,9 @@
 import Head from "next/head";
 import React, { useState } from "react";
-import { CardPanel, Layout, Loading, siteTittle } from "../../components";
+import { CardPanel, Layout, Loading, siteTittle, TextFieldMask } from "../../components";
 import { useRouter } from "next/router";
 import { Switch, Card, Collapse, Button, CardActions, CardContent, CardMedia, CardActionArea, Typography, TextField, Avatar, Grid, makeStyles, InputLabel, FormControl, MenuItem, Select, Container } from "@material-ui/core";
-import { CompanyClass, ProfileTypeClass, UserClass } from "../../classes";
+import { CompanyClass, ProfileTypeClass, UserClass, PositionClass } from "../../classes";
 import { FormControlLabel } from "@material-ui/core";
 import { Person, Save, ViewList } from "@material-ui/icons";
 import { useSnackbar } from "notistack";
@@ -16,6 +16,17 @@ const CustomPersonIcon = function name() {
 		</Grid>
 	);
 };
+
+function currencyFormatterBr(value) {
+	if (!Number(value)) return "";
+
+	const amount = new Intl.NumberFormat("pt-BR", {
+		style: "currency",
+		currency: "BRL",
+	}).format(value / 100);
+
+	return `${amount}`;
+}
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -49,13 +60,14 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function UserById({ data, profiles, companies }) {
+export default function UserById({ data, profiles, companies, positions }) {
 	const route = useRouter();
 	const { enqueueSnackbar } = useSnackbar();
 	const classes = useStyles();
 	const [imgSrc, setImgSrc] = useState(data.logo.image);
 	const [loading, setLoading] = useState(false);
 	const [stateUser, setStateUser] = useState(data);
+	const oldPass = stateUser.password;
 	const [confirmPass, setConfirmPass] = useState(route.query.id == "new" ? "" : stateUser.password);
 	const [confirmPassError, setConfirmPassError] = useState(false);
 	const [confirmPassErrorText, setConfirmPassErrorText] = useState("");
@@ -64,7 +76,7 @@ export default function UserById({ data, profiles, companies }) {
 	const handleClickCollapseImage = () => {
 		setOpenCollapseImage(!openCollapseImage);
 	};
-	const handleChangeCompany = (e) => {
+	const handleChangeUser = (e) => {
 		if (e.target.name == "password") {
 			setConfirmPassError(true);
 			setConfirmPassErrorText("Senhas não coincidem");
@@ -97,9 +109,11 @@ export default function UserById({ data, profiles, companies }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault(e);
 		try {
-			if (confirmPassError || !validatePass.test(stateUser.password)) {
-				enqueueSnackbar("Senha inválida", { variant: "error" });
-				return;
+			if (!(oldPass != "" && oldPass == stateUser.password && oldPass == confirmPass)) {
+				if (confirmPassError || !validatePass.test(stateUser.password)) {
+					enqueueSnackbar("Senha inválida", { variant: "error" });
+					return;
+				}
 			}
 
 			setLoading(true);
@@ -208,7 +222,7 @@ export default function UserById({ data, profiles, companies }) {
 									<Grid xs="12" container direction="column">
 										<Grid container direction="row" alignItems="flex-end" xs={12}>
 											<Grid item xs={10} direction="row">
-												<TextField required id="name" name="name" margin="normal" value={stateUser.name} fullWidth label="Nome do Usuário" onChange={handleChangeCompany} />
+												<TextField required id="name" name="name" margin="normal" value={stateUser.name} fullWidth label="Nome do Usuário" onChange={handleChangeUser} />
 											</Grid>
 											<Grid item xs={2} direction="row">
 												<FormControlLabel
@@ -217,7 +231,7 @@ export default function UserById({ data, profiles, companies }) {
 															name="active"
 															color="primary"
 															onChange={(e) => {
-																handleChangeCompany(e);
+																handleChangeUser(e);
 															}}
 															checked={stateUser.active}
 															value={stateUser.active}
@@ -227,14 +241,14 @@ export default function UserById({ data, profiles, companies }) {
 												/>
 											</Grid>
 											<Grid item xs={12} direction="row" style={{ marginBottom: "10px" }}>
-												<TextField required id="email" name="email" margin="normal" type="email" value={stateUser.email} fullWidth label="E-mail" onChange={handleChangeCompany} />
+												<TextField required id="email" name="email" margin="normal" type="email" value={stateUser.email} fullWidth label="E-mail" onChange={handleChangeUser} />
 											</Grid>
 										</Grid>
 										<Grid container xs={12} direction="row" spacing={1}>
 											<Grid item xs={12} sm={6} direction="row">
 												<FormControl required fullWidth className={classes.formControl}>
 													<InputLabel>Empresa</InputLabel>
-													<Select id="company" name="company" value={stateUser.company} fullWidth onChange={handleChangeCompany}>
+													<Select id="company" name="company" value={stateUser.company} fullWidth onChange={handleChangeUser}>
 														{companies.map((c) => (
 															<MenuItem value={c._id}>{c.name}</MenuItem>
 														))}
@@ -244,7 +258,7 @@ export default function UserById({ data, profiles, companies }) {
 											<Grid item xs={12} sm={6} direction="row">
 												<FormControl required fullWidth className={classes.formControl}>
 													<InputLabel>Perfil</InputLabel>
-													<Select id="profile" name="profile" value={stateUser.profile} fullWidth onChange={handleChangeCompany}>
+													<Select id="profile" name="profile" value={stateUser.profile} fullWidth onChange={handleChangeUser}>
 														{profiles.map((c) => (
 															<MenuItem value={c._id}>{c.name}</MenuItem>
 														))}
@@ -252,9 +266,24 @@ export default function UserById({ data, profiles, companies }) {
 												</FormControl>
 											</Grid>
 										</Grid>
+										<Grid container xs={12} direction="row" spacing={1} alignItems="flex-end">
+											<Grid item xs={12} sm={6}>
+												<FormControl required fullWidth className={classes.formControl}>
+													<InputLabel>Cargo</InputLabel>
+													<Select id="position" name="position" value={stateUser.position} fullWidth onChange={handleChangeUser}>
+														{positions.map((c) => (
+															<MenuItem value={c._id}>{c.name}</MenuItem>
+														))}
+													</Select>
+												</FormControl>
+											</Grid>
+											<Grid item xs={12} sm={6} style={{ marginBottom: "-8px" }}>
+												<TextFieldMask id="priceHour" name="priceHour" margin="normal" isNumericString={true} onChange={handleChangeUser} value={stateUser.priceHour} fullWidth label="Preço da Hora" format={currencyFormatterBr} />
+											</Grid>
+										</Grid>
 										<Grid container xs={12} direction="row" spacing={1}>
 											<Grid item xs={12} sm={6} direction="row">
-												<TextField required id="password" name="password" type="password" margin="normal" value={stateUser.password} fullWidth label="Senha" onChange={handleChangeCompany} helperText="Senha deve conter mínimo de oito caracteres, pelo menos uma letra maiúscula, uma letra minúscula e um número" />
+												<TextField required id="password" name="password" type="password" margin="normal" value={stateUser.password} fullWidth label="Senha" onChange={handleChangeUser} helperText="Senha deve conter mínimo de oito caracteres, pelo menos uma letra maiúscula, uma letra minúscula e um número" />
 											</Grid>
 											<Grid item xs={12} sm={6} direction="row">
 												<TextField required error={confirmPassError} helperText={confirmPassErrorText} id="confirmPassword" name="confirmPassword" type="password" margin="normal" fullWidth label="Confirme a Senha" value={confirmPass} onChange={handleConfirmPass} />
@@ -284,6 +313,7 @@ export async function getServerSideProps(context) {
 	try {
 		const profiles = await new ProfileTypeClass().getAll();
 		const companies = await new CompanyClass().getAll();
+		const positions = await new PositionClass().getAll();
 
 		if (context.query.id == "new") {
 			return {
@@ -299,15 +329,17 @@ export async function getServerSideProps(context) {
 						password: "",
 						company: "",
 						profile: "",
+						position: "",
+						priceHour: "",
 					},
 					profiles,
 					companies,
+					positions,
 				},
 			};
 		} else {
 			const data = await new UserClass().get(context.query.id);
-			console.log(data);
-			return { props: { data, profiles, companies } };
+			return { props: { data, profiles, companies, positions } };
 		}
 	} catch (error) {
 		return { notFound: true };

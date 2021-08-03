@@ -11,7 +11,7 @@ const handler = nc().use(mongodb);
 handler.post(async (req, res) => {
 	try {
 		const { email, password } = req.body;
-		const user = await _UserClass.getByFilter({ email: email, password: md5(password + hash) });
+		const user = await _UserClass.getByFilter({ email: email, password: md5(password + hash), active: true });
 
 		if (user) {
 			res.status(200).end();

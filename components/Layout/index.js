@@ -16,7 +16,8 @@ import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, ExpandLess, ExpandMore, LockOpen, Settings, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
+import { Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
+import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import Loading from "../Loading";
 import { Collapse } from "@material-ui/core";
 
@@ -148,10 +149,8 @@ export default function Layout(props) {
 	const [loadingComponent, setLoadingComponent] = React.useState(false);
 
 	const handleLoading = (e) => {
-		console.log(e);
 		e != router.pathname && setLoadingComponent(!loadingComponent);
 	};
-
 	const handleDrawerToggle = () => {
 		setOpenDrawer(!openDrawer);
 	};
@@ -192,7 +191,7 @@ export default function Layout(props) {
 						<PersonIcon />
 					</ListItemIcon>
 					{session && (
-						<Link href={`/user/${session.user.email}`}>
+						<Link href={`/user/${session.user._id}`}>
 							<ListItemText primary={session.user.name != null ? session.user.name : "Minha Conta"} />
 						</Link>
 					)}
@@ -312,6 +311,14 @@ export default function Layout(props) {
 								<ListItemText primary="Perfis" />
 							</ListItem>
 						</Link>
+						<Link href="/admin/position">
+							<ListItem button className={classes.nested} onClick={() => handleLoading("/admin/position")}>
+								<ListItemIcon>
+									<DeviceHubIcon />
+								</ListItemIcon>
+								<ListItemText primary="Cargos" />
+							</ListItem>
+						</Link>
 						<Link href="/admin/screen">
 							<ListItem button className={classes.nested} onClick={() => handleLoading("/admin/screen")}>
 								<ListItemIcon>
@@ -333,7 +340,15 @@ export default function Layout(props) {
 								<ListItemIcon>
 									<CallSplit />
 								</ListItemIcon>
-								<ListItemText primary="Tipo Chamado" />
+								<ListItemText primary="Tipos de Chamado" />
+							</ListItem>
+						</Link>
+						<Link href="/admin/status">
+							<ListItem button className={classes.nested} onClick={() => handleLoading("/admin/status")}>
+								<ListItemIcon>
+									<Style />
+								</ListItemIcon>
+								<ListItemText primary="Status" />
 							</ListItem>
 						</Link>
 					</List>

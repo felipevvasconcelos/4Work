@@ -1,5 +1,6 @@
 import dbConnect from "../src/dbConfig";
 const mongoose = require("mongoose");
+const autoNumber = require('mongoose-auto-number');
 
 export default async function mongodb(req, res, next) {
 	await dbConnect();

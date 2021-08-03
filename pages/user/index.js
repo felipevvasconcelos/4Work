@@ -21,8 +21,9 @@ const styles = {
 const columns = [
 	{ name: "name", label: "Nome" },
 	{ name: "email", label: "E-mail" },
-	{ name: "profile", label: "Perfil", options: { customBodyRender: (value) => value.name } },
-	{ name: "company", label: "Empresa", options: { customBodyRender: (value) => value.name } },
+	{ name: "position", label: "Cargo", options: { customBodyRender: (value) => value?.name } },
+	{ name: "profile", label: "Perfil", options: { customBodyRender: (value) => value?.name } },
+	{ name: "company", label: "Empresa", options: { customBodyRender: (value) => value?.name } },
 	{
 		name: "createdAt",
 		label: "Data Criação",
@@ -117,21 +118,13 @@ export default function User({ data }) {
 }
 
 export async function getServerSideProps(context) {
-	//EXEMPLO PARA API INTERNA, PORÉM NÃO É RECOMENDADO PELA DOC DO NEXT
-	//DESSA FORMA É NECESSÁRIO A CRIAÇÃO DE CLASSES PARA A INCLUSÃO DA LÓGICA E
-	//ASSIM EFETUAR AS CHAMADAS DAS CLASSES NOS COMPONENTE E NA API
-	//const res = await fetch(`${process.env.NEXTAUTH_URL}/api/users`, context.req);
-	//const data = await res.json();
-	var data = "";
 	const userClass = new UserClass();
 
 	if (context.query.idCompany) {
-		data = await userClass.getByFilter({ company: context.query.idCompany });
+		const data = await userClass.getByFilter({ company: context.query.idCompany });
+		return { props: { data } };
 	} else {
-		data = await userClass.getAll();
+		const data = await userClass.getAll();
+		return { props: { data } };
 	}
-
-	return {
-		props: { data },
-	};
 }
