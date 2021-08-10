@@ -17,5 +17,7 @@ export function currencyFormatterBr(value) {
 		currency: "BRL",
 	}).format(value / 100);
 
+	console.log(amount);
+
 	return `${amount}`;
 }

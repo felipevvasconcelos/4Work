@@ -7,6 +7,7 @@ import Link from "next/link";
 import React from "react";
 import { ProjectClass } from "../../classes";
 import { CardPanel, CustomDataTable, Layout, siteTittle } from "../../components";
+import { currencyFormatterBr } from '../../classes/GlobalClass';
 
 const styles = {
 	//cardTitle,
@@ -38,6 +39,22 @@ const columns = [
 			filter: false,
 			customBodyRender: (value) => moment(new Date(value)).format("DD/MM/YYYY HH:mm"),
 		},
+	},
+	{
+		name: 'priceCalculated',
+		label: 'Preço Calculado',
+		options: {
+			filter: false,
+			customBodyRender: (value) => currencyFormatterBr(value)
+		}
+	},
+	{
+		name: 'priceCharged',
+		label: 'Preço Cobrado',
+		options: {
+			filter: false,
+			customBodyRender: (value) => currencyFormatterBr(value)
+		}
 	},
 	{
 		name: "_id",

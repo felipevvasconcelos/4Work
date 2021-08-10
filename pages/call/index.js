@@ -5,25 +5,61 @@ import Link from "next/link";
 import { makeStyles } from "@material-ui/core/styles";
 import { CardPanel, CustomDataTable, Layout, siteTittle } from "../../components";
 import QueueIcon from "@material-ui/icons/Queue";
+import CallClass from '../../classes/CallClass';
+import moment from "moment";
+import { Edit } from "@material-ui/icons";
 
-const columns = ["Título", "Operador", "Solicitante", "Data Criação", "Sla"];
-
-const data = [
-	["Titulo chamado teste", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste2", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste3", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste4", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste5", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste55", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste6", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste66", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste7", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste8", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste9", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste999", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste65553", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste45347", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste63636", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
+const columns = [
+	{ name: "title", label: "Nome do Chamado" },
+	{ 
+		name: "userCreate", 
+		label: "Solicitante",
+		options: {
+			customBodyRender: (value) => {
+				return value.name;
+			}
+		}
+	},
+	{ 
+		name: "status", 
+		label: "status",
+		options: {
+			customBodyRender: (value) => {
+				return value.name;
+			}
+		}
+	},
+	{ name: "callNumber", label: "Número do Chamado" },
+	{ 
+		name: "dateCreate", 
+		label: "Data de Criação",
+		options: {
+			filter: false,
+			customBodyRender: (value) => moment(new Date(value)).format("DD/MM/YYYY HH:mm"),
+		},
+	},
+	{
+		name: "_id",
+		label: "Ações",
+		options: {
+			sort: false,
+			print: false,
+			filter: false,
+			customBodyRender: (value, tableMeta) => {
+				return (
+					<div>
+						<Link href={`/call/${value}`}>
+							<Tooltip title={"Editar"}>
+								<IconButton size="small" style={{ color: "#2E8BC0" }}>
+									<Edit />
+								</IconButton>
+							</Tooltip>
+						</Link> 
+					</div>
+				);
+			},
+		},
+	},
 ];
 
 const customToolbar = (
@@ -63,7 +99,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function Call() {
+export default function Call({ data }) {
 	const classes = useStyles();
 
 	return (
@@ -87,4 +123,12 @@ export default function Call() {
 			</CardPanel>
 		</Layout>
 	);
+}
+
+export async function getServerSideProps(context) {
+	const callClass = new CallClass();
+
+	var data = await callClass.getAll();
+
+	return {props: { data }};
 }
