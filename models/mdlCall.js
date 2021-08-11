@@ -10,6 +10,7 @@ const CallModel = new mongoose.Schema({
 	description: { type: String, required: true, trim: true },
 	dateCreate: { type: Date, default: Date.now },
 	dateModified: { type: Date, default: Date.now },
+	deadline: { type: Date, required: true, default: Date.now },
 	userCreate: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "User",

@@ -20,6 +20,7 @@ import ProjectClass from '../../classes/ProjectClass';
 import StatusClass from '../../classes/StatusClass';
 import TypeCallClass from '../../classes/TypeCallClass';
 import { useSession } from "next-auth/client";
+import dayjs from "dayjs";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -68,6 +69,24 @@ export default function CallById({ projects, data, status, typesCall }) {
 	const [loading, setLoading] = React.useState(false);
 	const { enqueueSnackbar } = useSnackbar();
 	const callForm = React.useRef(null);
+
+	const CalculateDeadline = (TypeCall) => {
+		const InitialTerm = state.dateCreate || Date.now();
+		const DeadLine = dayjs(InitialTerm).add(TypeCall || 1, 'hour');
+		return DeadLine;
+	}
+
+	useEffect(() =>{
+		if(state.type){
+			const selectedObejct = typesCall.find(element => element._id === state.type);
+
+			if(selectedObejct){
+				const newDeadLine = CalculateDeadline(selectedObejct.slaDefault);
+
+				setState({...state, deadline: newDeadLine})
+			}
+		}
+	},[state.type])
 
 	const handleChange = (event) => {
 		setState({ ...state, [event.target.name]: event.target.value });
@@ -181,7 +200,7 @@ export default function CallById({ projects, data, status, typesCall }) {
 							<Grid container spacing={3} alignContent="flex-end">
 								<Grid item xs={12} md={3}>
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
-										<KeyboardDatePicker fullWidth id="date-picker-inline" disabled disableToolbar variant="inline" format="dd/MM/yyyy" margin="normal" label="Criado em" value={state.dateCreate} name="dateCreate" onChange={handleChange} KeyboardButtonProps={{ "aria-label": "change date" }} />
+										<KeyboardDatePicker fullWidth id="date-picker-inline" disabled disableToolbar variant="inline" format="dd/MM/yyyy HH:MM" margin="normal" label="Criado em" value={state.dateCreate} name="dateCreate" onChange={handleChange} KeyboardButtonProps={{ "aria-label": "change date" }} />
 									</MuiPickersUtilsProvider>
 								</Grid>
 								<Grid item xs={12} md={3}>
@@ -189,7 +208,7 @@ export default function CallById({ projects, data, status, typesCall }) {
 								</Grid>
 								<Grid item xs={12} md={3}>
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
-										<KeyboardDatePicker fullWidth id="date-picker-inline" disabled disableToolbar variant="inline" format="dd/MM/yyyy" margin="normal" label="Modificado em" value={state.dateModified} name="dateModified" onChange={handleChange} KeyboardButtonProps={{ "aria-label": "change date" }} />
+										<KeyboardDatePicker fullWidth id="date-picker-inline" disabled disableToolbar variant="inline" format="dd/MM/yyyy HH:MM" margin="normal" label="Modificado em" value={state.dateModified} name="dateModified" onChange={handleChange} KeyboardButtonProps={{ "aria-label": "change date" }} />
 									</MuiPickersUtilsProvider>
 								</Grid>
 								<Grid item xs={12} md={3}>
@@ -228,6 +247,11 @@ export default function CallById({ projects, data, status, typesCall }) {
 											}
 										</Select>
 									</FormControl>
+								</Grid>
+								<Grid item xs={12} md={3}>
+									<MuiPickersUtilsProvider utils={DateFnsUtils}>
+										<KeyboardDatePicker fullWidth id="date-picker-inline" disabled disableToolbar variant="inline" format="dd/MM/yyyy HH:MM" margin="normal" label="Prazo" value={state.deadline} name="deadline" onChange={handleChange} KeyboardButtonProps={{ "aria-label": "change date" }} />
+									</MuiPickersUtilsProvider>
 								</Grid>
 								{/* <Grid item xs={12} md={6} container alignContent="flex-end">
 									<FormControl fullWidth margin="normal">
@@ -297,6 +321,7 @@ export async function getServerSideProps(context) {
 			userModified: "",
 			type: "",
 			status: "",
+			deadline: Date.now(),
 			project: ""
 		}
 

@@ -32,6 +32,7 @@ export default class CallClass {
 					type: data.type,
 					status: data.status,
 					project: data.project,
+					deadline: data.deadline
 				},
 			})
 				.populate("user", "name")

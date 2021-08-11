@@ -2,11 +2,12 @@ import MUIDataTable from "mui-datatables";
 import PropTypes from "prop-types";
 
 export default function CustomDataTable(props) {
-	const { data, columns, children } = props;
+	const { data, columns, children, CustomOptions } = props;
 
 	const options = {
 		selectableRowsHideCheckboxes: true,
 		filterType: "checkbox",
+		filter: true,
 		labelRowsPerPage: "Linhas por página",
 		textLabels: {
 			pagination: {
@@ -25,6 +26,7 @@ export default function CustomDataTable(props) {
 		customToolbar: () => {
 			return children;
 		},
+		...CustomOptions
 	};
 
 	return <MUIDataTable data={data} columns={columns} options={options} />;
