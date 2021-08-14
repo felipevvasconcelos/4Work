@@ -19,3 +19,8 @@ export function currencyFormatterBr(value) {
 
 	return `${amount}`;
 }
+
+function formaterHour(value) {
+	var strValue = value.toString();
+	return `${strValue.substring(0, strValue.length - 2)}:${strValue.substring(strValue.length - 2, strValue.length)}`;
+}

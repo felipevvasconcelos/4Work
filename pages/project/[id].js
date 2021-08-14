@@ -173,10 +173,10 @@ export default function ProjectById({ data, companies, statusList, users }) {
 		setStateProject({ ...stateProject, hoursTotal: hour1 + hour2 + hour3 + hour4 + hour5 + hour6 + hour7 });
 	};
 	const handleNext = () => {
-		if (!myForm.current.checkValidity()) {
-			enqueueSnackbar("Preencha todos os campos obrigatórios nesta etapa", { variant: "error" });
-			return;
-		}
+		// if (!myForm.current.checkValidity()) {
+		// 	enqueueSnackbar("Preencha todos os campos obrigatórios nesta etapa", { variant: "error" });
+		// 	return;
+		// }
 
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};

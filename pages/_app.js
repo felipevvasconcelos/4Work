@@ -8,6 +8,7 @@ import { Provider } from "next-auth/client";
 import { Slide } from "@material-ui/core";
 import { SnackbarProvider } from "notistack";
 import { ConfirmDialog } from "../components";
+
 //import '../styles/global.css';
 
 export default function MyApp(props) {

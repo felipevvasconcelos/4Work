@@ -16,7 +16,7 @@ import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
+import { AccessAlarm, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import Loading from "../Loading";
 import { Collapse } from "@material-ui/core";
@@ -206,8 +206,6 @@ export default function Layout(props) {
 				</ListItem>
 			</List>
 			<Divider variant="middle" />
-			{/* Lista rapida de tarefas */}
-			<ListTask></ListTask>
 		</div>
 	);
 	//End Sidebar User
@@ -257,6 +255,22 @@ export default function Layout(props) {
 							<FolderSpecialIcon />
 						</ListItemIcon>
 						<ListItemText primary="Melhorias" />
+					</ListItem>
+				</Link>
+				<Link href="/timesheet">
+					<ListItem button onClick={() => handleLoading("/timesheet")}>
+						<ListItemIcon>
+							<AccessAlarm />
+						</ListItemIcon>
+						<ListItemText primary="TimeSheet" />
+					</ListItem>
+				</Link>
+				<Link href="/timemanager">
+					<ListItem button onClick={() => handleLoading("/timesheet")}>
+						<ListItemIcon>
+							<AvTimer />
+						</ListItemIcon>
+						<ListItemText primary="Gerenciar Horas" />
 					</ListItem>
 				</Link>
 				<Link href="/task">
@@ -439,8 +453,8 @@ export default function Layout(props) {
 					<Grid alignItems="center" alignContent="center">
 						<Typography className={classes.pFooter}>
 							<Copyright style={{ marginRight: "2px" }} />
-							<Typography style={{ marginRight: "2px" }}>Desenvolvido por</Typography>
-							<Link href="https://www.linkedin.com/in/felipe-vasconcelos-324905179/">Felipe Vasconcelos</Link>
+							<Typography style={{ marginRight: "2px" }}>Desenvolvido pela </Typography>
+							<Link href="https://www.linkedin.com/company/koodetech/about/"> Koode</Link>
 						</Typography>
 					</Grid>
 				</footer>
