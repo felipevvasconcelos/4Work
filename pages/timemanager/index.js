@@ -7,6 +7,12 @@ import moment from "moment";
 import { useSnackbar } from "notistack";
 import { FormControlLabel } from "@material-ui/core";
 import { StatusClass } from "../../classes";
+import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend } from "@devexpress/dx-react-chart-material-ui";
+import { ValueScale } from "@devexpress/dx-react-chart";
+import { FormControl } from "@material-ui/core";
+import { InputLabel } from "@material-ui/core";
+import { Select } from "@material-ui/core";
+import { MenuItem } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -21,6 +27,15 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
+const chartData = [
+	{ month: "Jan", sale: 50, total: 987 },
+	{ month: "Feb", sale: 100, total: 3000 },
+	{ month: "March", sale: 30, total: 1100 },
+	{ month: "April", sale: 107, total: 7100 },
+	{ month: "May", sale: 95, total: 4300 },
+	{ month: "June", sale: 150, total: 7500 },
+];
+
 export default function Timemanager({ data, handleConfirmDialogOpen, handleConfirmDialogClose }) {
 	const { enqueueSnackbar } = useSnackbar();
 	const classes = useStyles();
@@ -33,7 +48,36 @@ export default function Timemanager({ data, handleConfirmDialogOpen, handleConfi
 				<title>{siteTittle}</title>
 			</Head>
 			{loading && <Loading></Loading>}
-			<CardPanel title="Gerenciamento de Horas" subtitle="Gerenciamento de horas lançadas por projetos e parceiros" color="primary"></CardPanel>
+			<Grid container spacing={1} direction="row" alignItems="flex-start" xs={12}>
+				<Grid item xs={12} lg={6}>
+					<CardPanel title="" subtitle="Visualização por Tipo" color="primary">
+						<Chart data={chartData}>
+							<ValueScale name="sale" />
+							<ValueScale name="total" />
+							<ArgumentAxis />
+							<ValueAxis scaleName="sale" showGrid={false} showLine showTicks />
+							<ValueAxis scaleName="total" position="right" showGrid={false} showLine showTicks />
+							<BarSeries name="Units Sold" color="black" valueField="sale" argumentField="month" scaleName="sale" />
+							<LineSeries name="Total Transactions" valueField="total" argumentField="month" scaleName="total" />
+							<Legend />
+						</Chart>
+					</CardPanel>
+				</Grid>
+				<Grid item xs={12} lg={6}>
+					<CardPanel title="" subtitle="Visualização por Usuário" color="primary">
+						<Chart data={chartData}>
+							<ValueScale name="sale" />
+							<ValueScale name="total" />
+							<ArgumentAxis />
+							<ValueAxis scaleName="sale" showGrid={false} showLine showTicks />
+							<ValueAxis scaleName="total" position="right" showGrid={false} showLine showTicks />
+							<BarSeries name="Units Sold" color="black" valueField="sale" argumentField="month" scaleName="sale" />
+							<LineSeries name="Total Transactions" valueField="total" argumentField="month" scaleName="total" />
+							<Legend />
+						</Chart>
+					</CardPanel>
+				</Grid>
+			</Grid>
 		</Layout>
 	);
 }

@@ -9,18 +9,14 @@ import { FormControlLabel } from "@material-ui/core";
 import { StatusClass } from "../../classes";
 import { Link } from "@material-ui/core";
 import QueueIcon from "@material-ui/icons/Queue";
-import { Inject, Month, ScheduleComponent, ViewDirective, ViewsDirective, Week, WorkWeek } from "@syncfusion/ej2-react-schedule";
-
-import "@syncfusion/ej2-base/styles/material.css";
-import "@syncfusion/ej2-buttons/styles/material.css";
-import "@syncfusion/ej2-calendars/styles/material.css";
-import "@syncfusion/ej2-dropdowns/styles/material.css";
-import "@syncfusion/ej2-inputs/styles/material.css";
-import "@syncfusion/ej2-lists/styles/material.css";
-import "@syncfusion/ej2-navigations/styles/material.css";
-import "@syncfusion/ej2-popups/styles/material.css";
-import "@syncfusion/ej2-splitbuttons/styles/material.css";
-import "@syncfusion/ej2-react-schedule/styles/material.css";
+import { ViewState } from "@devexpress/dx-react-scheduler";
+import { Scheduler, WeekView, Appointments } from "@devexpress/dx-react-scheduler-material-ui";
+import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend } from "@devexpress/dx-react-chart-material-ui";
+import { ValueScale } from "@devexpress/dx-react-chart";
+import { FormControl } from "@material-ui/core";
+import { InputLabel } from "@material-ui/core";
+import { Select } from "@material-ui/core";
+import { MenuItem } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -37,20 +33,25 @@ const useStyles = makeStyles((theme) => ({
 
 const columns = ["Descrição", "Tipo", "Fonte", "Hora Início", "Hora Fim", "Hora Início", "Hora Fim", "Total"];
 
+const chartData = [
+	{ month: "Jan", sale: 50, total: 987 },
+	{ month: "Feb", sale: 100, total: 3000 },
+	{ month: "March", sale: 30, total: 1100 },
+	{ month: "April", sale: 107, total: 7100 },
+	{ month: "May", sale: 95, total: 4300 },
+	{ month: "June", sale: 150, total: 7500 },
+];
+
 const data1 = [
 	["Descrição Teste", "Chamado", "Chamado Teste", "09:00", "13:00"],
 	["Descrição Teste", "Melhoria", "Melhoria Teste", "14:00", "16:00"],
 	["Descrição Teste", "Projeto", "Projeto Teste", "16:00", "18:00"],
 ];
 
-const schedule = [
-	{
-		Id: 1,
-		Subject: "Meeting - 1",
-		StartTime: new Date(2018, 1, 15, 10, 0),
-		EndTime: new Date(2018, 1, 16, 12, 30),
-		IsAllDay: false,
-	},
+const currentDate = "2018-11-01";
+const schedulerData = [
+	{ startDate: "2018-11-01T09:45", endDate: "2018-11-01T11:00", title: "Meeting" },
+	{ startDate: "2018-11-01T12:00", endDate: "2018-11-01T13:30", title: "Go to a gym" },
 ];
 
 const customToolbar = (
@@ -84,25 +85,53 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 			</Head>
 			{loading && <Loading></Loading>}
 			<Grid container spacing={1} direction="row" alignItems="flex-start" xs={12}>
-				<Grid item xs={6}>
-					<CardPanel title="" subtitle="Visualização de lançamentos de horas" color="primary">
-						<ScheduleComponent width="100%" height="100%" selectedDate={new Date(2018, 1, 15)} eventSettings={{ dataSource: schedule }}>
-							<ViewsDirective>
-								<ViewDirective option="WorkWeek" startHour="08:00" endHour="18:00" />
-								<ViewDirective option="Week" startHour="08:00" endHour="18:00" />
-								<ViewDirective option="Month" showWeekend={false} />
-							</ViewsDirective>
-							<Inject services={[WorkWeek, Week, Month]} />
-						</ScheduleComponent>
+				<Grid item xs={12} lg={6}>
+					<CardPanel title="" subtitle="Lançamentos de Horas" color="primary">
+						<Scheduler data={schedulerData}>
+							<ViewState currentDate={currentDate} />
+							<WeekView startDayHour={9} endDayHour={19} />
+							<Appointments />
+						</Scheduler>
 					</CardPanel>
 				</Grid>
-				<Grid item xs={6}>
-					<CardPanel title="" subtitle="Apontamento de horas" color="primary">
-						<div className={classes.root}>
-							<CustomDataTable data={dataTable} columns={columns}>
-								{customToolbar}
-							</CustomDataTable>
-						</div>
+				<Grid item xs={12} lg={6}>
+					<CardPanel color="primary" subtitle="Visualização de Horas">
+						<Grid container spacing={1} direction="row" alignItems="center" xs={12}>
+							<Grid item xs={12}>
+								<Grid container spacing={1} direction="row" alignItems="flex-end" xs={12}>
+									<Grid item xs={12} md={3}>
+										<FormControl fullWidth margin="normal">
+											<InputLabel id="demo-simple-select-helper-label">Período</InputLabel>
+											<Select labelId="demo-simple-select-label" id="demo-simple-select">
+												<MenuItem value={10}>Mensal</MenuItem>
+												<MenuItem value={20}>Semanal</MenuItem>
+											</Select>
+										</FormControl>
+									</Grid>
+									<Grid item xs={12} md={3}>
+										<FormControl fullWidth margin="normal">
+											<InputLabel id="demo-simple-select-helper-label">Tipo</InputLabel>
+											<Select labelId="demo-simple-select-label" id="demo-simple-select">
+												<MenuItem value={10}>Projeto tal</MenuItem>
+												<MenuItem value={20}>Melhoria x</MenuItem>
+											</Select>
+										</FormControl>
+									</Grid>
+								</Grid>
+							</Grid>
+							<Grid item xs={12}>
+								<Chart data={chartData}>
+									<ValueScale name="sale" />
+									<ValueScale name="total" />
+									<ArgumentAxis />
+									<ValueAxis scaleName="sale" showGrid={false} showLine showTicks />
+									<ValueAxis scaleName="total" position="right" showGrid={false} showLine showTicks />
+									<BarSeries name="Units Sold" color="black" valueField="sale" argumentField="month" scaleName="sale" />
+									<LineSeries name="Total Transactions" valueField="total" argumentField="month" scaleName="total" />
+									<Legend />
+								</Chart>
+							</Grid>
+						</Grid>
 					</CardPanel>
 				</Grid>
 			</Grid>

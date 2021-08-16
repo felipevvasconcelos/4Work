@@ -9,4 +9,5 @@ export { default as ImprovementClass } from "./ImprovementClass";
 export { default as CallClass } from "./CallClass";
 export { default as StatusClass } from "./StatusClass";
 export { default as PositionClass } from "./PositionClass";
+export { default as TimeSheetClass } from "./TimeSheetClass";
 export * from "./GlobalClass";
