@@ -1,9 +1,12 @@
 import React from "react";
 import clsx from "clsx";
-import { makeStyles, useTheme, Drawer, AppBar, CssBaseline, Toolbar, List, ListItem, ListItemIcon, ListItemText, Button, Avatar, IconButton, Hidden, Box, SwipeableDrawer, Divider, CircularProgress, Typography, Grid, Grow } from "@material-ui/core";
+import Link from "next/link";
+
+import { Loading, AppointmentDialog, ListNotifications } from "../../components";
+import { makeStyles, useTheme, Drawer, AppBar, CssBaseline, Toolbar, List, ListItem, ListItemIcon, ListItemText, Button, Avatar, IconButton, Hidden, Box, SwipeableDrawer, Divider, CircularProgress, Typography, Grid, Tooltip, Collapse, Badge } from "@material-ui/core";
+
 import GroupIcon from "@material-ui/icons/Group";
 import AssignmentIcon from "@material-ui/icons/Assignment";
-import Link from "next/link";
 import MenuIcon from "@material-ui/icons/Menu";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
@@ -16,10 +19,8 @@ import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { AccessAlarm, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
+import { AccessAlarm, AddAlarm, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Notifications, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
-import Loading from "../Loading";
-import { Collapse } from "@material-ui/core";
 
 // //ISSO AQUI SERVE PARA GERAR AS PAGINAS ESTATICAS
 // //FAZENDO ASSIM UMA REQUISIÇÃO INSTATANEA
@@ -132,6 +133,10 @@ const useStyles = makeStyles((theme) => ({
 	nested: {
 		paddingLeft: theme.spacing(4),
 	},
+	customBadge: {
+		backgroundColor: "black",
+		color: "white",
+	},
 }));
 
 export default function Layout(props) {
@@ -147,12 +152,20 @@ export default function Layout(props) {
 	const [openDrawerTaskMobile, setOpenDrawerTaskMobile] = React.useState(false);
 	const [openCollapseListConfig, setOpenCollapseLisConfig] = React.useState(false);
 	const [loadingComponent, setLoadingComponent] = React.useState(false);
+	const [appoitmentDialog, setAppoitmentDialog] = React.useState(false);
+	const [notifications, setNotifications] = React.useState(false);
 
 	const handleLoading = (e) => {
 		e != router.pathname && setLoadingComponent(!loadingComponent);
 	};
 	const handleDrawerToggle = () => {
 		setOpenDrawer(!openDrawer);
+	};
+	const handleAppoitment = () => {
+		setAppoitmentDialog(!appoitmentDialog);
+	};
+	const handleNotifications = () => {
+		setNotifications(!notifications);
 	};
 	const handleDrawerTasksToggle = () => {
 		setOpenDrawerTask(!openDrawerTask);
@@ -225,14 +238,14 @@ export default function Layout(props) {
 				</ListItem>
 			</Hidden>
 			<List>
-				<Link href="/dashboard">
+				{/* <Link href="/dashboard">
 					<ListItem disabled button onClick={() => handleLoading("/dashboard")}>
 						<ListItemIcon>
 							<Dashboard />
 						</ListItemIcon>
 						<ListItemText primary="Dashboard" />
 					</ListItem>
-				</Link>
+				</Link> */}
 				<Link href="/project">
 					<ListItem button onClick={() => handleLoading("/project")}>
 						<ListItemIcon>
@@ -273,7 +286,7 @@ export default function Layout(props) {
 						<ListItemText primary="Gerenciar Horas" />
 					</ListItem>
 				</Link>
-				<Link href="/task">
+				{/* <Link href="/task">
 					<ListItem disabled button onClick={() => handleLoading("/task")}>
 						<ListItemIcon>
 							<DynamicFeedIcon />
@@ -288,7 +301,7 @@ export default function Layout(props) {
 						</ListItemIcon>
 						<ListItemText primary="Quadro" />
 					</ListItem>
-				</Link>
+				</Link> */}
 			</List>
 			<Divider variant="middle" />
 			<List>
@@ -398,12 +411,36 @@ export default function Layout(props) {
 					<div style={{ width: "100%" }}>
 						<Box display="flex" flexDirection="row-reverse">
 							<Hidden xsDown implementation="css">
+								<Tooltip title={"Notificações"}>
+									<IconButton onClick={handleNotifications} style={{ color: "white" }}>
+										<Badge badgeContent={4} classes={{ badge: classes.customBadge }} overlap="circle">
+											<Notifications />
+										</Badge>
+									</IconButton>
+								</Tooltip>
+								<Tooltip title={"Iniciar Apontamento"}>
+									<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+										<AddAlarm />
+									</IconButton>
+								</Tooltip>
 								<IconButton onClick={handleDrawerTasksToggle} style={{ color: "white" }}>
 									<AccountCircle />
 								</IconButton>
 							</Hidden>
 							<Hidden smUp implementation="css">
-								<IconButton onClick={handleDrawerTasksMobileToggle}>
+								<Tooltip title={"Notificações"}>
+									<IconButton onClick={handleNotifications} style={{ color: "white" }}>
+										<Badge badgeContent={4} color="error">
+											<Notifications />
+										</Badge>
+									</IconButton>
+								</Tooltip>
+								<Tooltip title={"Iniciar Apontamento"}>
+									<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+										<AddAlarm />
+									</IconButton>
+								</Tooltip>
+								<IconButton onClick={handleDrawerTasksMobileToggle} style={{ color: "white" }}>
 									<AccountCircle />
 								</IconButton>
 							</Hidden>
@@ -437,6 +474,9 @@ export default function Layout(props) {
 				{/* EndWeb */}
 			</nav>
 			{/* End Sidebar */}
+
+			<AppointmentDialog open={appoitmentDialog} session={session} closeFunction={handleAppoitment}></AppointmentDialog>
+			<ListNotifications open={notifications} closeFunction={handleNotifications} />
 
 			<div className={classes.app}>
 				<main

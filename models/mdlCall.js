@@ -9,6 +9,11 @@ const CallModel = new mongoose.Schema({
 	dateEnd: { type: Date, default: Date.now },
 	dateCreate: { type: Date, default: Date.now },
 	dateModified: { type: Date, default: Date.now },
+	user: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "User",
+		required: true,
+	},
 	userCreate: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "User",
@@ -24,7 +29,7 @@ const CallModel = new mongoose.Schema({
 		ref: "TypeCall",
 		required: true,
 	},
-    status: {
+	status: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Status",
 		required: true,

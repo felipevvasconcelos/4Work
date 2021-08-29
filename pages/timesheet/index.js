@@ -1,22 +1,25 @@
 import React, { useState } from "react";
-import { Button, Container, Grid, IconButton, makeStyles, Paper, Switch, TextField, Tooltip } from "@material-ui/core";
-import { AddToQueue, Delete } from "@material-ui/icons";
 import Head from "next/head";
-import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../components";
-import moment from "moment";
 import { useSnackbar } from "notistack";
-import { FormControlLabel } from "@material-ui/core";
 import { StatusClass } from "../../classes";
-import { Link } from "@material-ui/core";
+
+//COMPONENTES
+import { CardPanel, Layout, Loading, siteTittle, AppointmentDialog, AppointmentCompleteDialog } from "../../components";
+import { Grid, IconButton, makeStyles, Tooltip, RadioGroup, Radio, MenuItem, Select, InputLabel, FormControl, Link, FormControlLabel, TextField } from "@material-ui/core";
+
+//ICONES
 import QueueIcon from "@material-ui/icons/Queue";
-import { ViewState } from "@devexpress/dx-react-scheduler";
-import { Scheduler, WeekView, Appointments } from "@devexpress/dx-react-scheduler-material-ui";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileExport } from "@fortawesome/free-solid-svg-icons";
+
+//DEVEXPRESS
+import { AppointmentForm, EditingState, EditRecurrenceMenu, IntegratedEditing, ViewState } from "@devexpress/dx-react-scheduler";
+import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator, TodayButton } from "@devexpress/dx-react-scheduler-material-ui";
 import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend } from "@devexpress/dx-react-chart-material-ui";
 import { ValueScale } from "@devexpress/dx-react-chart";
-import { FormControl } from "@material-ui/core";
-import { InputLabel } from "@material-ui/core";
-import { Select } from "@material-ui/core";
-import { MenuItem } from "@material-ui/core";
+import { Button } from "@material-ui/core";
+import { AlarmAdd } from "@material-ui/icons";
+import { useSession } from "next-auth/client";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -29,9 +32,10 @@ const useStyles = makeStyles((theme) => ({
 	paddingBtn: {
 		padding: "10px",
 	},
+	primary: {
+		backgroundColor: theme.palette.primary,
+	},
 }));
-
-const columns = ["Descrição", "Tipo", "Fonte", "Hora Início", "Hora Fim", "Hora Início", "Hora Fim", "Total"];
 
 const chartData = [
 	{ month: "Jan", sale: 50, total: 987 },
@@ -49,34 +53,70 @@ const data1 = [
 ];
 
 const currentDate = "2018-11-01";
-const schedulerData = [
-	{ startDate: "2018-11-01T09:45", endDate: "2018-11-01T11:00", title: "Meeting" },
-	{ startDate: "2018-11-01T12:00", endDate: "2018-11-01T13:30", title: "Go to a gym" },
-];
 
-const customToolbar = (
-	<Link href="#">
-		<Tooltip title={"Nova Linha"}>
-			<IconButton
-				aria-label="add"
-				style={{
-					order: -1,
-					color: "#66d393",
-					marginLeft: "25px",
-					marginRight: "-40px",
-				}}
-			>
-				<QueueIcon />
-			</IconButton>
-		</Tooltip>
-	</Link>
+const ExternalViewSwitcher = ({ currentViewName, onChange }) => (
+	<RadioGroup aria-label="Views" style={{ flexDirection: "row" }} name="views" value={currentViewName} onChange={onChange}>
+		<FormControlLabel value="Day" control={<Radio color="primary" />} label="Diário" />
+		<FormControlLabel value="Week" control={<Radio color="primary" />} label="Semana" />
+		<FormControlLabel value="Month" control={<Radio color="primary" />} label="Mensal" />
+	</RadioGroup>
+);
+
+const appointmentComponent = ({ children, style, ...restProps }) => (
+	<Appointments.Appointment
+		{...restProps}
+		style={{
+			...style,
+			backgroundColor: "#cc6828",
+		}}
+	>
+		{children}
+	</Appointments.Appointment>
 );
 
 export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirmDialogClose }) {
 	const { enqueueSnackbar } = useSnackbar();
 	const classes = useStyles();
+	const [session] = useSession();
 	const [loading, setLoading] = useState(false);
+	const [viewName, setViewName] = useState("Month");
+	const [radioChart, setRadioChart] = useState("month");
 	const [dataTable, setDataTable] = useState(data1);
+	const [appoitmentDialog, setAppoitmentDialog] = React.useState(false);
+	const [schedulerData, setSchedulerData] = useState([
+		{ startDate: "2018-11-01T09:45", endDate: "2018-11-01T11:00", title: "Meeting", id: 100 },
+		{ startDate: "2018-11-01T12:00", endDate: "2018-11-01T13:30", title: "Go to a gym", id: 200 },
+	]);
+
+	const handleAppoitment = () => {
+		setAppoitmentDialog(!appoitmentDialog);
+	};
+
+	const handleViewSwitcher = (e) => {
+		setViewName(e.target.value);
+	};
+	const handleRadioChart = (e) => {
+		setRadioChart(e.target.value);
+	};
+
+	const handleEditScheduler = ({ added, changed, deleted }) => {
+		let data = schedulerData;
+
+		if (added) {
+			const startingAddedId = data.length > 0 ? data[data.length - 1].id + 1 : 0;
+			data = [...data, { id: startingAddedId, ...added }];
+		}
+
+		if (changed) {
+			data = data.map((appointment) => (changed[appointment.id] ? { ...appointment, ...changed[appointment.id] } : appointment));
+		}
+
+		if (deleted !== undefined) {
+			data = data.filter((appointment) => appointment.id !== deleted);
+		}
+
+		setSchedulerData(data);
+	};
 
 	return (
 		<Layout>
@@ -87,38 +127,89 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 			<Grid container spacing={1} direction="row" alignItems="flex-start" xs={12}>
 				<Grid item xs={12} lg={6}>
 					<CardPanel title="" subtitle="Lançamentos de Horas" color="primary">
-						<Scheduler data={schedulerData}>
-							<ViewState currentDate={currentDate} />
+						<Grid container justify="flex-end" direction="row" spacing={2}>
+							<ExternalViewSwitcher currentViewName={viewName} onChange={handleViewSwitcher} />
+							<Tooltip title={"Adicionar Apontamento"}>
+								<IconButton onClick={handleAppoitment} color="inherit" aria-label="open drawer" edge="start">
+									<AlarmAdd style={{ color: "green" }} />
+								</IconButton>
+							</Tooltip>
+						</Grid>
+						<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
+							<ViewState defaultCurrentDate={currentDate} currentViewName={viewName} />
+							<EditingState onCommitChanges={handleEditScheduler} />
+							<IntegratedEditing />
+							<Toolbar />
+
 							<WeekView startDayHour={9} endDayHour={19} />
-							<Appointments />
+							<WeekView name="Work Week" excludedDays={[0, 6]} startDayHour={9} endDayHour={19} />
+							<MonthView />
+							<DayView />
+
+							<DateNavigator />
+							<Appointments appointmentComponent={appointmentComponent} />
+							<AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
+
+							<DragDropProvider />
 						</Scheduler>
 					</CardPanel>
 				</Grid>
 				<Grid item xs={12} lg={6}>
 					<CardPanel color="primary" subtitle="Visualização de Horas">
 						<Grid container spacing={1} direction="row" alignItems="center" xs={12}>
-							<Grid item xs={12}>
-								<Grid container spacing={1} direction="row" alignItems="flex-end" xs={12}>
-									<Grid item xs={12} md={3}>
-										<FormControl fullWidth margin="normal">
-											<InputLabel id="demo-simple-select-helper-label">Período</InputLabel>
-											<Select labelId="demo-simple-select-label" id="demo-simple-select">
-												<MenuItem value={10}>Mensal</MenuItem>
-												<MenuItem value={20}>Semanal</MenuItem>
-											</Select>
-										</FormControl>
+							<Grid item xs={12} style={{ padding: "5px" }}>
+								<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12}>
+									<Grid item xs={12} md={6}>
+										<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
+											<Grid item xs={12} md={6}>
+												<TextField
+													id="timeStart"
+													name="timeStart"
+													type="date"
+													fullWidth
+													label="Início"
+													InputLabelProps={{
+														shrink: true,
+													}}
+												></TextField>
+											</Grid>
+											<Grid item xs={12} md={6}>
+												<TextField
+													id="timeStart"
+													name="timeStart"
+													type="date"
+													fullWidth
+													label="Fim"
+													InputLabelProps={{
+														shrink: true,
+													}}
+												></TextField>
+											</Grid>
+										</Grid>
 									</Grid>
-									<Grid item xs={12} md={3}>
-										<FormControl fullWidth margin="normal">
-											<InputLabel id="demo-simple-select-helper-label">Tipo</InputLabel>
-											<Select labelId="demo-simple-select-label" id="demo-simple-select">
-												<MenuItem value={10}>Projeto tal</MenuItem>
-												<MenuItem value={20}>Melhoria x</MenuItem>
-											</Select>
-										</FormControl>
+									<Grid item xs={12} md={6}>
+										<Grid container spacing={1} direction="row" justify="flex-end" alignItems="flex-end" xs={12}>
+											<Grid item xs={10} md={8}>
+												<FormControl fullWidth margin="normal">
+													<InputLabel id="demo-simple-select-helper-label">Tipo</InputLabel>
+													<Select labelId="demo-simple-select-label" id="demo-simple-select">
+														<MenuItem value={10}>Projeto tal</MenuItem>
+														<MenuItem value={20}>Melhoria x</MenuItem>
+													</Select>
+												</FormControl>
+											</Grid>
+											<Grid item xs={1}>
+												<Tooltip title={"Exportar Relatório"}>
+													<IconButton style={{ color: "grey" }}>
+														<FontAwesomeIcon icon={faFileExport} />
+													</IconButton>
+												</Tooltip>
+											</Grid>
+										</Grid>
 									</Grid>
 								</Grid>
 							</Grid>
+
 							<Grid item xs={12}>
 								<Chart data={chartData}>
 									<ValueScale name="sale" />
@@ -135,6 +226,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 					</CardPanel>
 				</Grid>
 			</Grid>
+			<AppointmentCompleteDialog open={appoitmentDialog} session={session} closeFunction={handleAppoitment}></AppointmentCompleteDialog>
 		</Layout>
 	);
 }

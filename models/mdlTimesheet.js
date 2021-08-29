@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const TimeSheetModel = new mongoose.Schema({
 	description: { type: String, required: true, trim: true },
-	date: { type: Date, default: Date.now },
+	type: { type: String, required: true, trim: true },
 	user: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "User",
@@ -24,10 +24,8 @@ const TimeSheetModel = new mongoose.Schema({
 		ref: "Call",
 		required: true,
 	},
-	hourStart1: { type: Number, required: true },
-	hourEnd1: { type: Number, required: true },
-	hourStart2: { type: Number, required: true },
-	hourEnd2: { type: Number, required: true },
+	timeStart: { type: Date, required: true },
+	timeEnd: { type: Date, required: true },
 });
 
 export default mongoose.models.TimeSheet || mongoose.model("TimeSheet", TimeSheetModel);
