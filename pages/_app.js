@@ -8,10 +8,15 @@ import { Provider } from "next-auth/client";
 import { Slide } from "@material-ui/core";
 import { SnackbarProvider } from "notistack";
 import { ConfirmDialog } from "../components";
+import PermissionClass from '../classes/PermissionClass';
 //import '../styles/global.css';
 
+import { AtuhenticationContextProvider } from '../Context/AuthenticationContextAPI';
+import { PermissionViewContextProvider } from '../Context/PermissionViewContext';
+import { ControllerNotifyContextProvider } from '../Context/ControllerNotifyContext';
+
 export default function MyApp(props) {
-	const { Component, pageProps } = props;
+	const { Component, pageProps, ScreenPermissions } = props;
 	const [confirmDialog, setConfirmDialog] = useState({
 		openDialog: false,
 		dialogTitle: "",
@@ -37,25 +42,32 @@ export default function MyApp(props) {
 	}, []);
 
 	return (
-		<React.Fragment>
-			<Head>
-				<title>My page</title>
-				<meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-			</Head>
-			<ThemeProvider theme={theme}>
-				{/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-				<CssBaseline />
+		<ControllerNotifyContextProvider>
+			<AtuhenticationContextProvider>
+				<PermissionViewContextProvider>
+				<React.Fragment>
+					<Head>
+						<title>My page</title>
+						<meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+					</Head>
+					<ThemeProvider theme={theme}>
+						{/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+						<CssBaseline />
 
-				{/* Provedor de sessão */}
-				<Provider session={pageProps.session}>
-					<SnackbarProvider maxSnack={3} anchorOrigin={{ horizontal: "right", vertical: "top", autoHideDuration: 2500 }} TransitionComponent={Slide}>
-						<Component {...pageProps} handleConfirmDialogOpen={handleConfirmDialogOpen} handleConfirmDialogClose={handleConfirmDialogClose} />
-					</SnackbarProvider>
-					{/* Diálogo de confirmação padrão, disponibilizado em todas telas */}
-					<ConfirmDialog confirmDialog={confirmDialog} handleConfirmDialogClose={handleConfirmDialogClose}></ConfirmDialog>
-				</Provider>
-			</ThemeProvider>
-		</React.Fragment>
+						{/* Provedor de sessão */}
+						<Provider session={pageProps.session}>
+							<SnackbarProvider maxSnack={3} anchorOrigin={{ horizontal: "right", vertical: "top", autoHideDuration: 2500 }} TransitionComponent={Slide}>
+								<Component {...pageProps} handleConfirmDialogOpen={handleConfirmDialogOpen} handleConfirmDialogClose={handleConfirmDialogClose} />
+							</SnackbarProvider>
+							{/* Diálogo de confirmação padrão, disponibilizado em todas telas */}
+							<ConfirmDialog confirmDialog={confirmDialog} handleConfirmDialogClose={handleConfirmDialogClose}></ConfirmDialog>
+						</Provider>
+					</ThemeProvider>
+				</React.Fragment>
+				</PermissionViewContextProvider>
+			</AtuhenticationContextProvider>
+		</ControllerNotifyContextProvider>
+
 	);
 }
 

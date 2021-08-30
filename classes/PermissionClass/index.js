@@ -1,6 +1,6 @@
-import { Permission } from "../../models";
+import Permission from "../../models/mdlPermission";
 import dbConnect from "../../src/dbConfig";
-import { jsonify } from "../index";
+import { jsonify } from '../GlobalClass'
 
 export default class PermissionClass {
 	constructor() {}

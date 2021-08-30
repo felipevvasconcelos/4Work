@@ -7,10 +7,12 @@ import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 import { CompanyClass } from "../../classes";
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import { FormControlLabel } from "@material-ui/core";
 import { Switch } from "@material-ui/core";
 import { Avatar } from "@material-ui/core";
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
 
 const validacnpj = /^[0-9]{14}$/;
 
@@ -48,6 +50,16 @@ export default function CompanyById({ data }) {
 	const [loading, setLoading] = useState(true);
 	const [openCollapseImage, setOpenCollapseImage] = useState(false);
 	const [imgSrc, setImgSrc] = useState(data.logo.image);
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+
+	useEffect(() =>{
+		// const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
+		// if(!Authentication(permissionsScren, permission?.name)){
+		// 	return router.push('/');
+		// }
+	},[])
 
 	const CustomBusinessIcon = function name() {
 		return (

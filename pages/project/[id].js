@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
@@ -10,6 +10,8 @@ import { CardPanel, Layout, Loading, siteTittle, TextFieldMask } from "../../com
 import { useSession } from "next-auth/client";
 import moment from "moment";
 import dayjs from 'dayjs';
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
 
 const steps = ["Dados Gerais", "Estrutura", "Recursos", "Confirmação"];
 
@@ -94,6 +96,16 @@ export default function ProjectById({ data, companies, statusList, users }) {
 	const [stateProject, setStateProject] = useState(data);
 	const [stateAllUsers, setStateAllUsers] = useState(users);
 	const [stateIncludeUsers, setStateIncludeUsers] = useState([]);
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+
+	useEffect(() =>{
+		const permissionsScren = filterPermissionByScreen("60bc3091f582fe96a40b729a");
+		if(!Authentication(permissionsScren, permission?.name)){
+			return router.push('/');
+		}
+	},[]);
 
 	useEffect(() =>{
 		if(data.includeUsers.length !== 0){

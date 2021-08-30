@@ -4,10 +4,14 @@ import QueueIcon from "@material-ui/icons/Queue";
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from 'next/router';
+import React, { useEffect, useContext } from "react";
 import { ProjectClass } from "../../classes";
 import { CardPanel, CustomDataTable, Layout, siteTittle } from "../../components";
 import { currencyFormatterBr } from '../../classes/GlobalClass';
+import { Authentication } from '../../middlewares/AuthenticationRoutes';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
 
 const styles = {
 	//cardTitle,
@@ -102,6 +106,16 @@ const customToolbar = (
 
 export default function Project({ data }) {
 	const classes = useStyles();
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+	const router = useRouter();
+
+	useEffect(() =>{
+		const permissionsScren = filterPermissionByScreen("60bc3091f582fe96a40b729a");
+		if(!Authentication(permissionsScren, permission?.name)){
+			return router.push('/');
+		}
+	},[])
 
 	return (
 		<Layout>
