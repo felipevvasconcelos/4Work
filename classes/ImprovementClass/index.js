@@ -20,6 +20,11 @@ export default class ImprovementClass {
 		return jsonify(await new Improvement(data).save().then((improvement) => improvement.populate("user", "name").populate("project", "name").populate("status", "name").execPopulate()));
 	}
 
+	async getByFilter(data) {
+		await dbConnect();
+		return jsonify(await Improvement.find(data).populate("user", "name").populate("project", "name").populate("status", "name"));
+	}
+
 	async update(data) {
 		await dbConnect();
 		return jsonify(

@@ -15,6 +15,11 @@ export default class CallClass {
 		return jsonify(await Call.findById(id).populate("userCreate", "name").populate("userModified", "name").populate("typeCall", "name"));
 	}
 
+	async getByFilter(data) {
+		await dbConnect();
+		return jsonify(await Call.find(data).populate("user", "name").populate("project", "name").populate("status", "name").populate("typeCall", "name"));
+	}
+
 	async add(data) {
 		await dbConnect();
 		return jsonify(await new Call(data).save().then((call) => call.populate("user", "name").populate("project", "name").populate("status", "name").populate("typeCall", "name").execPopulate()));
