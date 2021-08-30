@@ -1,0 +1,237 @@
+import React, { useState } from "react";
+import Head from "next/head";
+import { useSnackbar } from "notistack";
+import { StatusClass } from "../../classes";
+
+//COMPONENTES
+import { CardPanel, Layout, Loading, siteTittle, AppointmentDialog, AppointmentCompleteDialog } from "../../components";
+import { Grid, IconButton, makeStyles, Tooltip, RadioGroup, Radio, MenuItem, Select, InputLabel, FormControl, Link, FormControlLabel, TextField } from "@material-ui/core";
+
+//ICONES
+import QueueIcon from "@material-ui/icons/Queue";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileExport } from "@fortawesome/free-solid-svg-icons";
+
+//DEVEXPRESS
+import { AppointmentForm, EditingState, EditRecurrenceMenu, IntegratedEditing, ViewState } from "@devexpress/dx-react-scheduler";
+import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator, TodayButton } from "@devexpress/dx-react-scheduler-material-ui";
+import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend } from "@devexpress/dx-react-chart-material-ui";
+import { ValueScale } from "@devexpress/dx-react-chart";
+import { Button } from "@material-ui/core";
+import { AlarmAdd } from "@material-ui/icons";
+import { useSession } from "next-auth/client";
+
+const useStyles = makeStyles((theme) => ({
+	root: {
+		padding: "10px",
+	},
+	padding: {
+		padding: "20px",
+		width: "100%",
+	},
+	paddingBtn: {
+		padding: "10px",
+	},
+	primary: {
+		backgroundColor: theme.palette.primary,
+	},
+}));
+
+const chartData = [
+	{ month: "Jan", sale: 50, total: 987 },
+	{ month: "Feb", sale: 100, total: 3000 },
+	{ month: "March", sale: 30, total: 1100 },
+	{ month: "April", sale: 107, total: 7100 },
+	{ month: "May", sale: 95, total: 4300 },
+	{ month: "June", sale: 150, total: 7500 },
+];
+
+const data1 = [
+	["Descrição Teste", "Chamado", "Chamado Teste", "09:00", "13:00"],
+	["Descrição Teste", "Melhoria", "Melhoria Teste", "14:00", "16:00"],
+	["Descrição Teste", "Projeto", "Projeto Teste", "16:00", "18:00"],
+];
+
+const currentDate = "2018-11-01";
+
+const ExternalViewSwitcher = ({ currentViewName, onChange }) => (
+	<RadioGroup aria-label="Views" style={{ flexDirection: "row" }} name="views" value={currentViewName} onChange={onChange}>
+		<FormControlLabel value="Day" control={<Radio color="primary" />} label="Diário" />
+		<FormControlLabel value="Week" control={<Radio color="primary" />} label="Semana" />
+		<FormControlLabel value="Month" control={<Radio color="primary" />} label="Mensal" />
+	</RadioGroup>
+);
+
+const appointmentComponent = ({ children, style, ...restProps }) => (
+	<Appointments.Appointment
+		{...restProps}
+		style={{
+			...style,
+			backgroundColor: "#cc6828",
+		}}
+	>
+		{children}
+	</Appointments.Appointment>
+);
+
+export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirmDialogClose }) {
+	const { enqueueSnackbar } = useSnackbar();
+	const classes = useStyles();
+	const [session] = useSession();
+	const [loading, setLoading] = useState(false);
+	const [viewName, setViewName] = useState("Month");
+	const [radioChart, setRadioChart] = useState("month");
+	const [dataTable, setDataTable] = useState(data1);
+	const [appoitmentDialog, setAppoitmentDialog] = React.useState(false);
+	const [schedulerData, setSchedulerData] = useState([
+		{ startDate: "2018-11-01T09:45", endDate: "2018-11-01T11:00", title: "Meeting", id: 100 },
+		{ startDate: "2018-11-01T12:00", endDate: "2018-11-01T13:30", title: "Go to a gym", id: 200 },
+	]);
+
+	const handleAppoitment = () => {
+		setAppoitmentDialog(!appoitmentDialog);
+	};
+
+	const handleViewSwitcher = (e) => {
+		setViewName(e.target.value);
+	};
+	const handleRadioChart = (e) => {
+		setRadioChart(e.target.value);
+	};
+
+	const handleEditScheduler = ({ added, changed, deleted }) => {
+		let data = schedulerData;
+
+		if (added) {
+			const startingAddedId = data.length > 0 ? data[data.length - 1].id + 1 : 0;
+			data = [...data, { id: startingAddedId, ...added }];
+		}
+
+		if (changed) {
+			data = data.map((appointment) => (changed[appointment.id] ? { ...appointment, ...changed[appointment.id] } : appointment));
+		}
+
+		if (deleted !== undefined) {
+			data = data.filter((appointment) => appointment.id !== deleted);
+		}
+
+		setSchedulerData(data);
+	};
+
+	return (
+		<Layout>
+			<Head>
+				<title>{siteTittle}</title>
+			</Head>
+			{loading && <Loading></Loading>}
+			<Grid container spacing={1} direction="row" alignItems="flex-start" xs={12}>
+				<Grid item xs={12} lg={6}>
+					<CardPanel title="" subtitle="Lançamentos de Horas" color="primary">
+						<Grid container justify="flex-end" direction="row" spacing={2}>
+							<ExternalViewSwitcher currentViewName={viewName} onChange={handleViewSwitcher} />
+							<Tooltip title={"Adicionar Apontamento"}>
+								<IconButton onClick={handleAppoitment} color="inherit" aria-label="open drawer" edge="start">
+									<AlarmAdd style={{ color: "green" }} />
+								</IconButton>
+							</Tooltip>
+						</Grid>
+						<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
+							<ViewState defaultCurrentDate={currentDate} currentViewName={viewName} />
+							<EditingState onCommitChanges={handleEditScheduler} />
+							<IntegratedEditing />
+							<Toolbar />
+
+							<WeekView startDayHour={9} endDayHour={19} />
+							<WeekView name="Work Week" excludedDays={[0, 6]} startDayHour={9} endDayHour={19} />
+							<MonthView />
+							<DayView />
+
+							<DateNavigator />
+							<Appointments appointmentComponent={appointmentComponent} />
+							<AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
+
+							<DragDropProvider />
+						</Scheduler>
+					</CardPanel>
+				</Grid>
+				<Grid item xs={12} lg={6}>
+					<CardPanel color="primary" subtitle="Visualização de Horas">
+						<Grid container spacing={1} direction="row" alignItems="center" xs={12}>
+							<Grid item xs={12} style={{ padding: "5px" }}>
+								<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12}>
+									<Grid item xs={12} md={6}>
+										<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
+											<Grid item xs={12} md={6}>
+												<TextField
+													id="timeStart"
+													name="timeStart"
+													type="date"
+													fullWidth
+													label="Início"
+													InputLabelProps={{
+														shrink: true,
+													}}
+												></TextField>
+											</Grid>
+											<Grid item xs={12} md={6}>
+												<TextField
+													id="timeStart"
+													name="timeStart"
+													type="date"
+													fullWidth
+													label="Fim"
+													InputLabelProps={{
+														shrink: true,
+													}}
+												></TextField>
+											</Grid>
+										</Grid>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<Grid container spacing={1} direction="row" justify="flex-end" alignItems="flex-end" xs={12}>
+											<Grid item xs={10} md={8}>
+												<FormControl fullWidth margin="normal">
+													<InputLabel id="demo-simple-select-helper-label">Tipo</InputLabel>
+													<Select labelId="demo-simple-select-label" id="demo-simple-select">
+														<MenuItem value={10}>Projeto tal</MenuItem>
+														<MenuItem value={20}>Melhoria x</MenuItem>
+													</Select>
+												</FormControl>
+											</Grid>
+											<Grid item xs={1}>
+												<Tooltip title={"Exportar Relatório"}>
+													<IconButton style={{ color: "grey" }}>
+														<FontAwesomeIcon icon={faFileExport} />
+													</IconButton>
+												</Tooltip>
+											</Grid>
+										</Grid>
+									</Grid>
+								</Grid>
+							</Grid>
+
+							<Grid item xs={12}>
+								<Chart data={chartData}>
+									<ValueScale name="sale" />
+									<ValueScale name="total" />
+									<ArgumentAxis />
+									<ValueAxis scaleName="sale" showGrid={false} showLine showTicks />
+									<ValueAxis scaleName="total" position="right" showGrid={false} showLine showTicks />
+									<BarSeries name="Units Sold" color="black" valueField="sale" argumentField="month" scaleName="sale" />
+									<LineSeries name="Total Transactions" valueField="total" argumentField="month" scaleName="total" />
+									<Legend />
+								</Chart>
+							</Grid>
+						</Grid>
+					</CardPanel>
+				</Grid>
+			</Grid>
+			<AppointmentCompleteDialog open={appoitmentDialog} session={session} closeFunction={handleAppoitment}></AppointmentCompleteDialog>
+		</Layout>
+	);
+}
+
+export async function getServerSideProps(context) {
+	const data = await new StatusClass().getAll();
+	return { props: { data } };
+}

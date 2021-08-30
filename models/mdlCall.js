@@ -26,7 +26,7 @@ const CallModel = new mongoose.Schema({
 		ref: "TypeCall",
 		required: true,
 	},
-    status: {
+	status: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "Status",
 		required: true,

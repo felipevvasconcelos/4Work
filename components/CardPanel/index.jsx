@@ -26,20 +26,17 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CardPanel(props) {
 	const classes = useStyles();
-	const { title, children, color, subtitle } = props;
+	const { title, children, color, subtitle, chart } = props;
 
 	return (
 		<Card className={classes.textCenter}>
 			<CardHeader color={color}>
 				<Grid container justify="space-between" alignContent="flex-end">
+					{chart}
 					<Typography variant="h5" className={classes.titleHeader}>
 						{title}
 					</Typography>
-					<Typography
-						align="right"
-						variant="subtitle1"
-						className={classes.subtitleHeader}
-					>
+					<Typography align="right" variant="subtitle1" className={classes.subtitleHeader}>
 						{subtitle}
 					</Typography>
 				</Grid>
