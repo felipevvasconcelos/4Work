@@ -94,6 +94,8 @@ export default function SignIn({ providers, csrfToken, error }) {
 
 	if (error) enqueueSnackbar("Credenciais Inválidas", { variant: "error" });
 
+	console.log(providers);
+
 	return (
 		<Grid container component="main">
 			<Container maxWidth="xs" className={classes.paper}>

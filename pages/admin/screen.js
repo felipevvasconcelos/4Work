@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Button, Container, Grid, IconButton, makeStyles, Paper, Switch, TextField, Tooltip } from "@material-ui/core";
 import { AddToQueue, Delete } from "@material-ui/icons";
 import Head from "next/head";
@@ -7,6 +7,10 @@ import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../c
 import moment from "moment";
 import { useSnackbar } from "notistack";
 import { FormControlLabel } from "@material-ui/core";
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { useRouter } from 'next/router';
+import { Authentication } from '../../middlewares/AuthenticationRoutes';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -24,6 +28,17 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 	const [loading, setLoading] = useState(false);
 	const [dataTable, setDataTable] = useState(data);
 	const [name, setName] = useState("");
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+	const router = useRouter();
+
+	useEffect(() =>{
+		const permissionsScren = filterPermissionByScreen("60bc30c7f582fe96a40b72a1");
+		if(!Authentication(permissionsScren, permission?.name)){
+			return router.push('/');
+		}
+	},[]);
 
 	const handleName = (e) => {
 		setName(e.target.value);

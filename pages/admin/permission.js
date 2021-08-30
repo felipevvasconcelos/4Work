@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Button, Grid, IconButton, InputLabel, makeStyles, MenuItem, Paper, Select, Switch, Tooltip } from "@material-ui/core";
 import { AddToPhotos, Delete } from "@material-ui/icons";
 import Head from "next/head";
@@ -7,6 +7,10 @@ import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../c
 import { useSnackbar } from "notistack";
 import { FormControlLabel } from "@material-ui/core";
 import { FormControl } from "@material-ui/core";
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { Authentication } from '../../middlewares/AuthenticationRoutes';
+import { useRouter } from 'next/router';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -36,6 +40,17 @@ export default function Permission({ data, profiles, views, handleConfirmDialogO
 		allowEdit: false,
 		allowDelete: false,
 	});
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+	const router = useRouter();
+
+	useEffect(() =>{
+		const permissionsScren = filterPermissionByScreen("60bc30c7f582fe96a40b72a1");
+		if(!Authentication(permissionsScren, permission?.name)){
+			return router.push('/');
+		}
+	},[])
 
 	const handleChangePermission = (event) => {
 		if (event.target.name.includes("allow")) {

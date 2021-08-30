@@ -3,10 +3,14 @@ import { Assignment, Edit, Group } from "@material-ui/icons";
 import QueueIcon from "@material-ui/icons/Queue";
 import moment from "moment";
 import Head from "next/head";
+import { useRouter } from 'next/router';
 import Link from "next/link";
-import React from "react";
+import React, { useContext, useEffect } from "react";
+import { Authentication } from '../../middlewares/AuthenticationRoutes';
 import { UserClass } from "../../classes";
 import { CardPanel, CustomDataTable, Layout, siteTittle } from "../../components";
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
 
 const styles = {
 	//cardTitle,
@@ -93,6 +97,17 @@ const useStyles = makeStyles(styles);
 
 export default function User({ data }) {
 	const classes = useStyles();
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+	const router = useRouter();
+
+	useEffect(() =>{
+		const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
+		if(!Authentication(permissionsScren, permission?.name)){
+			return router.push('/');
+		}
+	},[])
 
 	return (
 		<Layout>

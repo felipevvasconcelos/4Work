@@ -1,6 +1,5 @@
-// "use strict";
-
-const mongoose = require("mongoose");
+//"use strict";
+import mongoose from "mongoose";
 
 const PermissionModel = new mongoose.Schema({
 	view: {
@@ -21,4 +20,4 @@ const PermissionModel = new mongoose.Schema({
 	creationDate: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.models.Permission || mongoose.model("Permission", PermissionModel);
+export default mongoose.models?.Permission || mongoose.model("Permission", PermissionModel);

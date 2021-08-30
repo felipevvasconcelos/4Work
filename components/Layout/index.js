@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 
@@ -21,6 +21,13 @@ import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
 import { AccessAlarm, AddAlarm, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Notifications, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
+
+import { dataDrawer } from './data';
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { Authentication } from '../../middlewares/AuthenticationRoutes';
+
+import { ControllerNotifyContext } from '../../Context/ControllerNotifyContext';
 
 // //ISSO AQUI SERVE PARA GERAR AS PAGINAS ESTATICAS
 // //FAZENDO ASSIM UMA REQUISIÇÃO INSTATANEA
@@ -178,12 +185,17 @@ export default function Layout(props) {
 	};
 
 	const container = window !== undefined ? () => window().document.body : undefined;
-
+	const { handleSetUserData, handleSetPermission, permission } = useContext(AtuhenticationContext);
+	const { setPermissionsView } = useContext(PermissionViewContext);
+	const { SenderNotify } = useContext(ControllerNotifyContext);
 	//Validação de Sessão
 	React.useEffect(() => {
 		if (!(session || loading)) {
 			router.push("/auth/signin");
 		}
+		handleSetUserData(session?.user);
+		handleSetPermission(session?.user?.profile);
+		setPermissionsView(session?.user?.screenPermission);
 	}, [session, loading]);
 	if (!session) return <Loading></Loading>;
 
@@ -328,6 +340,45 @@ export default function Layout(props) {
 					<ListItemText primary="Configurações" />
 					{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
 				</ListItem>
+				<button
+					onClick={() => {
+						SenderNotify("Notification Emited!");
+					}}
+				>Enviar Notificação</button>
+				{
+					dataDrawer.map((element) => {
+						if(Authentication(element.permissions, permission?.name)){
+							if(element.type === 'Divider'){
+								return (element.jsx);
+							}
+							
+							if(element.type === 'Acordian'){
+								return (
+									<ListItem button onClick={handleClickCollapseLisConfig}>
+										<ListItemIcon>
+											{element.icon}
+										</ListItemIcon>
+										<ListItemText primary={element.primary} />
+										{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
+									</ListItem>
+								);
+							}
+							
+							if(element.type === 'IconLink'){
+								return (
+									<Link href={element.href}>
+										<ListItem disabled={element.disabled ? element.disabled : false} button onClick={() => handleLoading(element.handleLoading)}>
+											<ListItemIcon>
+												{element.icon}
+											</ListItemIcon>
+											<ListItemText primary={element.primary} />
+										</ListItem>
+									</Link>
+								);
+							}
+						}
+					})
+				}
 				<Collapse in={openCollapseListConfig}>
 					<List component="div" disablePadding>
 						<Link href="/admin/profile">

@@ -1,11 +1,15 @@
 import { IconButton, Container, Grid, Button, Paper, makeStyles, Tooltip, FormControlLabel, Switch, TextField } from "@material-ui/core";
 import { Delete, PersonAdd } from "@material-ui/icons";
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ProfileTypeClass } from "../../classes";
 import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../components";
 import moment from "moment";
 import { useSnackbar } from "notistack";
+import { Authentication } from '../../middlewares/AuthenticationRoutes';
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { useRouter } from 'next/router';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -23,6 +27,17 @@ export default function Profile({ data, handleConfirmDialogOpen, handleConfirmDi
 	const [loading, setLoading] = useState(false);
 	const [dataTable, setDataTable] = useState(data);
 	const [nameProfile, setNameProfile] = useState("");
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+	const router = useRouter();
+
+	useEffect(() =>{
+		const permissionsScren = filterPermissionByScreen("60bc30c7f582fe96a40b72a1");
+		if(!Authentication(permissionsScren, permission?.name)){
+			return router.push('/');
+		}
+	},[])
 
 	const handleNameProfile = (e) => {
 		setNameProfile(e.target.value);

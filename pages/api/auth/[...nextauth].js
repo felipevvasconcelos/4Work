@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
-import { UserClass } from "../../../classes";
+import { UserClass, PermissionClass } from "../../../classes";
 import jwt from "next-auth/jwt";
 import md5 from "md5";
 
@@ -17,9 +17,11 @@ export default NextAuth({
 
 			async authorize(credentials) {
 				const user = await new UserClass().getByFilter({ email: credentials.username, password: md5(credentials.password + hash), active: true });
-
+				const permissionClass = new PermissionClass();
+				const screns = await permissionClass.getAll();
+				const data = {...user[0], screns}
 				if (user) {
-					return Promise.resolve(user[0]);
+					return Promise.resolve(data);
 				} else {
 					return Promise.resolve(null);
 				}
@@ -88,6 +90,8 @@ export default NextAuth({
 					_id: user._id,
 					name: user.name,
 					username: user.email,
+					profile: user.profile,
+					screenPermission: user.screns
 				};
 			}
 			return Promise.resolve(token);

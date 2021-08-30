@@ -17,10 +17,7 @@ export function currencyFormatterBr(value) {
 		currency: "BRL",
 	}).format(value / 100);
 
-	return `${amount}`;
-}
+	console.log(amount);
 
-function formaterHour(value) {
-	var strValue = value.toString();
-	return `${strValue.substring(0, strValue.length - 2)}:${strValue.substring(strValue.length - 2, strValue.length)}`;
+	return `${amount}`;
 }
