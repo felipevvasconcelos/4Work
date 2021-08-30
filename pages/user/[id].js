@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { CardPanel, Layout, Loading, siteTittle, TextFieldMask } from "../../components";
 import { useRouter } from "next/router";
 import { Switch, Card, Collapse, Button, CardActions, CardContent, CardMedia, CardActionArea, Typography, TextField, Avatar, Grid, makeStyles, InputLabel, FormControl, MenuItem, Select, Container } from "@material-ui/core";
@@ -7,6 +7,9 @@ import { CompanyClass, ProfileTypeClass, UserClass, PositionClass } from "../../
 import { FormControlLabel } from "@material-ui/core";
 import { Person, Save, ViewList } from "@material-ui/icons";
 import { useSnackbar } from "notistack";
+
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
 
 const validatePass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{6,})/;
 const CustomPersonIcon = function name() {
@@ -72,6 +75,16 @@ export default function UserById({ data, profiles, companies, positions }) {
 	const [confirmPassError, setConfirmPassError] = useState(false);
 	const [confirmPassErrorText, setConfirmPassErrorText] = useState("");
 	const [openCollapseImage, setOpenCollapseImage] = useState(false);
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+
+	useEffect(() =>{
+		const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
+		if(!Authentication(permissionsScren, permission?.name)){
+			return router.push('/');
+		}
+	},[])
 
 	const handleClickCollapseImage = () => {
 		setOpenCollapseImage(!openCollapseImage);

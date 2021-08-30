@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import clsx from "clsx";
 import { makeStyles, useTheme, Drawer, AppBar, CssBaseline, Toolbar, List, ListItem, ListItemIcon, ListItemText, Button, Avatar, IconButton, Hidden, Box, SwipeableDrawer, Divider, CircularProgress, Typography, Grid, Grow } from "@material-ui/core";
 import GroupIcon from "@material-ui/icons/Group";
@@ -20,6 +20,13 @@ import { Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import Loading from "../Loading";
 import { Collapse } from "@material-ui/core";
+
+import { dataDrawer } from './data';
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { Authentication } from '../../middlewares/AuthenticationRoutes';
+
+import { ControllerNotifyContext } from '../../Context/ControllerNotifyContext';
 
 // //ISSO AQUI SERVE PARA GERAR AS PAGINAS ESTATICAS
 // //FAZENDO ASSIM UMA REQUISIÇÃO INSTATANEA
@@ -165,12 +172,17 @@ export default function Layout(props) {
 	};
 
 	const container = window !== undefined ? () => window().document.body : undefined;
-
+	const { handleSetUserData, handleSetPermission, permission } = useContext(AtuhenticationContext);
+	const { setPermissionsView } = useContext(PermissionViewContext);
+	const { SenderNotify } = useContext(ControllerNotifyContext);
 	//Validação de Sessão
 	React.useEffect(() => {
 		if (!(session || loading)) {
 			router.push("/auth/signin");
 		}
+		handleSetUserData(session?.user);
+		handleSetPermission(session?.user?.profile);
+		setPermissionsView(session?.user?.screenPermission);
 	}, [session, loading]);
 	if (!session) return <Loading></Loading>;
 
@@ -227,80 +239,45 @@ export default function Layout(props) {
 				</ListItem>
 			</Hidden>
 			<List>
-				<Link href="/dashboard">
-					<ListItem disabled button onClick={() => handleLoading("/dashboard")}>
-						<ListItemIcon>
-							<Dashboard />
-						</ListItemIcon>
-						<ListItemText primary="Dashboard" />
-					</ListItem>
-				</Link>
-				<Link href="/project">
-					<ListItem button onClick={() => handleLoading("/project")}>
-						<ListItemIcon>
-							<BusinessCenter />
-						</ListItemIcon>
-						<ListItemText primary="Projetos" />
-					</ListItem>
-				</Link>
-				<Link href="/call">
-					<ListItem button onClick={() => handleLoading("/call")}>
-						<ListItemIcon>
-							<AssignmentIcon />
-						</ListItemIcon>
-						<ListItemText primary="Chamados" />
-					</ListItem>
-				</Link>
-				<Link href="/improvement">
-					<ListItem button onClick={() => handleLoading("/improvement")}>
-						<ListItemIcon>
-							<FolderSpecialIcon />
-						</ListItemIcon>
-						<ListItemText primary="Melhorias" />
-					</ListItem>
-				</Link>
-				<Link href="/task">
-					<ListItem disabled button onClick={() => handleLoading("/task")}>
-						<ListItemIcon>
-							<DynamicFeedIcon />
-						</ListItemIcon>
-						<ListItemText primary="Tarefas" />
-					</ListItem>
-				</Link>
-				<Link href="/room">
-					<ListItem disabled button onClick={() => handleLoading("/room")}>
-						<ListItemIcon>
-							<Cast />
-						</ListItemIcon>
-						<ListItemText primary="Quadro" />
-					</ListItem>
-				</Link>
-			</List>
-			<Divider variant="middle" />
-			<List>
-				<Link href="/user">
-					<ListItem button onClick={() => handleLoading("/user")}>
-						<ListItemIcon>
-							<GroupIcon />
-						</ListItemIcon>
-						<ListItemText primary="Usuários" />
-					</ListItem>
-				</Link>
-				<Link href="/company">
-					<ListItem button onClick={() => handleLoading("/company")}>
-						<ListItemIcon>
-							<LocationCityIcon />
-						</ListItemIcon>
-						<ListItemText primary="Empresas" />
-					</ListItem>
-				</Link>
-				<ListItem button onClick={handleClickCollapseLisConfig}>
-					<ListItemIcon>
-						<Settings />
-					</ListItemIcon>
-					<ListItemText primary="Configurações" />
-					{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
-				</ListItem>
+				<button
+					onClick={() => {
+						SenderNotify("Notification Emited!");
+					}}
+				>Enviar Notificação</button>
+				{
+					dataDrawer.map((element) => {
+						if(Authentication(element.permissions, permission?.name)){
+							if(element.type === 'Divider'){
+								return (element.jsx);
+							}
+							
+							if(element.type === 'Acordian'){
+								return (
+									<ListItem button onClick={handleClickCollapseLisConfig}>
+										<ListItemIcon>
+											{element.icon}
+										</ListItemIcon>
+										<ListItemText primary={element.primary} />
+										{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
+									</ListItem>
+								);
+							}
+							
+							if(element.type === 'IconLink'){
+								return (
+									<Link href={element.href}>
+										<ListItem disabled={element.disabled ? element.disabled : false} button onClick={() => handleLoading(element.handleLoading)}>
+											<ListItemIcon>
+												{element.icon}
+											</ListItemIcon>
+											<ListItemText primary={element.primary} />
+										</ListItem>
+									</Link>
+								);
+							}
+						}
+					})
+				}
 				<Collapse in={openCollapseListConfig}>
 					<List component="div" disablePadding>
 						<Link href="/admin/profile">

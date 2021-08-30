@@ -3,10 +3,13 @@ import { Edit, Group } from "@material-ui/icons";
 import QueueIcon from "@material-ui/icons/Queue";
 import Head from "next/head";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from 'next/router';
+import React, { useState, useContext, useEffect } from "react";
 import { CompanyClass } from "../../classes";
 import moment from "moment";
 import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../components";
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import { PermissionViewContext } from '../../Context/PermissionViewContext';
 
 const useStyles = makeStyles((theme) => ({
 	textCenter: {
@@ -38,6 +41,17 @@ const customToolbar = (
 export default function Company({ data }) {
 	const classes = useStyles();
 	const [loading, setLoading] = useState(false);
+
+	const { filterPermissionByScreen } = useContext(PermissionViewContext);
+	const { permission } = useContext(AtuhenticationContext);
+	const router = useRouter();
+
+	useEffect(() =>{
+		// const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
+		// if(!Authentication(permissionsScren, permission?.name)){
+		// 	return router.push('/');
+		// }
+	},[])
 
 	const columns = [
 		{ name: "active", options: { print: false, filter: false, sort: false, display: false } },

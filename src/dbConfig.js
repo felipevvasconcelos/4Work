@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const connection = {};
 
 async function dbConnect() {
-	if (mongoose.connection.readyState >= 1) {
+	if (mongoose.connection?.readyState >= 1) {
 		return;
 	}
 
