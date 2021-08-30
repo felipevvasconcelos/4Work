@@ -4,7 +4,7 @@ import DynamicFeedIcon from "@material-ui/icons/DynamicFeed";
 import GroupIcon from "@material-ui/icons/Group";
 import LocationCityIcon from "@material-ui/icons/LocationCity";
 import { Divider } from "@material-ui/core";
-import { Dashboard, BusinessCenter, Cast, Settings } from "@material-ui/icons";
+import { Dashboard, BusinessCenter, Cast, Settings, AvTimer, AccessAlarm } from "@material-ui/icons";
 
 export const dataDrawer = [
   {
@@ -38,6 +38,22 @@ export const dataDrawer = [
     handleLoading: "/improvement",
     primary: "Melhorias",
     icon: <FolderSpecialIcon />,
+    permissions: ['All']
+  },
+  {
+    type: "IconLink",
+    href: "/timesheet",
+    handleLoading: "/timesheet",
+    primary: "TimeSheet",
+    icon: <AccessAlarm />,
+    permissions: ['All']
+  },
+  {
+    type: "IconLink",
+    href: "/timemanager",
+    handleLoading: "/timesheet",
+    primary: "Gerenciar Horas",
+    icon: <AvTimer />,
     permissions: ['All']
   },
   {

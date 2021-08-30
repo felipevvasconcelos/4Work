@@ -249,7 +249,7 @@ export default function Layout(props) {
 					</Link>
 				</ListItem>
 			</Hidden>
-			<List>
+			{/* <List> */}
 				{/* <Link href="/dashboard">
 					<ListItem disabled button onClick={() => handleLoading("/dashboard")}>
 						<ListItemIcon>
@@ -258,46 +258,6 @@ export default function Layout(props) {
 						<ListItemText primary="Dashboard" />
 					</ListItem>
 				</Link> */}
-				<Link href="/project">
-					<ListItem button onClick={() => handleLoading("/project")}>
-						<ListItemIcon>
-							<BusinessCenter />
-						</ListItemIcon>
-						<ListItemText primary="Projetos" />
-					</ListItem>
-				</Link>
-				<Link href="/call">
-					<ListItem button onClick={() => handleLoading("/call")}>
-						<ListItemIcon>
-							<AssignmentIcon />
-						</ListItemIcon>
-						<ListItemText primary="Chamados" />
-					</ListItem>
-				</Link>
-				<Link href="/improvement">
-					<ListItem button onClick={() => handleLoading("/improvement")}>
-						<ListItemIcon>
-							<FolderSpecialIcon />
-						</ListItemIcon>
-						<ListItemText primary="Melhorias" />
-					</ListItem>
-				</Link>
-				<Link href="/timesheet">
-					<ListItem button onClick={() => handleLoading("/timesheet")}>
-						<ListItemIcon>
-							<AccessAlarm />
-						</ListItemIcon>
-						<ListItemText primary="TimeSheet" />
-					</ListItem>
-				</Link>
-				<Link href="/timemanager">
-					<ListItem button onClick={() => handleLoading("/timesheet")}>
-						<ListItemIcon>
-							<AvTimer />
-						</ListItemIcon>
-						<ListItemText primary="Gerenciar Horas" />
-					</ListItem>
-				</Link>
 				{/* <Link href="/task">
 					<ListItem disabled button onClick={() => handleLoading("/task")}>
 						<ListItemIcon>
@@ -314,37 +274,8 @@ export default function Layout(props) {
 						<ListItemText primary="Quadro" />
 					</ListItem>
 				</Link> */}
-			</List>
-			<Divider variant="middle" />
+			{/* </List> */}
 			<List>
-				<Link href="/user">
-					<ListItem button onClick={() => handleLoading("/user")}>
-						<ListItemIcon>
-							<GroupIcon />
-						</ListItemIcon>
-						<ListItemText primary="Usuários" />
-					</ListItem>
-				</Link>
-				<Link href="/company">
-					<ListItem button onClick={() => handleLoading("/company")}>
-						<ListItemIcon>
-							<LocationCityIcon />
-						</ListItemIcon>
-						<ListItemText primary="Empresas" />
-					</ListItem>
-				</Link>
-				<ListItem button onClick={handleClickCollapseLisConfig}>
-					<ListItemIcon>
-						<Settings />
-					</ListItemIcon>
-					<ListItemText primary="Configurações" />
-					{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
-				</ListItem>
-				<button
-					onClick={() => {
-						SenderNotify("Notification Emited!");
-					}}
-				>Enviar Notificação</button>
 				{
 					dataDrawer.map((element) => {
 						if(Authentication(element.permissions, permission?.name)){
