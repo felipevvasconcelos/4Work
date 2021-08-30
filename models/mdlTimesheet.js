@@ -11,18 +11,15 @@ const TimeSheetModel = new mongoose.Schema({
 	},
 	project: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: "Project",
-		required: true,
+		ref: "Project"
 	},
 	improvement: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: "Improvement",
-		required: true,
+		ref: "Improvement"
 	},
 	call: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: "Call",
-		required: true,
+		ref: "Call"
 	},
 	timeStart: { type: Date, required: true },
 	timeEnd: { type: Date, required: true },
