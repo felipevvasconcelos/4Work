@@ -1,4 +1,4 @@
-import { User, Permission } from "../../models";
+import { User } from "../../models";
 import dbConnect from "../../src/dbConfig";
 import { jsonify } from "../index";
 

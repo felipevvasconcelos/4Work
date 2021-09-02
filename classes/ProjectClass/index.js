@@ -6,11 +6,6 @@ import { jsonify } from "../index";
 export default class ProjectClass {
 	constructor() {}
 
-	async new() {
-		await dbConnect();
-		return jsonify(Project.schema.obj);
-	}
-
 	async getAll() {
 		await dbConnect();
 		return jsonify(await Project.find().populate("company", "name").populate("user", "name").populate("status", "name"));
@@ -23,7 +18,12 @@ export default class ProjectClass {
 
 	async getByFilter(data) {
 		await dbConnect();
-		return jsonify(await Project.find(data).populate("company", "name").populate("user", "name").populate("status", "name"));
+
+		if (data) {
+			return jsonify(await Project.find(data).populate("company", "name").populate("user", "name").populate("status", "name"));
+		} else {
+			return jsonify(await Project.find().populate("company", "name").populate("user", "name").populate("status", "name"));
+		}
 	}
 
 	async add(data) {

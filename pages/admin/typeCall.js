@@ -8,10 +8,10 @@ import { useSnackbar } from "notistack";
 import { FormControlLabel } from "@material-ui/core";
 import { TypeCallClass } from "../../classes";
 
-import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
-import { PermissionViewContext } from '../../Context/PermissionViewContext';
-import { useRouter } from 'next/router';
-
+import { AtuhenticationContext } from "../../Context/AuthenticationContextAPI";
+import { PermissionViewContext } from "../../Context/PermissionViewContext";
+import { useRouter } from "next/router";
+import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -37,12 +37,12 @@ export default function TypeCall({ data, handleConfirmDialogOpen, handleConfirmD
 	const { permission } = useContext(AtuhenticationContext);
 	const router = useRouter();
 
-	useEffect(() =>{
+	useEffect(() => {
 		const permissionsScren = filterPermissionByScreen("60bc30c7f582fe96a40b72a1");
-		if(!Authentication(permissionsScren, permission?.name)){
-			return router.push('/');
+		if (!Authentication(permissionsScren, permission?.name)) {
+			return router.push("/");
 		}
-	},[])
+	}, []);
 
 	const handleTypeCall = (e) => {
 		setTypeCall({ ...stateTypeCall, [e.target.name]: e.target.value });

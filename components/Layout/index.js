@@ -22,12 +22,12 @@ import { useRouter } from "next/router";
 import { AccessAlarm, AddAlarm, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Notifications, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 
-import { dataDrawer } from './data';
-import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
-import { PermissionViewContext } from '../../Context/PermissionViewContext';
-import { Authentication } from '../../middlewares/AuthenticationRoutes';
+import { dataDrawer } from "./data";
+import { AtuhenticationContext } from "../../Context/AuthenticationContextAPI";
+import { PermissionViewContext } from "../../Context/PermissionViewContext";
+import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
-import { ControllerNotifyContext } from '../../Context/ControllerNotifyContext';
+import { ControllerNotifyContext } from "../../Context/ControllerNotifyContext";
 
 // //ISSO AQUI SERVE PARA GERAR AS PAGINAS ESTATICAS
 // //FAZENDO ASSIM UMA REQUISIÇÃO INSTATANEA
@@ -250,7 +250,7 @@ export default function Layout(props) {
 				</ListItem>
 			</Hidden>
 			{/* <List> */}
-				{/* <Link href="/dashboard">
+			{/* <Link href="/dashboard">
 					<ListItem disabled button onClick={() => handleLoading("/dashboard")}>
 						<ListItemIcon>
 							<Dashboard />
@@ -258,7 +258,7 @@ export default function Layout(props) {
 						<ListItemText primary="Dashboard" />
 					</ListItem>
 				</Link> */}
-				{/* <Link href="/task">
+			{/* <Link href="/task">
 					<ListItem disabled button onClick={() => handleLoading("/task")}>
 						<ListItemIcon>
 							<DynamicFeedIcon />
@@ -276,40 +276,34 @@ export default function Layout(props) {
 				</Link> */}
 			{/* </List> */}
 			<List>
-				{
-					dataDrawer.map((element) => {
-						if(Authentication(element.permissions, permission?.name)){
-							if(element.type === 'Divider'){
-								return (element.jsx);
-							}
-							
-							if(element.type === 'Acordian'){
-								return (
-									<ListItem button onClick={handleClickCollapseLisConfig}>
-										<ListItemIcon>
-											{element.icon}
-										</ListItemIcon>
-										<ListItemText primary={element.primary} />
-										{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
-									</ListItem>
-								);
-							}
-							
-							if(element.type === 'IconLink'){
-								return (
-									<Link href={element.href}>
-										<ListItem disabled={element.disabled ? element.disabled : false} button onClick={() => handleLoading(element.handleLoading)}>
-											<ListItemIcon>
-												{element.icon}
-											</ListItemIcon>
-											<ListItemText primary={element.primary} />
-										</ListItem>
-									</Link>
-								);
-							}
+				{dataDrawer.map((element) => {
+					if (Authentication(element.permissions, permission?.name)) {
+						if (element.type === "Divider") {
+							return element.jsx;
 						}
-					})
-				}
+
+						if (element.type === "Acordian") {
+							return (
+								<ListItem button onClick={handleClickCollapseLisConfig}>
+									<ListItemIcon>{element.icon}</ListItemIcon>
+									<ListItemText primary={element.primary} />
+									{openCollapseListConfig ? <ExpandLess /> : <ExpandMore />}
+								</ListItem>
+							);
+						}
+
+						if (element.type === "IconLink") {
+							return (
+								<Link href={element.href}>
+									<ListItem disabled={element.disabled ? element.disabled : false} button onClick={() => handleLoading(element.handleLoading)}>
+										<ListItemIcon>{element.icon}</ListItemIcon>
+										<ListItemText primary={element.primary} />
+									</ListItem>
+								</Link>
+							);
+						}
+					}
+				})}
 				<Collapse in={openCollapseListConfig}>
 					<List component="div" disablePadding>
 						<Link href="/admin/profile">
@@ -333,7 +327,7 @@ export default function Layout(props) {
 								<ListItemIcon>
 									<WebAsset />
 								</ListItemIcon>
-								<ListItemText primary="Telas" />
+								<ListItemText primary="Módulos" />
 							</ListItem>
 						</Link>
 						<Link href="/admin/permission">

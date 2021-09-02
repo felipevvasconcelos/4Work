@@ -8,8 +8,9 @@ import { FormControlLabel } from "@material-ui/core";
 import { Person, Save, ViewList } from "@material-ui/icons";
 import { useSnackbar } from "notistack";
 
-import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
-import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { AtuhenticationContext } from "../../Context/AuthenticationContextAPI";
+import { PermissionViewContext } from "../../Context/PermissionViewContext";
+import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
 const validatePass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{6,})/;
 const CustomPersonIcon = function name() {
@@ -79,12 +80,12 @@ export default function UserById({ data, profiles, companies, positions }) {
 	const { filterPermissionByScreen } = useContext(PermissionViewContext);
 	const { permission } = useContext(AtuhenticationContext);
 
-	useEffect(() =>{
+	useEffect(() => {
 		const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
-		if(!Authentication(permissionsScren, permission?.name)){
-			return router.push('/');
+		if (!Authentication(permissionsScren, permission?.name)) {
+			return route.push("/");
 		}
-	},[])
+	}, []);
 
 	const handleClickCollapseImage = () => {
 		setOpenCollapseImage(!openCollapseImage);

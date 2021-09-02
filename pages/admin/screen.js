@@ -7,10 +7,10 @@ import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../c
 import moment from "moment";
 import { useSnackbar } from "notistack";
 import { FormControlLabel } from "@material-ui/core";
-import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
-import { PermissionViewContext } from '../../Context/PermissionViewContext';
-import { useRouter } from 'next/router';
-import { Authentication } from '../../middlewares/AuthenticationRoutes';
+import { AtuhenticationContext } from "../../Context/AuthenticationContextAPI";
+import { PermissionViewContext } from "../../Context/PermissionViewContext";
+import { useRouter } from "next/router";
+import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -27,21 +27,22 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 	const classes = useStyles();
 	const [loading, setLoading] = useState(false);
 	const [dataTable, setDataTable] = useState(data);
-	const [name, setName] = useState("");
+
+	const [module, setModule] = useState({ name: "", idFixed: "" });
 
 	const { filterPermissionByScreen } = useContext(PermissionViewContext);
 	const { permission } = useContext(AtuhenticationContext);
 	const router = useRouter();
 
-	useEffect(() =>{
+	useEffect(() => {
 		const permissionsScren = filterPermissionByScreen("60bc30c7f582fe96a40b72a1");
-		if(!Authentication(permissionsScren, permission?.name)){
-			return router.push('/');
+		if (!Authentication(permissionsScren, permission?.name)) {
+			return router.push("/");
 		}
-	},[]);
+	}, []);
 
-	const handleName = (e) => {
-		setName(e.target.value);
+	const handleModule = (e) => {
+		setModule({ ...module, [e.target.name]: e.target.value });
 	};
 
 	async function handleSubmit(e) {
@@ -49,20 +50,19 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 
 		try {
 			setLoading(true);
-			const body = { name: e.currentTarget.name.value };
 			const res = await fetch("/api/screen", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(body),
+				body: JSON.stringify(module),
 			});
 
 			if (res.status === 200) {
 				const newView = await res.json();
 				setDataTable([...dataTable, newView]);
-				setName("");
-				enqueueSnackbar("Tela Cadastrada", { variant: "success" });
+				setModule({ name: "", idFixed: "" });
+				enqueueSnackbar("Módulo Cadastrado", { variant: "success" });
 			} else {
-				throw "Erro ao cadastrar a tela.";
+				throw "Erro ao cadastrar o módulo.";
 			}
 			setLoading(false);
 		} catch (e) {
@@ -114,7 +114,8 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 	};
 
 	const columns = [
-		{ name: "name", label: "Tela", options: { filter: false } },
+		{ name: "name", label: "Módulo", options: { filter: false } },
+		{ name: "idFixed", label: "Nome Lógico", options: { filter: false } },
 		{
 			name: "creationDate",
 			label: "Data Criação",
@@ -168,18 +169,25 @@ export default function Screen({ data, handleConfirmDialogOpen, handleConfirmDia
 				<title>{siteTittle}</title>
 			</Head>
 			{loading && <Loading></Loading>}
-			<CardPanel title="Telas" subtitle="Lista de telas do sistema" color="primary">
+			<CardPanel title="Módulos" subtitle="Lista de módulos do sistema" color="primary">
 				<Container maxWidth="xl" spacing={3} className={classes.root}>
 					<Grid container spacing={3} xs={12} direction="row">
-						<Grid xs={12} md={6} direction="row" spacing={3} className={classes.padding}>
+						<Grid xs={12} md={6} direction="row" spacing={0} className={classes.padding}>
 							<form onSubmit={handleSubmit}>
-								<Grid xs="12">
-									<TextField id="name" margin="normal" value={name} onChange={handleName} fullWidth label="Nome da Tela" />
-								</Grid>
-								<Grid xs="12" container justify="flex-end">
-									<Button color="primary" variant="outlined" type="submit" startIcon={<AddToQueue />}>
-										Adicionar
-									</Button>
+								<Grid container spacing={3} xs={12}>
+									<Grid item xs={12} sm={6}>
+										<TextField id="name" name="name" margin="normal" value={module.name} onChange={handleModule} fullWidth label="Nome do Módulo" />
+									</Grid>
+									<Grid item xs={12} sm={6}>
+										<TextField id="idFixed" name="idFixed" margin="normal" value={module.idFixed} onChange={handleModule} fullWidth label="Nome lógico (utilizado nas permissões)" />
+									</Grid>
+									<Grid item xs={12}>
+										<Grid xs={12} container justify="flex-end" alignContent="flex-start">
+											<Button color="primary" variant="outlined" type="submit" startIcon={<AddToQueue />}>
+												Adicionar
+											</Button>
+										</Grid>
+									</Grid>
 								</Grid>
 							</form>
 						</Grid>

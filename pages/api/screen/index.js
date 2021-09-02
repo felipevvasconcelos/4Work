@@ -20,15 +20,15 @@ handler.get(async (req, res) => {
 
 handler.post(async (req, res) => {
 	try {
-		const { name } = req.body;
-		if (!name) {
+		const view = req.body;
+		if (!view) {
 			throw "Nome de Tela inválido";
 		}
 
-		const view = await new ViewClass().add({ name: name });
+		const newView = await new ViewClass().add(view);
 
-		if (view) {
-			res.status(200).json(view);
+		if (newView) {
+			res.status(200).json(newView);
 		} else {
 			throw "Erro ao cadastrar uma nova tela.";
 		}
