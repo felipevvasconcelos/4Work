@@ -48,17 +48,17 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 				const resProject = await fetch("/api/project/filter", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ "includeUsers.user": session.user._id }),
+					body: JSON.stringify({ filter: { "includeUsers.user": session.user._id } }),
 				});
 				const resImprovement = await fetch("/api/call/filter", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ "users.user": session.user._id }),
+					body: JSON.stringify({ filter: { "users.user": session.user._id } }),
 				});
 				const resCall = await fetch("/api/call/filter", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ "user.user": session.user._id }),
+					body: JSON.stringify({ filter: { "user.user": session.user._id } }),
 				});
 
 				if (!(resProject.status === 200 && resImprovement.status === 200 && resCall.status === 200)) throw "Erro ao carregar combos de origem, por favor, contate o administrador do sistema.";

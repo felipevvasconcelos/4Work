@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { useSnackbar } from "notistack";
 import { StatusClass } from "../../classes";
+import { chartPallete } from "../../styles/pallete";
 
 //COMPONENTES
-import { CardPanel, Layout, Loading, siteTittle, AppointmentDialog, AppointmentCompleteDialog } from "../../components";
+import { CardPanel, Layout, Loading, siteTittle, AppointmentCompleteDialog } from "../../components";
 import { Grid, IconButton, makeStyles, Tooltip, RadioGroup, Radio, MenuItem, Select, InputLabel, FormControl, Link, FormControlLabel, TextField } from "@material-ui/core";
 
 //ICONES
@@ -14,9 +15,9 @@ import { faFileExport } from "@fortawesome/free-solid-svg-icons";
 
 //DEVEXPRESS
 import { AppointmentForm, EditingState, EditRecurrenceMenu, IntegratedEditing, ViewState } from "@devexpress/dx-react-scheduler";
-import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator, TodayButton } from "@devexpress/dx-react-scheduler-material-ui";
-import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend } from "@devexpress/dx-react-chart-material-ui";
-import { ValueScale } from "@devexpress/dx-react-chart";
+import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator } from "@devexpress/dx-react-scheduler-material-ui";
+import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend, Tooltip as TooltipChart } from "@devexpress/dx-react-chart-material-ui";
+import { Animation, EventTracker, Palette, Stack, Title, ValueScale } from "@devexpress/dx-react-chart";
 import { Button } from "@material-ui/core";
 import { AlarmAdd } from "@material-ui/icons";
 import { useSession } from "next-auth/client";
@@ -38,18 +39,57 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const chartData = [
-	{ month: "Jan", sale: 50, total: 987 },
-	{ month: "Feb", sale: 100, total: 3000 },
-	{ month: "March", sale: 30, total: 1100 },
-	{ month: "April", sale: 107, total: 7100 },
-	{ month: "May", sale: 95, total: 4300 },
-	{ month: "June", sale: 150, total: 7500 },
-];
-
-const data1 = [
-	["Descrição Teste", "Chamado", "Chamado Teste", "09:00", "13:00"],
-	["Descrição Teste", "Melhoria", "Melhoria Teste", "14:00", "16:00"],
-	["Descrição Teste", "Projeto", "Projeto Teste", "16:00", "18:00"],
+	{
+		month: "Janeiro",
+		melhoria1: 30,
+		melhoria2: 40,
+		projeto1: 30,
+		chamado1: 10,
+		projeto2: 60,
+		projeto3: 10,
+		total: 156,
+	},
+	{
+		month: "Fevereiro",
+		melhoria1: 30,
+		melhoria2: 40,
+		projeto1: 30,
+		chamado1: 10,
+		total: 176,
+	},
+	{
+		month: "Março",
+		melhoria1: 30,
+		melhoria2: 40,
+		chamado1: 10,
+		projeto2: 60,
+		projeto3: 10,
+		total: 168,
+	},
+	{
+		month: "Abril",
+		melhoria1: 30,
+		melhoria2: 40,
+		projeto1: 30,
+		chamado1: 10,
+		projeto2: 60,
+		total: 176,
+	},
+	{
+		month: "Maio",
+		melhoria1: 30,
+		projeto1: 30,
+		chamado1: 10,
+		projeto2: 60,
+		projeto3: 10,
+		total: 168,
+	},
+	{
+		month: "Junho",
+		melhoria1: 30,
+		melhoria2: 40,
+		total: 176,
+	},
 ];
 
 const currentDate = "2018-11-01";
@@ -81,7 +121,6 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 	const [loading, setLoading] = useState(false);
 	const [viewName, setViewName] = useState("Month");
 	const [radioChart, setRadioChart] = useState("month");
-	const [dataTable, setDataTable] = useState(data1);
 	const [appoitmentDialog, setAppoitmentDialog] = React.useState(false);
 	const [schedulerData, setSchedulerData] = useState([
 		{ startDate: "2018-11-01T09:45", endDate: "2018-11-01T11:00", title: "Meeting", id: 100 },
@@ -157,7 +196,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 				<Grid item xs={12} lg={6}>
 					<CardPanel color="primary" subtitle="Visualização de Horas">
 						<Grid container spacing={1} direction="row" alignItems="center" xs={12}>
-							<Grid item xs={12} style={{ padding: "5px" }}>
+							<Grid item xs={12} style={{ padding: "10px" }}>
 								<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12}>
 									<Grid item xs={12} md={6}>
 										<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
@@ -191,8 +230,9 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 										<Grid container spacing={1} direction="row" justify="flex-end" alignItems="flex-end" xs={12}>
 											<Grid item xs={10} md={8}>
 												<FormControl fullWidth margin="normal">
-													<InputLabel id="demo-simple-select-helper-label">Tipo</InputLabel>
+													<InputLabel id="demo-simple-select-helper-label">Filtro Tipo</InputLabel>
 													<Select labelId="demo-simple-select-label" id="demo-simple-select">
+														<MenuItem value={10}>Todos</MenuItem>
 														<MenuItem value={10}>Projeto tal</MenuItem>
 														<MenuItem value={20}>Melhoria x</MenuItem>
 													</Select>
@@ -210,15 +250,28 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 								</Grid>
 							</Grid>
 
-							<Grid item xs={12}>
+							<Grid item xs={12} style={{ marginTop: "15px" }}>
 								<Chart data={chartData}>
-									<ValueScale name="sale" />
-									<ValueScale name="total" />
+									<Palette scheme={chartPallete} />
+									<ValueScale name="month" />
+
 									<ArgumentAxis />
-									<ValueAxis scaleName="sale" showGrid={false} showLine showTicks />
-									<ValueAxis scaleName="total" position="right" showGrid={false} showLine showTicks />
-									<BarSeries name="Units Sold" color="black" valueField="sale" argumentField="month" scaleName="sale" />
-									<LineSeries name="Total Transactions" valueField="total" argumentField="month" scaleName="total" />
+									<ValueAxis scaleName="month" />
+
+									<BarSeries name="Melhoria 1" valueField="melhoria1" argumentField="month" scaleName="month" />
+									<BarSeries name="Melhoria 2" valueField="melhoria2" argumentField="month" scaleName="month" />
+									<BarSeries name="Projeto 1" valueField="projeto1" argumentField="month" scaleName="month" />
+									<BarSeries name="Chamado 1" valueField="chamado1" argumentField="month" scaleName="month" />
+									<BarSeries name="Projeto 2" valueField="projeto2" argumentField="month" scaleName="month" />
+									<BarSeries name="Projeto 3" valueField="projeto3" argumentField="month" scaleName="month" />
+
+									<LineSeries name="Meta Mês" valueField="total" argumentField="month" scaleName="month" color="green" />
+
+									<Stack stacks={[{ series: ["Melhoria 1", "Melhoria 2", "Projeto 1", "Chamado 1", "Projeto 2", "Projeto 3"] }]} />
+
+									<EventTracker />
+									<TooltipChart />
+									<Animation />
 									<Legend />
 								</Chart>
 							</Grid>

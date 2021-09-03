@@ -15,9 +15,16 @@ export default class CallClass {
 		return jsonify(await Call.findById(id).populate("userCreate", "name").populate("userModified", "name").populate("typeCall", "name"));
 	}
 
-	async getByFilter(data) {
+	async getByFilter(filter, fields) {
 		await dbConnect();
-		return jsonify(await Call.find(data).populate("user", "name").populate("project", "name").populate("status", "name").populate("typeCall", "name"));
+		return jsonify(
+			await Call.find(filter)
+				.select(fields && fields)
+				.populate("user", "name")
+				.populate("project", "name")
+				.populate("status", "name")
+				.populate("typeCall", "name")
+		);
 	}
 
 	async add(data) {
@@ -37,7 +44,7 @@ export default class CallClass {
 					type: data.type,
 					status: data.status,
 					project: data.project,
-					deadline: data.deadline
+					deadline: data.deadline,
 				},
 			})
 				.populate("user", "name")

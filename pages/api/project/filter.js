@@ -7,12 +7,12 @@ const handler = nc().use(all);
 
 handler.post(async (req, res) => {
 	try {
-		const body = req.body;
-		if (!body) {
+		const { filter, fields } = req.body;
+		if (!filter) {
 			throw "Filtro inválido";
 		}
 
-		const result = await classe.getByFilter(body);
+		const result = await classe.getByFilter(filter, fields);
 
 		if (result) {
 			res.status(200).json(result);
