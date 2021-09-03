@@ -5,26 +5,59 @@ import Link from "next/link";
 import { makeStyles } from "@material-ui/core/styles";
 import { CardPanel, CustomDataTable, Layout, siteTittle } from "../../components";
 import QueueIcon from "@material-ui/icons/Queue";
+import ImprovementClass from '../../classes/ImprovementClass';
+import moment from "moment";
+import { Edit } from "@material-ui/icons";
 
-const columns = ["Título", "Operador", "Solicitante", "Data Criação", "Sla"];
-
-const data = [
-	["Titulo chamado teste", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste2", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste3", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste4", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste5", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste55", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste6", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste66", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste7", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste8", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste9", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste999", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste65553", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste45347", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-	["Titulo chamado teste63636", "Felipe", "Felipinho", "07/03/2021", "07/03/2021"],
-];
+const columns = [
+	{
+		name: "title",
+		label: "Title"
+	},
+	{
+		name: "userCreate",
+		label: "Solicitante",
+		options: {
+			customBodyRender: (value) => value.name,
+		}
+	},
+	{
+		name: "dateCreate",
+		label: "Criado em",
+		options: {
+			customBodyRender: (value) => moment(new Date(value)).format("DD/MM/YYYY HH:mm")
+		}
+	},
+	{
+		name: "status",
+		label: "Status",
+		options: {
+			customBodyRender: (value) => value.name
+		}
+	},
+	{
+		name: "_id",
+		label: "Ações",
+		options: {
+			sort: false,
+			print: false,
+			filter: false,
+			customBodyRender: (value, tableMeta) => {
+				return (
+					<div>
+						<Link href={`/improvement/${value}`}>
+							<Tooltip title={"Editar"}>
+								<IconButton size="small" style={{ color: "#2E8BC0" }}>
+									<Edit />
+								</IconButton>
+							</Tooltip>
+						</Link> 
+					</div>
+				);
+			},
+		},
+	},
+]
 
 const customToolbar = (
 	<Link href="/improvement/new">
@@ -63,9 +96,9 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function Improvement() {
+export default function Improvement({ improvements }) {
 	const classes = useStyles();
-
+	console.log(improvements)
 	return (
 		<Layout>
 			<Head>
@@ -78,7 +111,7 @@ export default function Improvement() {
 							<Grid container spacing={3} justify="flex-end" style={{ marginBottom: "3px" }}></Grid>
 						</div>
 						<div className={classes.root}>
-							<CustomDataTable data={data} columns={columns}>
+							<CustomDataTable data={improvements} columns={columns}>
 								{customToolbar}
 							</CustomDataTable>
 						</div>
@@ -88,3 +121,10 @@ export default function Improvement() {
 		</Layout>
 	);
 }
+
+export async function getServerSideProps(context){
+	const improvementClass = new ImprovementClass();
+	const data = await improvementClass.getAll();
+
+	return {props: {improvements: data}}
+} 
