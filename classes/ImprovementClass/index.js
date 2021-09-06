@@ -12,7 +12,13 @@ export default class ImprovementClass {
 
 	async get(id) {
 		await dbConnect();
-		return jsonify(await Improvement.findById(id).populate("userCreate", "name").populate("project", "name").populate("status", "name"));
+		return jsonify(await Improvement.findById(id)
+		.populate("userCreate", "name")
+		.populate("project", "name")
+		.populate("status", "name")
+		.populate("userCreate", "logo")
+		.populate("userCreate", "priceHour")
+		);
 	}
 
 	async add(data) {

@@ -21,6 +21,7 @@ import { useSession } from "next-auth/client";
 import { useSnackbar } from "notistack";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import UserClass from '../../classes/UserClass';
+import { Person } from "@material-ui/icons";
 
 import { RootRef, ListSubheader, Paper, List, ListItemSecondaryAction, Typography, ListItem, FormControl, ListItemText, Stepper, Step, StepLabel, StepContent,ListItemAvatar, Avatar } from "@material-ui/core";
 
@@ -65,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
 		},
 	},
 }));
-export default function ImprovementById({ Improvement, projects, status }) {
+export default function ImprovementById({ Improvement, projects, status, users }) {
 
 	const route = useRouter();
 	const classes = useStyles();
@@ -78,6 +79,7 @@ export default function ImprovementById({ Improvement, projects, status }) {
 	const ImprovementForm = React.useRef(null);
 	const [loading, setLoading] = React.useState(false);
 	const [session] = useSession();
+	const [stateAllUsers, setStateAllUsers] = React.useState(users);
 
 	useEffect(() =>{
 		let data = {...state, 
@@ -123,30 +125,30 @@ export default function ImprovementById({ Improvement, projects, status }) {
 	};
 
 	const handleOnDragEnd = ({ source, destination }) => {
-		// if (destination === undefined || destination === null) return null;
-		// if (source.droppableId === destination.droppableId && destination.index === source.index) return null;
+		if (destination === undefined || destination === null) return null;
+		if (source.droppableId === destination.droppableId && destination.index === source.index) return null;
 
-		// if (source.droppableId === destination.droppableId) {
-		// 	if (source.droppableId === "allUsers") {
-		// 		const newList = stateAllUsers.filter((_, idx) => idx !== source.index);
-		// 		newList.splice(destination.index, 0, stateAllUsers[source.index]);
-		// 		setStateAllUsers(newList);
-		// 	} else {
-		// 		const newList = stateIncludeUsers.filter((_, idx) => idx !== source.index);
-		// 		newList.splice(destination.index, 0, stateIncludeUsers[source.index]);
-		// 		setStateIncludeUsers(newList);
-		// 	}
-		// } else {
-		// 	if (source.droppableId === "allUsers") {
-		// 		setStateAllUsers(stateAllUsers.filter((_, idx) => idx !== source.index));
-		// 		setStateIncludeUsers([...stateIncludeUsers, Object.assign({ hours: "", sumPricebyHours: "" }, stateAllUsers[source.index])]);
-		// 	} else {
-		// 		setStateIncludeUsers(stateIncludeUsers.filter((_, idx) => idx !== source.index));
-		// 		setStateAllUsers([...stateAllUsers, stateIncludeUsers[source.index]]);
-		// 	}
-		// }
+		if (source.droppableId === destination.droppableId) {
+			if (source.droppableId === "allUsers") {
+				const newList = stateAllUsers.filter((_, idx) => idx !== source.index);
+				newList.splice(destination.index, 0, stateAllUsers[source.index]);
+				setStateAllUsers(newList);
+			} else {
+				const newList = state.users.filter((_, idx) => idx !== source.index);
+				newList.splice(destination.index, 0, state.users[source.index]);
+				setState({...state, users: newList});
+			}
+		} else {
+			if (source.droppableId === "allUsers") {
+				setStateAllUsers(stateAllUsers.filter((_, idx) => idx !== source.index));
+				setState({...state, users: [...state.users, Object.assign({ hours: "", sumPricebyHours: "" }, stateAllUsers[source.index])]})
+			} else {
+				setState({...state, users: state.users.filter((_, idx) => idx !== source.index)})
+				setStateAllUsers([...stateAllUsers, state.users[source.index]]);
+			}
+		}
 
-		// return null;
+		return null;
 	};
 
 	const handleSubmit = async (event) => {
@@ -193,6 +195,25 @@ export default function ImprovementById({ Improvement, projects, status }) {
 			setLoading(false);
 		}
 	};
+
+	useEffect(() =>{
+		if(state.users.length !== 0){
+			let AvailableUsers = users;
+			let IncludeUsersArray = [];
+			state.users.map(_id => {
+				stateAllUsers.map((User, index) => {
+					if(User._id === _id){
+						IncludeUsersArray.push(User);
+						AvailableUsers.splice(index, 1);
+					}
+				})
+			})
+			setState({...state, users: IncludeUsersArray})
+			setStateAllUsers(AvailableUsers);
+			console.log(IncludeUsersArray, "Includes");
+			console.log(state, "Includes");
+		}
+	},[])
 
 	return (
 		<Layout>
@@ -381,7 +402,7 @@ export default function ImprovementById({ Improvement, projects, status }) {
 																							)}
 																						</ListItemAvatar>
 																						<ListItemText primary={u.name} secondary={u.position.name} />
-																						<ListItemSecondaryAction>{`${u.priceHour ? currencyFormatterBr(u.priceHour) : "R$ 0,00"}`}</ListItemSecondaryAction>
+																						<ListItemSecondaryAction></ListItemSecondaryAction>
 																					</ListItem>
 																				)}
 																			</Draggable>
@@ -399,13 +420,13 @@ export default function ImprovementById({ Improvement, projects, status }) {
 															<RootRef rootRef={provided.innerRef}>
 																<Paper className={classes.paper} elevation={1}>
 																	<List subheader={<ListSubheader>Inclusos no Projeto</ListSubheader>} className={classes.list}>
-																		{stateIncludeUsers.map((u, index) => (
-																			<Draggable key={u._id} draggableId={u._id} index={index}>
+																		{state.users.map((u, index) => (
+																			<Draggable key={u?._id} draggableId={u?._id} index={index}>
 																				{(provided) => (
-																					<ListItem alignItems="flex-start" className={classes.listItem} key={u._id} role={undefined} dense button ContainerComponent="li" ContainerProps={{ ref: provided.innerRef }} {...provided.draggableProps} {...provided.dragHandleProps}>
+																					<ListItem alignItems="flex-start" className={classes.listItem} key={u?._id} role={undefined} dense button ContainerComponent="li" ContainerProps={{ ref: provided.innerRef }} {...provided.draggableProps} {...provided.dragHandleProps}>
 																						<ListItemAvatar>
-																							{u.logo.image ? (
-																								<Avatar src={u.logo.image} />
+																							{u?.logo?.image ? (
+																								<Avatar src={u?.logo?.image} />
 																							) : (
 																								<Avatar>
 																									<Person />
@@ -414,11 +435,7 @@ export default function ImprovementById({ Improvement, projects, status }) {
 																						</ListItemAvatar>
 																						<Grid container direction="row" justify="space-between" alignItems="flex-start">
 																							<Grid item>
-																								<ListItemText primary={u.name} secondary={`${u.position.name} - ${u.priceHour ? currencyFormatterBr(u.priceHour) : "R$ 0,00"}`} />
-																							</Grid>
-																							<Grid item>
-																								<TextFieldMask required id={u._id} name={u._id} margin="normal" isNumericString={true} onChange={(e) => handleChangeHours(e, index)} value={u.hours} fullWidth label="Qtd Horas" format={formaterHour} className={classes.inputHours} />
-																								<TextField disabled id={u._id} name={u._id} margin="normal" fullWidth label="Total" value={currencyFormatterBr(u.sumPricebyHours)} className={classes.inputHours} />
+																								<ListItemText primary={u?.name} secondary={u?.position?.name} />
 																							</Grid>
 																						</Grid>
 																						<ListItemSecondaryAction></ListItemSecondaryAction>
@@ -464,7 +481,7 @@ export default function ImprovementById({ Improvement, projects, status }) {
 							<Hidden mdUp>
 								<Backdrop open={open} />
 								<SpeedDial ariaLabel="SpeedDial" className={classes.fab} hidden={hidden} icon={<MenuIcon />} onClose={handleClose} onOpen={handleOpen} open={open}>
-									<SpeedDialAction key="Lista" icon={<ViewList className={classes.info} />} tooltipTitle="Lista" tooltipOpen onClick={(e) => route.push("/call")} />
+									<SpeedDialAction key="Lista" icon={<ViewList className={classes.info} />} tooltipTitle="Lista" tooltipOpen onClick={(e) => route.push("/improvement")} />
 									<SpeedDialAction key="Salvar" icon={<SaveIcon className={classes.info} />} tooltipTitle="Salvar" tooltipOpen />
 								</SpeedDial>
 							</Hidden>
@@ -481,14 +498,15 @@ export async function getServerSideProps(context){
 		const improvementClass = new ImprovementClass();
 		const projectClass = new ProjectClass();
 		const statusClass = new StatusClass();
-		
+		const userClass = new UserClass();
 
 		const projects = await projectClass.getAll();
 		const status = await statusClass.getByFilter({ module: "Melhorias" });
+		const users = await userClass.getAll();
 
 		if(context.query.id !== "new"){
 			const data = await improvementClass.get(context.query.id);
-			return {props: { Improvement: data, projects, status }}
+			return {props: { Improvement: data, projects, status, users }}
 		}
 		else{
 			return { props: { Improvement: {
@@ -506,7 +524,7 @@ export async function getServerSideProps(context){
 				userModified: "",
 				project: "",
 				status: ""
-			}, projects, status }} 
+			}, projects, status, users }} 
 		}
 	}
 	catch(error){
