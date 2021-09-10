@@ -11,12 +11,15 @@ export function TimesheetContextProvider({children}){
 
   async function TimesheetIsOpen(){
 
-    const timesheet = await fetch(`/api/timesheet/context/getPending/${userData._id}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
+    const data = { filter: { user: userData._id, timeEnd: null } }
+
+    const timesheet = await fetch('/api/timesheet/filter', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
     
-    timesheet.body && setOpenTimesheet(true);
+    await timesheet.json() && setOpenTimesheet(true);
     console.log(openTimesheet);
   }
 
@@ -25,24 +28,20 @@ export function TimesheetContextProvider({children}){
   },[])
 
   const validateTimesheet = async (timesheet) => {
-    if(openTimesheet){ 
-      return { message: "Timesheet Pendente!", success: false } 
-    };
 
-    if(timesheet.timeStart > dayjs(timesheet.timeEnd)) { 
+    if(dayjs(timesheet.timeStart) > dayjs(timesheet.timeEnd)) { 
       return { message: "Data Final não pode ser menor que a Inicial!", success: false } 
     };
 
-    const start = await fetch(
-      `/api/timesheet/context/getTimesheet
-      /:${timesheet.timeStart}
-      /:${timesheet.timeEnd}
-      /:${userData._id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
+    const data = { filter: { user: userData._id, timeEnd: timesheet.timeEnd, timeStart: timesheet.timeStart } }
+
+    const start = await fetch(`/api/timesheet/filter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
     });
 
-    if(start.body){
+    if(!await start.json()){
       return { message: "Já existe um registro com essa data!", success: false }
     }
 

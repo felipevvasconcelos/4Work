@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import { FormControlLabel, Switch, Collapse, Select, Slide, TextField, MenuItem, Grid, InputLabel, Dialog, DialogTitle, DialogContent, Button, FormControl, makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import { Close, Save } from "@material-ui/icons";
 import { useSnackbar } from "notistack";
 import { ObjectId } from "mongoose";
+import { TimesheetContext } from '../../Context/TImesheetContext';
+import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
 
 const useStyles = makeStyles({
 	btn: {
@@ -25,14 +27,13 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 	const classes = useStyles();
 	const { enqueueSnackbar } = useSnackbar();
 
-	const [projects, setProjects] = useState([]);
-	const [improvements, setImprovements] = useState([]);
-	const [calls, setCalls] = useState([]);
-
 	const [collpase, setCollpase] = useState(false);
 	const [appointmentState, setAppointmentState] = useState(appointment);
 
 	const [selectsData, setSelectsData] = useState([]);
+	const appointmentForm = useRef(null);
+	const { validateTimesheet } = useContext(TimesheetContext)
+	const { userData } = useContext(AtuhenticationContext)
 
 	const QuerrySelects = {
 		project: async () => {
@@ -76,9 +77,25 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 
 	useEffect(() =>{
 		handleSelectonChange(appointmentState.type)
+		switch (appointmentState.type) {
+			case "project":
+				setAppointmentState({...appointmentState, call: null, improvement: null});
+				break;
+			case "improvement":
+				setAppointmentState({...appointmentState, call: null, project: null});
+				break;
+			case "call":
+				setAppointmentState({...appointmentState, improvement: null, project: null});
+				break;
+
+			default:
+				setAppointmentState({...appointmentState, improvement: null, project: null, call: null});
+				break;
+		}
 	},[appointmentState.type])
 
 	const handleChangeAppointment = (e) => {
+		console.log([e.target.name], e.target.value);
 		setAppointmentState({ ...appointmentState, [e.target.name]: e.target.value });
 
 		if (e.target.name === "type") {
@@ -90,14 +107,14 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 		closeFunction();
 	};
 
-	useEffect(() =>{
-		console.log(selectsData);
-	},[selectsData])
-
-	async function handleSubmit(e) {
+	async function handleSubmit(e, method) {
 		e.preventDefault(e);
-
+		setAppointmentState({...appointmentState, user: userData._id});
 		try {
+			if(!appointmentForm.current.checkValidity()){
+				enqueueSnackbar("Preencha todos os campos!", { variant: "error" });
+				return;
+			}
 			//VALIDAÇÕES
 			switch (appointmentState.type) {
 				case "project":
@@ -114,28 +131,30 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 					throw "Campo tipo é obrigatório";
 					break;
 			}
-
+			const validate = await validateTimesheet(appointmentState);
+			if(!validate.success){
+				throw validate.message;
+			}
+			console.log(appointmentState);
+			console.log(userData._id);
 			const res = await fetch("/api/timesheet", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(appointmentState),
 			});
+			console.log(await res.json())
+			if(res.status == 200){
+				enqueueSnackbar("Horas cadastradas!", { variant: "success" });
+			}
+			method !== "save" && handleCancel();
+			handleClearFields();
 		} catch (e) {
-			enqueueSnackbar(e.message, { variant: "error" });
+			enqueueSnackbar(e, { variant: "error" });
 		}
 	}
 
 	const handleClearFields = () => {
-		console.log(appointmentState);
-		setAppointmentState({
-			call: "",
-			description: "",
-			improvement: "",
-			project: "",
-			timeStart: "",
-			type: "",
-			user: ""
-		});
+		setAppointmentState(appointment);
 	}
 
 	return (
@@ -151,11 +170,12 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 		>
 			<DialogTitle>Lançamento de Horas</DialogTitle>
 			<DialogContent>
-				<form onSubmit={handleSubmit}>
+				<form onSubmit={handleSubmit} ref={appointmentForm} >
 					<Grid container spacing={0} direction="row" justify="flex-end" alignItems="flex-end" xs={12}>
 						<Grid item xs={12}>
 							<Grid container direction="row" spacing={1} justify="flex-end" alignItems="flex-end" xs={12}>
 								<Grid item xs={12} sm={6}>
+
 									<TextField
 										id="timeStart"
 										name="timeStart"
@@ -167,7 +187,9 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 										InputLabelProps={{
 											shrink: true,
 										}}
+										required
 									></TextField>
+
 								</Grid>
 								<Grid item xs={12} sm={6}>
 									<TextField
@@ -181,6 +203,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 										InputLabelProps={{
 											shrink: true,
 										}}
+										required
 									></TextField>
 								</Grid>
 							</Grid>
@@ -188,7 +211,13 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 						<Grid item xs={12}>
 							<FormControl fullWidth margin="normal">
 								<InputLabel id="demo-simple-select-helper-label">Tipo</InputLabel>
-								<Select name="type" id="type" value={appointmentState.type} onChange={handleChangeAppointment}>
+								<Select 
+									name="type" 
+									id="type" 
+									value={appointmentState.type} 
+									onChange={handleChangeAppointment}
+									required
+								>
 									<MenuItem value="project">Projeto</MenuItem>
 									<MenuItem value="improvement">Melhoria</MenuItem>
 									<MenuItem value="call">Chamado</MenuItem>
@@ -210,7 +239,14 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 											appointmentState.type === 'call' && "Chamados"
 										}
 									</InputLabel>
-									<Select id={appointment.type} name={appointment.type} value={appointmentState[appointment.type]} fullWidth onChange={handleChangeAppointment}>
+									<Select 
+										id={appointmentState.type} 
+										name={appointmentState.type} 
+										value={appointmentState[appointment.type]} 
+										fullWidth 
+										onChange={handleChangeAppointment}
+										required
+									>
 										{
 											selectsData[0] &&
 											selectsData.map((object) => (
@@ -225,17 +261,40 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 
 
 						<Grid item xs={12}>
-							<TextField required id="description" name="description" value={appointmentState.description} onChange={handleChangeAppointment} multiline rows={3} fullWidth label="Descrição"></TextField>
+							<TextField 
+								required 
+								id="description" 
+								name="description" 
+								value={appointmentState.description} 
+								onChange={handleChangeAppointment} 
+								multiline 
+								rows={3} 
+								fullWidth 
+								label="Descrição"
+								required
+							></TextField>
 						</Grid>
 						<Grid item xs={12}>
 							<Grid container xs={12} justify="flex-end" spacing={1} style={{ margin: "10px" }}>
 								<Grid item>
-									<Button type="submit" variant="outlined" color="primary" onClick={handleClearFields} startIcon={<Save />}>
-										Limpar
+									<Button 
+										type="submit" 
+										variant="outlined" 
+										color="primary" 
+										onClick={(event) => handleSubmit(event, "Save")} 
+										startIcon={<Save />}
+									>
+										Salvar
 									</Button>
 								</Grid>
 								<Grid item>
-									<Button type="submit" variant="contained" color="primary" startIcon={<Save />}>
+									<Button 
+										type="submit" 
+										variant="contained" 
+										color="primary" 
+										onClick={(event) => handleSubmit(event, "SaveAndClose")} 
+										startIcon={<Save />}
+									>
 										Salvar e Fechar
 									</Button>
 								</Grid>

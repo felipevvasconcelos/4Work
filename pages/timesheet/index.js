@@ -1,8 +1,10 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
 import Head from "next/head";
 import { useSnackbar } from "notistack";
 import { StatusClass } from "../../classes";
 import { chartPallete } from "../../styles/pallete";
+
+import { getSession } from 'next-auth/client'
 
 //COMPONENTES
 import { CardPanel, Layout, Loading, siteTittle, AppointmentCompleteDialog } from "../../components";
@@ -22,6 +24,7 @@ import { Button } from "@material-ui/core";
 import { AlarmAdd } from "@material-ui/icons";
 import { useSession } from "next-auth/client";
 import { TimesheetContextProvider } from '../../Context/TImesheetContext';
+import TimesheetClass from '../../classes/TimeSheetClass';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -115,7 +118,7 @@ const appointmentComponent = ({ children, style, ...restProps }) => (
 	</Appointments.Appointment>
 );
 
-export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirmDialogClose }) {
+export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirmDialogClose, GridTimesheet }) {
 	const { enqueueSnackbar } = useSnackbar();
 	const classes = useStyles();
 	const [session] = useSession();
@@ -123,12 +126,24 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 	const [viewName, setViewName] = useState("Month");
 	const [radioChart, setRadioChart] = useState("month");
 	const [appoitmentDialog, setAppoitmentDialog] = React.useState(false);
-	const [schedulerData, setSchedulerData] = useState([
-		{ startDate: "2018-11-01T09:45", endDate: "2018-11-01T11:00", title: "Meeting", id: 100 },
-		{ startDate: "2018-11-01T12:00", endDate: "2018-11-01T13:30", title: "Go to a gym", id: 200 },
-	]);
+	const [schedulerData, setSchedulerData] = useState([]);
 	const [state, setState] = useState();
 	const timesheetForm = useRef(null);
+
+	useEffect(() =>{
+		GridTimesheet.map((timesheet) => {
+			var state = GridTimesheet;
+			console.log(state);
+			console.log(timesheet[timesheet.type].name || timesheet[timesheet.type].title);
+			state.push({
+				endDate: timesheet.timeEnd,
+				id: timesheet._id,
+				startDate: timesheet.timeStart,
+				title: timesheet[timesheet.type].name || timesheet[timesheet.type].title
+			})
+			setSchedulerData(state);
+		})
+	},[])
 
 	const handleAppoitment = () => {
 		setAppoitmentDialog(!appoitmentDialog);
@@ -183,7 +198,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 								</Tooltip>
 							</Grid>
 							<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
-								<ViewState defaultCurrentDate={currentDate} currentViewName={viewName} />
+								<ViewState defaultCurrentDate={Date.now()}  currentViewName={viewName} />
 								<EditingState onCommitChanges={handleEditScheduler} />
 								<IntegratedEditing />
 								<Toolbar />
@@ -295,5 +310,11 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 
 export async function getServerSideProps(context) {
 	const data = await new StatusClass().getAll();
-	return { props: { data } };
+	const timesheetClass = new TimesheetClass();
+
+	const session = await getSession(context);
+	
+	const GridTimesheet = await timesheetClass.getByFilter({ user: session.user._id });
+
+	return { props: { data, GridTimesheet } };
 }

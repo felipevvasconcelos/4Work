@@ -7,7 +7,7 @@ export default class TimeSheetClass {
 
 	async getByFilter(filter) {
 		await dbConnect();
-		return jsonify(await TimeSheet.find(filter));
+		return jsonify(await TimeSheet.find(filter).populate("project", "name").populate("call", "title").populate("improvement", "title"));
 	}
 
 	async getByFilterasd(filter) {
