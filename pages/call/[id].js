@@ -3,7 +3,8 @@ import Head from "next/head";
 import React, { useEffect } from "react";
 import { CardPanel, Layout, siteTittle, Loading } from "../../components";
 import { useRouter } from "next/router";
-import { Container, Grid, TextField, FormControlLabel, Checkbox, Tooltip, Select, MenuItem, FormControl, InputLabel, Button, IconButton, Hidden, Backdrop } from "@material-ui/core";
+import { Container, Grid, TextField, FormControlLabel, Checkbox, Tooltip, Select, MenuItem, FormControl, InputLabel, Button, IconButton, Hidden, Backdrop, Avatar, ListItemAvatar } from "@material-ui/core";
+import { Person } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import DateFnsUtils from "@date-io/date-fns";
 import { useSnackbar } from "notistack";
@@ -21,6 +22,7 @@ import StatusClass from '../../classes/StatusClass';
 import TypeCallClass from '../../classes/TypeCallClass';
 import { useSession } from "next-auth/client";
 import dayjs from "dayjs";
+import UserClass from '../../classes/UserClass';
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -59,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function CallById({ projects, data, status, typesCall }) {
+export default function CallById({ projects, data, status, typesCall, users }) {
 	const route = useRouter();
 	const classes = useStyles();
 	const [session] = useSession();
@@ -248,6 +250,30 @@ export default function CallById({ projects, data, status, typesCall }) {
 										</Select>
 									</FormControl>
 								</Grid>
+								<Grid item xs={12} md={3} container alignContent="flex-end">
+									<FormControl fullWidth margin="normal">
+										<InputLabel id="demo-simple-select-helper-label">Atendente</InputLabel>
+										<Select labelId="demo-simple-select-label" id="demo-simple-select" onChange={handleChange} name="user" required value={state.user}>
+											{
+												users &&
+												users.map((element) => (
+													<MenuItem value={element._id} >
+														<ListItemAvatar>
+															{element.logo.image ? (
+																<Avatar src={u.logo.image} />
+															) : (
+																<Avatar>
+																	<Person />
+																</Avatar>
+															)}
+														</ListItemAvatar>
+														{element.name}
+													</MenuItem>
+												))
+											}
+										</Select>
+									</FormControl>
+								</Grid>
 								<Grid item xs={12} md={3}>
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
 										<KeyboardDatePicker fullWidth id="date-picker-inline" disabled disableToolbar variant="inline" format="dd/MM/yyyy HH:MM" margin="normal" label="Prazo" value={state.deadline} name="deadline" onChange={handleChange} KeyboardButtonProps={{ "aria-label": "change date" }} />
@@ -304,10 +330,12 @@ export async function getServerSideProps(context) {
 	const projectClass = new ProjectClass();
 	const statusClass = new StatusClass();
 	const typeCallClass = new TypeCallClass();
+	const userClass = new UserClass();
 
 	const projects = await projectClass.getAll();
 	const status = await statusClass.getByFilter({ module: "Chamados" });
 	const typesCall =  await typeCallClass.getAll();
+	const users = await userClass.getByFilter({ profile: "60bc30e5f582fe96a40b72a3" })
 
 	if (context.query.id == "new") {
 
@@ -322,16 +350,17 @@ export async function getServerSideProps(context) {
 			type: "",
 			status: "",
 			deadline: Date.now(),
-			project: ""
+			project: "",
+			user: ""
 		}
 
 		return {
-			props: { data, projects, status, typesCall }
+			props: { data, projects, status, typesCall, users }
 		};
 	} 
 	else {
 		const data = await callClass.get(context.query.id);
 		
-		return { props: { data, projects, status, typesCall } };
+		return { props: { data, projects, status, typesCall, users } };
 	}
 }

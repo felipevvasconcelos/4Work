@@ -22,7 +22,7 @@ const TimeSheetModel = new mongoose.Schema({
 		ref: "Call"
 	},
 	timeStart: { type: Date, required: true },
-	timeEnd: { type: Date, required: true },
+	timeEnd: { type: Date },
 });
 
 export default mongoose.models.TimeSheet || mongoose.model("TimeSheet", TimeSheetModel);

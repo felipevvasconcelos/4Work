@@ -12,6 +12,7 @@ import moment from "moment";
 import dayjs from 'dayjs';
 import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
 import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
 const steps = ["Dados Gerais", "Estrutura", "Recursos", "Confirmação"];
 

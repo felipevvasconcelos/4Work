@@ -10,6 +10,11 @@ export default class TimeSheetClass {
 		return jsonify(await TimeSheet.find(filter));
 	}
 
+	async getByFilterasd(filter) {
+		await dbConnect();
+		return jsonify(await TimeSheet.where('timeStart'));
+	}
+
 	async add(data) {
 		await dbConnect();
 		return jsonify(await new TimeSheet(data).save());

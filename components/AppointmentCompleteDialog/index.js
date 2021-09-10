@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FormControlLabel, Switch, Collapse, Select, Slide, TextField, MenuItem, Grid, InputLabel, Dialog, DialogTitle, DialogContent, Button, FormControl, makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import { Close, Save } from "@material-ui/icons";
 import { useSnackbar } from "notistack";
+import { ObjectId } from "mongoose";
 
 const useStyles = makeStyles({
 	btn: {
@@ -28,72 +29,70 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 	const [improvements, setImprovements] = useState([]);
 	const [calls, setCalls] = useState([]);
 
-	const [collpaseImprovement, setCollpaseImprovement] = useState(false);
-	const [collpaseProject, setCollpaseProject] = useState(false);
-	const [collpaseCall, setCollpaseCall] = useState(false);
+	const [collpase, setCollpase] = useState(false);
 	const [appointmentState, setAppointmentState] = useState(appointment);
 
-	useEffect(async () => {
-		return async () => {
-			try {
-				const resProject = await fetch("/api/project/filter", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ "includeUsers.user": session.user._id }),
-				});
-				const resImprovement = await fetch("/api/call/filter", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ "users.user": session.user._id }),
-				});
-				const resCall = await fetch("/api/call/filter", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ "user.user": session.user._id }),
-				});
+	const [selectsData, setSelectsData] = useState([]);
 
-				if (!(resProject.status === 200 && resImprovement.status === 200 && resCall.status === 200)) throw "Erro ao carregar combos de origem, por favor, contate o administrador do sistema.";
+	const QuerrySelects = {
+		project: async () => {
+			return await fetch("/api/project/filter", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({filter: {"includeUsers.user": session.user._id}}),
+			})
+		},
+		improvement: async () => {
+			return await fetch("/api/improvement/filter", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({filter: {"users": session.user._id }}),
+			})
+		},
+		call: async () => {
+			return await fetch("/api/call/filter", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ filter: {"user": session.user._id}}),
+			})
+		}
+	}
 
-				setProjects(await resProject.json());
-				setImprovements(await resImprovement.json());
-				setCalls(await resCall.json());
-				setAppointmentState(...appointmentState, { user: session.user._id });
-			} catch (e) {
+	async function handleSelectonChange(type){
+		if(QuerrySelects[type]){
+			try{
+				const data = await QuerrySelects[type]();
+
+				console.log(data);
+				if (!data.status === 200) throw "Erro ao carregar combos de origem, por favor, contate o administrador do sistema.";
+
+				setSelectsData(await data.json());
+			}
+			catch(e){
 				enqueueSnackbar(e.message, { variant: "error" });
 			}
-		};
-	});
+		}
+	}
+
+	useEffect(() =>{
+		handleSelectonChange(appointmentState.type)
+	},[appointmentState.type])
 
 	const handleChangeAppointment = (e) => {
 		setAppointmentState({ ...appointmentState, [e.target.name]: e.target.value });
 
 		if (e.target.name === "type") {
-			switch (e.target.value) {
-				case "project":
-					setCollpaseProject(true);
-					setCollpaseCall(false);
-					setCollpaseImprovement(false);
-					break;
-				case "improvement":
-					setCollpaseProject(false);
-					setCollpaseCall(false);
-					setCollpaseImprovement(true);
-					break;
-				case "call":
-					setCollpaseProject(false);
-					setCollpaseCall(true);
-					setCollpaseImprovement(false);
-					break;
-
-				default:
-					break;
-			}
+			setCollpase(true);
 		}
 	};
 	const handleCancel = (e) => {
 		setAppointmentState(appointment);
 		closeFunction();
 	};
+
+	useEffect(() =>{
+		console.log(selectsData);
+	},[selectsData])
 
 	async function handleSubmit(e) {
 		e.preventDefault(e);
@@ -126,6 +125,19 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 		}
 	}
 
+	const handleClearFields = () => {
+		console.log(appointmentState);
+		setAppointmentState({
+			call: "",
+			description: "",
+			improvement: "",
+			project: "",
+			timeStart: "",
+			type: "",
+			user: ""
+		});
+	}
+
 	return (
 		<Dialog
 			fullWidth
@@ -150,6 +162,8 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 										type="datetime-local"
 										fullWidth
 										label="Início"
+										value={appointmentState.timeStart}
+										onChange={handleChangeAppointment}
 										InputLabelProps={{
 											shrink: true,
 										}}
@@ -157,11 +171,13 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 								</Grid>
 								<Grid item xs={12} sm={6}>
 									<TextField
-										id="timeStart"
-										name="timeStart"
+										id="timeEnd"
+										name="timeEnd"
 										type="datetime-local"
 										fullWidth
 										label="Fim"
+										value={appointmentState.timeEnd}
+										onChange={handleChangeAppointment}
 										InputLabelProps={{
 											shrink: true,
 										}}
@@ -172,7 +188,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 						<Grid item xs={12}>
 							<FormControl fullWidth margin="normal">
 								<InputLabel id="demo-simple-select-helper-label">Tipo</InputLabel>
-								<Select name="type" id="type" onChange={handleChangeAppointment}>
+								<Select name="type" id="type" value={appointmentState.type} onChange={handleChangeAppointment}>
 									<MenuItem value="project">Projeto</MenuItem>
 									<MenuItem value="improvement">Melhoria</MenuItem>
 									<MenuItem value="call">Chamado</MenuItem>
@@ -181,52 +197,41 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 						</Grid>
 
 						<Grid item xs={12}>
-							<Collapse in={collpaseImprovement}>
+							<Collapse in={collpase}>
 								<FormControl fullWidth margin="normal">
-									<InputLabel id="demo-simple-select-helper-label">Melhorias</InputLabel>
-									<Select id="improvement" name="improvement" fullWidth onChange={handleChangeAppointment}>
-										{improvements.map((object) => (
-											<MenuItem value={object._id}>{object.name}</MenuItem>
-										))}
+									<InputLabel id="demo-simple-select-helper-label">
+										{
+											appointmentState.type === 'project' && "Projeto"
+										}
+										{
+											appointmentState.type === 'improvement' && "Melhorias"
+										}
+										{
+											appointmentState.type === 'call' && "Chamados"
+										}
+									</InputLabel>
+									<Select id={appointment.type} name={appointment.type} value={appointmentState[appointment.type]} fullWidth onChange={handleChangeAppointment}>
+										{
+											selectsData[0] &&
+											selectsData.map((object) => (
+												<MenuItem value={object._id}>{ object?.name || object?.title }</MenuItem>
+											))
+										}
 									</Select>
 								</FormControl>
 							</Collapse>
 						</Grid>
 
-						<Grid item xs={12}>
-							<Collapse in={collpaseCall}>
-								<FormControl fullWidth margin="normal">
-									<InputLabel id="demo-simple-select-helper-label">Chamados</InputLabel>
-									<Select id="call" name="call" fullWidth onChange={handleChangeAppointment}>
-										{calls.map((object) => (
-											<MenuItem value={object._id}>{object.name}</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Collapse>
-						</Grid>
+
 
 						<Grid item xs={12}>
-							<Collapse in={collpaseProject}>
-								<FormControl fullWidth margin="normal">
-									<InputLabel id="demo-simple-select-helper-label">Projetos</InputLabel>
-									<Select id="project" name="project" fullWidth onChange={handleChangeAppointment}>
-										{projects.map((object) => (
-											<MenuItem value={object._id}>{object.name}</MenuItem>
-										))}
-									</Select>
-								</FormControl>
-							</Collapse>
-						</Grid>
-
-						<Grid item xs={12}>
-							<TextField required id="description" name="description" onChange={handleChangeAppointment} multiline rows={3} fullWidth label="Descrição"></TextField>
+							<TextField required id="description" name="description" value={appointmentState.description} onChange={handleChangeAppointment} multiline rows={3} fullWidth label="Descrição"></TextField>
 						</Grid>
 						<Grid item xs={12}>
 							<Grid container xs={12} justify="flex-end" spacing={1} style={{ margin: "10px" }}>
 								<Grid item>
-									<Button type="submit" variant="outlined" color="primary" startIcon={<Save />}>
-										Salvar
+									<Button type="submit" variant="outlined" color="primary" onClick={handleClearFields} startIcon={<Save />}>
+										Limpar
 									</Button>
 								</Grid>
 								<Grid item>
