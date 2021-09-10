@@ -180,131 +180,129 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 	};
 
 	return (
-		<TimesheetContextProvider>
-			<Layout>
-				<Head>
-					<title>{siteTittle}</title>
-				</Head>
-				{loading && <Loading></Loading>}
-				<Grid container spacing={1} direction="row" alignItems="flex-start" xs={12}>
-					<Grid item xs={12} lg={6}>
-						<CardPanel title="" subtitle="Lançamentos de Horas" color="primary">
-							<Grid container justify="flex-end" direction="row" spacing={2}>
-								<ExternalViewSwitcher currentViewName={viewName} onChange={handleViewSwitcher} />
-								<Tooltip title={"Adicionar Apontamento"}>
-									<IconButton onClick={handleAppoitment} color="inherit" aria-label="open drawer" edge="start">
-										<AlarmAdd style={{ color: "green" }} />
-									</IconButton>
-								</Tooltip>
-							</Grid>
-							<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
-								<ViewState defaultCurrentDate={Date.now()}  currentViewName={viewName} />
-								<EditingState onCommitChanges={handleEditScheduler} />
-								<IntegratedEditing />
-								<Toolbar />
+		<Layout>
+			<Head>
+				<title>{siteTittle}</title>
+			</Head>
+			{loading && <Loading></Loading>}
+			<Grid container spacing={1} direction="row" alignItems="flex-start" xs={12}>
+				<Grid item xs={12} lg={6}>
+					<CardPanel title="" subtitle="Lançamentos de Horas" color="primary">
+						<Grid container justify="flex-end" direction="row" spacing={2}>
+							<ExternalViewSwitcher currentViewName={viewName} onChange={handleViewSwitcher} />
+							<Tooltip title={"Adicionar Apontamento"}>
+								<IconButton onClick={handleAppoitment} color="inherit" aria-label="open drawer" edge="start">
+									<AlarmAdd style={{ color: "green" }} />
+								</IconButton>
+							</Tooltip>
+						</Grid>
+						<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
+							<ViewState defaultCurrentDate={Date.now()}  currentViewName={viewName} />
+							<EditingState onCommitChanges={handleEditScheduler} />
+							<IntegratedEditing />
+							<Toolbar />
 
-								<WeekView startDayHour={9} endDayHour={19} />
-								<WeekView name="Work Week" excludedDays={[0, 6]} startDayHour={9} endDayHour={19} />
-								<MonthView />
-								<DayView />
+							<WeekView startDayHour={9} endDayHour={19} />
+							<WeekView name="Work Week" excludedDays={[0, 6]} startDayHour={9} endDayHour={19} />
+							<MonthView />
+							<DayView />
 
-								<DateNavigator />
-								<Appointments appointmentComponent={appointmentComponent} />
-								<AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
+							<DateNavigator />
+							<Appointments appointmentComponent={appointmentComponent} />
+							<AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
 
-								<DragDropProvider />
-							</Scheduler>
-						</CardPanel>
-					</Grid>
-					<Grid item xs={12} lg={6}>
-						<CardPanel color="primary" subtitle="Visualização de Horas">
-							<Grid container spacing={1} direction="row" alignItems="center" xs={12}>
-								<Grid item xs={12} style={{ padding: "10px" }}>
-									<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12}>
-										<Grid item xs={12} md={6}>
-											<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
-												<Grid item xs={12} md={6}>
-													<TextField
-														id="timeStart"
-														name="timeStart"
-														type="date"
-														fullWidth
-														label="Início"
-														InputLabelProps={{
-															shrink: true,
-														}}
-													></TextField>
-												</Grid>
-												<Grid item xs={12} md={6}>
-													<TextField
-														id="timeEnd"
-														name="timeEnd"
-														type="date"
-														fullWidth
-														label="Fim"
-														InputLabelProps={{
-															shrink: true,
-														}}
-													></TextField>
-												</Grid>
+							<DragDropProvider />
+						</Scheduler>
+					</CardPanel>
+				</Grid>
+				<Grid item xs={12} lg={6}>
+					<CardPanel color="primary" subtitle="Visualização de Horas">
+						<Grid container spacing={1} direction="row" alignItems="center" xs={12}>
+							<Grid item xs={12} style={{ padding: "10px" }}>
+								<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12}>
+									<Grid item xs={12} md={6}>
+										<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
+											<Grid item xs={12} md={6}>
+												<TextField
+													id="timeStart"
+													name="timeStart"
+													type="date"
+													fullWidth
+													label="Início"
+													InputLabelProps={{
+														shrink: true,
+													}}
+												></TextField>
+											</Grid>
+											<Grid item xs={12} md={6}>
+												<TextField
+													id="timeEnd"
+													name="timeEnd"
+													type="date"
+													fullWidth
+													label="Fim"
+													InputLabelProps={{
+														shrink: true,
+													}}
+												></TextField>
 											</Grid>
 										</Grid>
-										<Grid item xs={12} md={6}>
-											<Grid container spacing={1} direction="row" justify="flex-end" alignItems="flex-end" xs={12}>
-												<Grid item xs={10} md={8}>
-													<FormControl fullWidth margin="normal">
-														<InputLabel id="demo-simple-select-helper-label">Filtro Tipo</InputLabel>
-														<Select labelId="demo-simple-select-label" id="demo-simple-select">
-															<MenuItem value={10}>Todos</MenuItem>
-															<MenuItem value={10}>Projeto tal</MenuItem>
-															<MenuItem value={20}>Melhoria x</MenuItem>
-														</Select>
-													</FormControl>
-												</Grid>
-												<Grid item xs={1}>
-													<Tooltip title={"Exportar Relatório"}>
-														<IconButton style={{ color: "grey" }}>
-															<FontAwesomeIcon icon={faFileExport} />
-														</IconButton>
-													</Tooltip>
-												</Grid>
+									</Grid>
+									<Grid item xs={12} md={6}>
+										<Grid container spacing={1} direction="row" justify="flex-end" alignItems="flex-end" xs={12}>
+											<Grid item xs={10} md={8}>
+												<FormControl fullWidth margin="normal">
+													<InputLabel id="demo-simple-select-helper-label">Filtro Tipo</InputLabel>
+													<Select labelId="demo-simple-select-label" id="demo-simple-select">
+														<MenuItem value={10}>Todos</MenuItem>
+														<MenuItem value={10}>Projeto tal</MenuItem>
+														<MenuItem value={20}>Melhoria x</MenuItem>
+													</Select>
+												</FormControl>
+											</Grid>
+											<Grid item xs={1}>
+												<Tooltip title={"Exportar Relatório"}>
+													<IconButton style={{ color: "grey" }}>
+														<FontAwesomeIcon icon={faFileExport} />
+													</IconButton>
+												</Tooltip>
 											</Grid>
 										</Grid>
 									</Grid>
 								</Grid>
-
-								<Grid item xs={12} style={{ marginTop: "15px" }}>
-									<Chart data={chartData}>
-										<Palette scheme={chartPallete} />
-										<ValueScale name="month" />
-
-										<ArgumentAxis />
-										<ValueAxis scaleName="month" />
-
-										<BarSeries name="Melhoria 1" valueField="melhoria1" argumentField="month" scaleName="month" />
-										<BarSeries name="Melhoria 2" valueField="melhoria2" argumentField="month" scaleName="month" />
-										<BarSeries name="Projeto 1" valueField="projeto1" argumentField="month" scaleName="month" />
-										<BarSeries name="Chamado 1" valueField="chamado1" argumentField="month" scaleName="month" />
-										<BarSeries name="Projeto 2" valueField="projeto2" argumentField="month" scaleName="month" />
-										<BarSeries name="Projeto 3" valueField="projeto3" argumentField="month" scaleName="month" />
-
-										<LineSeries name="Meta Mês" valueField="total" argumentField="month" scaleName="month" color="green" />
-
-										<Stack stacks={[{ series: ["Melhoria 1", "Melhoria 2", "Projeto 1", "Chamado 1", "Projeto 2", "Projeto 3"] }]} />
-
-										<EventTracker />
-										<TooltipChart />
-										<Animation />
-										<Legend />
-									</Chart>
-								</Grid>
 							</Grid>
-						</CardPanel>
-					</Grid>
+
+							<Grid item xs={12} style={{ marginTop: "15px" }}>
+								<Chart data={chartData}>
+									<Palette scheme={chartPallete} />
+									<ValueScale name="month" />
+
+									<ArgumentAxis />
+									<ValueAxis scaleName="month" />
+
+									<BarSeries name="Melhoria 1" valueField="melhoria1" argumentField="month" scaleName="month" />
+									<BarSeries name="Melhoria 2" valueField="melhoria2" argumentField="month" scaleName="month" />
+									<BarSeries name="Projeto 1" valueField="projeto1" argumentField="month" scaleName="month" />
+									<BarSeries name="Chamado 1" valueField="chamado1" argumentField="month" scaleName="month" />
+									<BarSeries name="Projeto 2" valueField="projeto2" argumentField="month" scaleName="month" />
+									<BarSeries name="Projeto 3" valueField="projeto3" argumentField="month" scaleName="month" />
+
+									<LineSeries name="Meta Mês" valueField="total" argumentField="month" scaleName="month" color="green" />
+
+									<Stack stacks={[{ series: ["Melhoria 1", "Melhoria 2", "Projeto 1", "Chamado 1", "Projeto 2", "Projeto 3"] }]} />
+
+									<EventTracker />
+									<TooltipChart />
+									<Animation />
+									<Legend />
+								</Chart>
+							</Grid>
+						</Grid>
+					</CardPanel>
 				</Grid>
-				<AppointmentCompleteDialog open={appoitmentDialog} session={session} closeFunction={handleAppoitment}></AppointmentCompleteDialog>
-			</Layout>
-		</TimesheetContextProvider>
+			</Grid>
+			<AppointmentCompleteDialog open={appoitmentDialog} session={session} closeFunction={handleAppoitment}></AppointmentCompleteDialog>
+		</Layout>
 	);
 }
 

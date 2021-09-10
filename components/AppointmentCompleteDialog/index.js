@@ -121,10 +121,10 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 					if (!appointmentState.project) throw "Campo projeto é obrigatório";
 					break;
 				case "improvement":
-					if (!appointmentState.project) throw "Campo melhoria é obrigatório";
+					if (!appointmentState.improvement) throw "Campo melhoria é obrigatório";
 					break;
 				case "call":
-					if (!appointmentState.project) throw "Campo chamado é obrigatório";
+					if (!appointmentState.call) throw "Campo chamado é obrigatório";
 					break;
 
 				default:
@@ -135,8 +135,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 			if(!validate.success){
 				throw validate.message;
 			}
-			console.log(appointmentState);
-			console.log(userData._id);
+
 			const res = await fetch("/api/timesheet", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
