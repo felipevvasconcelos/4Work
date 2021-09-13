@@ -1,6 +1,7 @@
+import { getSession } from "next-auth/client";
 import Head from "next/head";
 import React from "react";
-import { AppointmentDialog, Layout, ListNotifications, siteTittle } from "../components";
+import { Layout, siteTittle } from "../components";
 
 export default function Home() {
 	return (
@@ -10,4 +11,11 @@ export default function Home() {
 			</Head>
 		</Layout>
 	);
+}
+
+export async function getServerSideProps(context) {
+	const session = await getSession(context);
+
+	console.log(session);
+	return { props: {} };
 }

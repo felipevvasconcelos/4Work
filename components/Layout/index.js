@@ -19,7 +19,7 @@ import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
 import { signIn, signOut, useSession } from "next-auth/client";
 import { useRouter } from "next/router";
-import { AccessAlarm, AddAlarm, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Notifications, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
+import { AccessAlarm, AddAlarm, AlarmOff, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Notifications, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 
 import { dataDrawer } from "./data";
@@ -160,6 +160,7 @@ export default function Layout(props) {
 	const [openCollapseListConfig, setOpenCollapseLisConfig] = React.useState(false);
 	const [loadingComponent, setLoadingComponent] = React.useState(false);
 	const [appoitmentDialog, setAppoitmentDialog] = React.useState(false);
+	const [appoitmentDialogVisible, setAppoitmentDialogVisible] = React.useState(false);
 	const [notifications, setNotifications] = React.useState(false);
 
 	const handleLoading = (e) => {
@@ -394,11 +395,21 @@ export default function Layout(props) {
 										</Badge>
 									</IconButton>
 								</Tooltip>
-								<Tooltip title={"Iniciar Apontamento"}>
-									<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
-										<AddAlarm />
-									</IconButton>
-								</Tooltip>
+
+								{appoitmentDialogVisible ? (
+									<Tooltip title={"Iniciar Apontamento"}>
+										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+											<AddAlarm />
+										</IconButton>
+									</Tooltip>
+								) : (
+									<Tooltip title={"Pausar Apontamento"}>
+										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+											<AlarmOff />
+										</IconButton>
+									</Tooltip>
+								)}
+
 								<IconButton onClick={handleDrawerTasksToggle} style={{ color: "white" }}>
 									<AccountCircle />
 								</IconButton>
@@ -411,11 +422,21 @@ export default function Layout(props) {
 										</Badge>
 									</IconButton>
 								</Tooltip>
-								<Tooltip title={"Iniciar Apontamento"}>
-									<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
-										<AddAlarm />
-									</IconButton>
-								</Tooltip>
+
+								{appoitmentDialogVisible ? (
+									<Tooltip title={"Iniciar Apontamento"}>
+										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+											<AddAlarm />
+										</IconButton>
+									</Tooltip>
+								) : (
+									<Tooltip title={"Pausar Apontamento"}>
+										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+											<AlarmOff />
+										</IconButton>
+									</Tooltip>
+								)}
+
 								<IconButton onClick={handleDrawerTasksMobileToggle} style={{ color: "white" }}>
 									<AccountCircle />
 								</IconButton>

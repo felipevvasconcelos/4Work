@@ -6,19 +6,17 @@ import { chartPallete } from "../../styles/pallete";
 
 //COMPONENTES
 import { CardPanel, Layout, Loading, siteTittle, AppointmentCompleteDialog } from "../../components";
-import { Grid, IconButton, makeStyles, Tooltip, RadioGroup, Radio, MenuItem, Select, InputLabel, FormControl, Link, FormControlLabel, TextField } from "@material-ui/core";
+import { Grid, IconButton, makeStyles, Tooltip, RadioGroup, Radio, MenuItem, Select, InputLabel, FormControl, FormControlLabel, TextField } from "@material-ui/core";
 
 //ICONES
-import QueueIcon from "@material-ui/icons/Queue";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExport } from "@fortawesome/free-solid-svg-icons";
 
 //DEVEXPRESS
-import { AppointmentForm, EditingState, EditRecurrenceMenu, IntegratedEditing, ViewState } from "@devexpress/dx-react-scheduler";
+import { EditingState, IntegratedEditing, ViewState } from "@devexpress/dx-react-scheduler";
 import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator } from "@devexpress/dx-react-scheduler-material-ui";
 import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend, Tooltip as TooltipChart } from "@devexpress/dx-react-chart-material-ui";
-import { Animation, EventTracker, Palette, Stack, Title, ValueScale } from "@devexpress/dx-react-chart";
-import { Button } from "@material-ui/core";
+import { Animation, EventTracker, Palette, Stack, ValueScale } from "@devexpress/dx-react-chart";
 import { AlarmAdd } from "@material-ui/icons";
 import { useSession } from "next-auth/client";
 

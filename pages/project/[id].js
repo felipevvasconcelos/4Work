@@ -9,9 +9,10 @@ import { ProjectClass, CompanyClass, StatusClass, UserClass } from "../../classe
 import { CardPanel, Layout, Loading, siteTittle, TextFieldMask } from "../../components";
 import { useSession } from "next-auth/client";
 import moment from "moment";
-import dayjs from 'dayjs';
-import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
-import { PermissionViewContext } from '../../Context/PermissionViewContext';
+import dayjs from "dayjs";
+import { AtuhenticationContext } from "../../Context/AuthenticationContextAPI";
+import { PermissionViewContext } from "../../Context/PermissionViewContext";
+import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
 const steps = ["Dados Gerais", "Estrutura", "Recursos", "Confirmação"];
 
@@ -100,32 +101,32 @@ export default function ProjectById({ data, companies, statusList, users }) {
 	const { filterPermissionByScreen } = useContext(PermissionViewContext);
 	const { permission } = useContext(AtuhenticationContext);
 
-	useEffect(() =>{
+	useEffect(() => {
 		const permissionsScren = filterPermissionByScreen("60bc3091f582fe96a40b729a");
-		if(!Authentication(permissionsScren, permission?.name)){
-			return router.push('/');
+		if (!Authentication(permissionsScren, permission?.name)) {
+			return router.push("/");
 		}
-	},[]);
+	}, []);
 
-	useEffect(() =>{
-		if(data.includeUsers.length !== 0){
+	useEffect(() => {
+		if (data.includeUsers.length !== 0) {
 			let AvailableUsers = stateAllUsers;
 			let IncludeUsersArray = [];
 			stateAllUsers.map((User, index) => {
-				data.includeUsers.map(UserFilter => {
-					if(User._id === UserFilter.user){
+				data.includeUsers.map((UserFilter) => {
+					if (User._id === UserFilter.user) {
 						User.hours = UserFilter.hours;
 						User.sumPricebyHours = User.priceHour * (User.hours / 100);
 						console.log(User);
 						IncludeUsersArray.push(User);
 						AvailableUsers.splice(index, 1);
 					}
-				})
-			})
+				});
+			});
 			setStateAllUsers(AvailableUsers);
 			setStateIncludeUsers(IncludeUsersArray);
 		}
-	},[users])
+	}, [users]);
 
 	const handleOnDragEnd = ({ source, destination }) => {
 		if (destination === undefined || destination === null) return null;
@@ -209,23 +210,22 @@ export default function ProjectById({ data, companies, statusList, users }) {
 		if (!myForm.current.checkValidity()) {
 			enqueueSnackbar("Preencha todos os campos obrigatórios nesta etapa", { variant: "error" });
 			return;
-		}
-		else {
-			if(!stateProject._id){
+		} else {
+			if (!stateProject._id) {
 				console.log(stateProject.dateCreate);
 				console.log(stateProject);
 				console.log(dayjs() < dayjs());
-				if(dayjs(stateProject.dateStart) < dayjs()){
+				if (dayjs(stateProject.dateStart) < dayjs()) {
 					enqueueSnackbar("A data de inico deve ser maior que a atual", { variant: "error" });
 					return;
 				}
-				if(dayjs(stateProject.dateEnd) < dayjs(stateProject.dateStart)){
+				if (dayjs(stateProject.dateEnd) < dayjs(stateProject.dateStart)) {
 					enqueueSnackbar("A data final deve ser maior ou igual a de inicio", { variant: "error" });
 					return;
 				}
 			}
 		}
-		
+
 		setActiveStep((prevActiveStep) => prevActiveStep + 1);
 	};
 	const handleBack = () => {
@@ -245,8 +245,8 @@ export default function ProjectById({ data, companies, statusList, users }) {
 			arrayIncludes.push({
 				user: u._id,
 				hours: u.hours,
-			})
-		})
+			});
+		});
 		project.includeUsers = arrayIncludes;
 
 		try {
@@ -328,20 +328,7 @@ export default function ProjectById({ data, companies, statusList, users }) {
 						</Typography>
 						<Grid container spacing={1} direction="row" alignItems="flex-end" xs={12}>
 							<Grid item xs={12} md={6} lg={4} direction="row">
-								<TextField 
-									required 
-									type="date" 
-									required 
-									id="dateStart" 
-									name="dateStart" 
-									margin="normal" 
-									onChange={handleChangeProject} 
-									value={moment(new Date(stateProject.dateStart)).format("YYYY-MM-DD")} 
-									fullWidth 
-									label="Data Início" 
-
-									InputLabelProps={{ shrink: true }} 
-								/>
+								<TextField required type="date" required id="dateStart" name="dateStart" margin="normal" onChange={handleChangeProject} value={moment(new Date(stateProject.dateStart)).format("YYYY-MM-DD")} fullWidth label="Data Início" InputLabelProps={{ shrink: true }} />
 							</Grid>
 							<Grid item xs={12} md={6} lg={4} direction="row">
 								<TextField required type="date" required id="dateEnd" name="dateEnd" margin="normal" onChange={handleChangeProject} value={moment(new Date(stateProject.dateEnd)).format("YYYY-MM-DD")} fullWidth label="Data Fim" InputLabelProps={{ shrink: true }} />
