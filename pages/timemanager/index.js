@@ -41,57 +41,56 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
+const filterObjectsChart = (arrayObjects, filter) => {
+	let newArray = [];
+
+	arrayObjects.map((value) => {
+		let newObject = {};
+
+		for (var prop in value) {
+			if (!(filter.includes(prop) || prop == "xTarget")) {
+				newObject = Object.assign(newObject, { [prop]: 0 });
+			} else {
+				newObject = Object.assign(newObject, { [prop]: value[prop] });
+			}
+		}
+
+		newArray.push(newObject);
+	});
+
+	return newArray;
+};
+
 const chartDataType = [
 	{
-		month: "Janeiro",
-		melhoria1: 30,
-		melhoria2: 40,
-		projeto1: 30,
-		chamado1: 10,
-		projeto2: 60,
-		projeto3: 10,
-		total: 156,
+		xTarget: "Janeiro",
+		["4 - Projeto1"]: 30,
+		["5 - Projeto2"]: 40,
 	},
 	{
-		month: "Fevereiro",
-		melhoria1: 30,
-		melhoria2: 40,
-		projeto1: 30,
-		chamado1: 10,
-		total: 176,
+		xTarget: "Fevereiro",
+		["4 - Projeto1"]: 30,
+		["5 - Projeto2"]: 40,
 	},
 	{
-		month: "Março",
-		melhoria1: 30,
-		melhoria2: 40,
-		chamado1: 10,
-		projeto2: 60,
-		projeto3: 10,
-		total: 168,
+		xTarget: "Março",
+		["4 - Projeto1"]: 30,
+		["5 - Projeto2"]: 40,
 	},
 	{
-		month: "Abril",
-		melhoria1: 30,
-		melhoria2: 40,
-		projeto1: 30,
-		chamado1: 10,
-		projeto2: 60,
-		total: 176,
+		xTarget: "Abril",
+		["4 - Projeto1"]: 30,
+		["5 - Projeto2"]: 40,
 	},
 	{
-		month: "Maio",
-		melhoria1: 30,
-		projeto1: 30,
-		chamado1: 10,
-		projeto2: 60,
-		projeto3: 10,
-		total: 168,
+		xTarget: "Maio",
+		["4 - Projeto1"]: 30,
+		["5 - Projeto2"]: 40,
 	},
 	{
-		month: "Junho",
-		melhoria1: 30,
-		melhoria2: 40,
-		total: 176,
+		xTarget: "Junho",
+		["4 - Projeto1"]: 30,
+		["5 - Projeto2"]: 40,
 	},
 ];
 
@@ -163,25 +162,36 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 	const [selectType, setSelectType] = useState([]);
 	const [selectUser, setSelectUser] = useState([]);
 
+	const handleChangeDate = (e) => {
+		//buscar dados somente quando ouver alteração de dados
+	};
+
 	const handleSelect = (e) => {
 		var selecteds = e.target.value;
 
 		switch (e.target.name) {
 			case "selectType":
-				//if((e.target.value).filter((object) => object.))
-				if (e.target.value.includes("Todos")) {
-					setDataChartType(baseChartType);
+				if (selecteds.includes("Todos")) {
+					setDataChartType(baseDataChartType);
 				} else {
+					setDataChartType(filterObjectsChart(baseDataChartType, selecteds));
+				}
+				break;
+
+			case "selectUser":
+				if (selecteds.includes("Todos")) {
+					setDataChartUser(baseDataChartUser);
+				} else {
+					setDataChartUser(filterObjectsChart(baseDataChartUser, selecteds));
 				}
 
-				setSelectType(e.target.value);
 				break;
-			case "selectUser":
-				setSelectUser(e.target.value);
-				break;
+
 			default:
 				break;
 		}
+
+		setSelectType(selecteds);
 	};
 
 	return (
@@ -248,8 +258,8 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 														Todos
 													</MenuItem>
 													{projects?.map((project) => (
-														<MenuItem id={project._id} key={project.name} value={project.name}>
-															{project.name}
+														<MenuItem id={project._id} key={project._id} value={`${project.projectNumber} - ${project.name}`}>
+															{`${project.projectNumber} - ${project.name}`}
 														</MenuItem>
 													))}
 												</Select>
@@ -269,19 +279,16 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 						<Grid item xs={12}>
 							<Chart data={dataChartType}>
 								<Palette scheme={chartPallete} />
-								<ValueScale name="month" />
+								<ValueScale name="xTarget" />
 
 								<ArgumentAxis />
-								<ValueAxis scaleName="month" />
+								<ValueAxis scaleName="xTarget" />
 
-								<BarSeries name="Melhoria 1" valueField="melhoria1" argumentField="month" scaleName="month" />
-								<BarSeries name="Melhoria 2" valueField="melhoria2" argumentField="month" scaleName="month" />
-								<BarSeries name="Projeto 1" valueField="projeto1" argumentField="month" scaleName="month" />
-								<BarSeries name="Chamado 1" valueField="chamado1" argumentField="month" scaleName="month" />
-								<BarSeries name="Projeto 2" valueField="projeto2" argumentField="month" scaleName="month" />
-								<BarSeries name="Projeto 3" valueField="projeto3" argumentField="month" scaleName="month" />
+								{projects?.map((project) => (
+									<BarSeries name={`${project.projectNumber} - ${project.name}`} valueField={`${project.projectNumber} - ${project.name}`} argumentField="xTarget" scaleName="xTarget" />
+								))}
 
-								<Stack stacks={[{ series: ["Melhoria 1", "Melhoria 2", "Projeto 1", "Chamado 1", "Projeto 2", "Projeto 3"] }]} />
+								<Stack stacks={[{ series: projects.map((value) => `${value.projectNumber} - ${value.name}`) }]} />
 
 								<EventTracker />
 								<TooltipChart />
@@ -399,8 +406,8 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 
 export async function getServerSideProps(context) {
 	// const date = Date.now();
-	const projects = await new ProjectClass().getByFilter({}, "name");
-	const users = await new UserClass().getByFilter({}, "name");
+	const projects = await new ProjectClass().getByFilter({});
+	const users = await new UserClass().getByFilter({});
 
 	return { props: { projects, users } };
 }

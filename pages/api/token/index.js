@@ -17,7 +17,7 @@ handler.post(async (req, res) => {
 		const user = await _UserClass.getByFilter({ email: email, password: md5(password + hash) });
 
 		if (user) {
-			var token = await jwt.auth(user, secret);
+			var token = await jwt.auth(user[0], secret);
 			res.status(200).send({ auth: true, token: token });
 		} else {
 			res.status(401).end();

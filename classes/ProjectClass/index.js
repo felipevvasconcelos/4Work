@@ -16,11 +16,11 @@ export default class ProjectClass {
 		return jsonify(await Project.findById(id));
 	}
 
-	async getByFilter(data) {
+	async getByFilter(filter) {
 		await dbConnect();
 
-		if (data) {
-			return jsonify(await Project.find(data).populate("company", "name").populate("user", "name").populate("status", "name"));
+		if (filter) {
+			return jsonify(await Project.find(filter).populate("company", "name").populate("user", "name").populate("status", "name"));
 		} else {
 			return jsonify(await Project.find().populate("company", "name").populate("user", "name").populate("status", "name"));
 		}

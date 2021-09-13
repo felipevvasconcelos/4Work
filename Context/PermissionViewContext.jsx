@@ -6,15 +6,11 @@ export function PermissionViewContextProvider({children}){
 
   const [permissionsView, setPermissionsView] = useState([]);
 
-  useEffect(() =>{
-    console.log(permissionsView);
-  },[permissionsView])
-
   function filterPermissionByScreen(view){
     var Permissions = [];
     const ObjectsView = permissionsView.filter((screen) => screen.view._id == view);
     ObjectsView.map((Objects) => {
-      Permissions.push(Objects.profile.name)
+      Permissions.push(Objects.profile._id)
     })
 
     return Permissions;
