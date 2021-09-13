@@ -28,7 +28,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 	const { enqueueSnackbar } = useSnackbar();
 
 	const [collpase, setCollpase] = useState(false);
-	const [appointmentState, setAppointmentState] = useState(appointment);
+	const [appointmentState, setAppointmentState] = useState({...appointment, user: session.user._id});
 
 	const [selectsData, setSelectsData] = useState([]);
 	const appointmentForm = useRef(null);
@@ -145,8 +145,8 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 			if(res.status == 200){
 				enqueueSnackbar("Horas cadastradas!", { variant: "success" });
 			}
-			method !== "save" && handleCancel();
-			handleClearFields();
+			// method !== "save" && handleCancel();
+			// handleClearFields();
 		} catch (e) {
 			enqueueSnackbar(e, { variant: "error" });
 		}

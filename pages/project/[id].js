@@ -102,11 +102,13 @@ export default function ProjectById({ data, companies, statusList, users }) {
 	const { permission } = useContext(AtuhenticationContext);
 
 	useEffect(() =>{
-		const permissionsScren = filterPermissionByScreen("60bc3091f582fe96a40b729a");
-		if(!Authentication(permissionsScren, permission?.name)){
-			return router.push('/');
+		if(permission?.name){
+			const permissionsScren = filterPermissionByScreen("60bc3091f582fe96a40b729a");
+			if(!Authentication(permissionsScren, permission?.name)){
+				return router.push('/');
+			}
 		}
-	},[]);
+	},[permission]);
 
 	useEffect(() =>{
 		if(data.includeUsers.length !== 0){
@@ -337,7 +339,7 @@ export default function ProjectById({ data, companies, statusList, users }) {
 									name="dateStart" 
 									margin="normal" 
 									onChange={handleChangeProject} 
-									value={moment(new Date(stateProject.dateStart)).format("YYYY-MM-DD")} 
+									value={stateProject.dateStart}
 									fullWidth 
 									label="Data Início" 
 
@@ -345,7 +347,7 @@ export default function ProjectById({ data, companies, statusList, users }) {
 								/>
 							</Grid>
 							<Grid item xs={12} md={6} lg={4} direction="row">
-								<TextField required type="date" required id="dateEnd" name="dateEnd" margin="normal" onChange={handleChangeProject} value={moment(new Date(stateProject.dateEnd)).format("YYYY-MM-DD")} fullWidth label="Data Fim" InputLabelProps={{ shrink: true }} />
+								<TextField required type="date" required id="dateEnd" name="dateEnd" margin="normal" onChange={handleChangeProject} value={stateProject.dateEnd} fullWidth label="Data Fim" InputLabelProps={{ shrink: true }} />
 							</Grid>
 						</Grid>
 						<Typography variant="h6" className={classes.typography}>
