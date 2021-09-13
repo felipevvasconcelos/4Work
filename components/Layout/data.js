@@ -22,7 +22,7 @@ export const dataDrawer = [
     handleLoading: "/project",
     primary: "Projetos",
     icon: <BusinessCenter />,
-    permissions: ['Gerente Projetos']
+    permissions: ['61156d728bd9c60008e0f4cc']
   },
   {
     type: "IconLink",
@@ -93,13 +93,13 @@ export const dataDrawer = [
     handleLoading: "/company",
     primary: "Empresas",
     icon: <LocationCityIcon />,
-    permissions: ['Gerente Projetos']
+    permissions: ['61156d728bd9c60008e0f4cc']
   },
   {
     type: "Acordian",
     primary: "Configurações",
     icon: <Settings />,
-    permissions: ['Administrador']
+    permissions: ['60bc30dbf582fe96a40b72a2']
   }
 ];
 

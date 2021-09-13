@@ -331,7 +331,7 @@ export default function ProjectById({ data, companies, statusList, users }) {
 								<TextField required type="date" required id="dateStart" name="dateStart" margin="normal" onChange={handleChangeProject} value={moment(new Date(stateProject.dateStart)).format("YYYY-MM-DD")} fullWidth label="Data Início" InputLabelProps={{ shrink: true }} />
 							</Grid>
 							<Grid item xs={12} md={6} lg={4} direction="row">
-								<TextField required type="date" required id="dateEnd" name="dateEnd" margin="normal" onChange={handleChangeProject} value={moment(new Date(stateProject.dateEnd)).format("YYYY-MM-DD")} fullWidth label="Data Fim" InputLabelProps={{ shrink: true }} />
+								<TextField required type="date" required id="dateEnd" name="dateEnd" margin="normal" onChange={handleChangeProject} value={stateProject.dateEnd} fullWidth label="Data Fim" InputLabelProps={{ shrink: true }} />
 							</Grid>
 						</Grid>
 						<Typography variant="h6" className={classes.typography}>

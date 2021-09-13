@@ -111,11 +111,13 @@ export default function Project({ data }) {
 	const router = useRouter();
 
 	useEffect(() =>{
-		const permissionsScren = filterPermissionByScreen("60bc3091f582fe96a40b729a");
-		if(!Authentication(permissionsScren, permission?.name)){
-			return router.push('/');
+		if(permission?.name){
+			const permissionsScren = filterPermissionByScreen("60bc3091f582fe96a40b729a");
+			if(!Authentication(permissionsScren, permission?.name)){
+				return router.push('/');
+			}
 		}
-	},[])
+	},[permission]);
 
 	return (
 		<Layout>

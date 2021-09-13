@@ -81,11 +81,13 @@ export default function UserById({ data, profiles, companies, positions }) {
 	const { permission } = useContext(AtuhenticationContext);
 
 	useEffect(() => {
-		const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
-		if (!Authentication(permissionsScren, permission?.name)) {
-			return route.push("/");
+		if(permission?.name){
+			const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
+			if (!Authentication(permissionsScren, permission?.name)) {
+				return route.push("/");
+			}
 		}
-	}, []);
+	}, [permission]);
 
 	const handleClickCollapseImage = () => {
 		setOpenCollapseImage(!openCollapseImage);

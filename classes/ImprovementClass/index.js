@@ -7,17 +7,23 @@ export default class ImprovementClass {
 
 	async getAll() {
 		await dbConnect();
-		return jsonify(await Improvement.find().populate("user", "name").populate("project", "name").populate("status", "name"));
+		return jsonify(await Improvement.find().populate("userCreate", "name").populate("project", "name").populate("status", "name"));
 	}
 
 	async get(id) {
 		await dbConnect();
-		return jsonify(await Improvement.findById(id).populate("user", "name").populate("project", "name").populate("status", "name"));
+		return jsonify(await Improvement.findById(id)
+		.populate("userCreate", "name")
+		.populate("project", "name")
+		.populate("status", "name")
+		.populate("userCreate", "logo")
+		.populate("userCreate", "priceHour")
+		);
 	}
 
 	async add(data) {
 		await dbConnect();
-		return jsonify(await new Improvement(data).save().then((improvement) => improvement.populate("user", "name").populate("project", "name").populate("status", "name").execPopulate()));
+		return jsonify(await new Improvement(data).save().then((improvement) => improvement.populate("userCreate", "name").populate("project", "name").populate("status", "name").execPopulate()));
 	}
 
 	async getByFilter(filter, fields) {
@@ -25,7 +31,7 @@ export default class ImprovementClass {
 		return jsonify(
 			await Improvement.find(filter)
 				.select(fields && fields)
-				.populate("user", "name")
+				.populate("userCreate", "name")
 				.populate("project", "name")
 				.populate("status", "name")
 		);
@@ -42,7 +48,7 @@ export default class ImprovementClass {
 					dateStart: data.dateStart,
 					dateEnd: data.dateEnd,
 					dateModified: data.dateModified,
-					userModified: date.userModified,
+					userModified: data.userModified,
 					users: data.users,
 					project: data.project,
 					status: data.status,
