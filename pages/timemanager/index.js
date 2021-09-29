@@ -1,17 +1,11 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import { useSnackbar } from "notistack";
-import { CardPanel, CustomDataTable, Layout, Loading, siteTittle } from "../../components";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExport } from "@fortawesome/free-solid-svg-icons";
-
-import { FormControl, InputLabel, Grid, IconButton, makeStyles, Select, MenuItem, TextField, Tooltip, Chip } from "@material-ui/core";
-import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend, Tooltip as TooltipChart } from "@devexpress/dx-react-chart-material-ui";
-import { Animation, EventTracker, Palette, Stack, Title, ValueScale } from "@devexpress/dx-react-chart";
-import { chartPallete } from "../../styles/pallete";
+import { CardPanel, Layout, Loading, siteTittle, BtnExportExcel, CustomChartType, CustomChartUser, filterObjectsChart, convertToAppointmentUser } from "../../components";
+import { FormControl, InputLabel, Grid, makeStyles, Select, MenuItem, TextField, Chip } from "@material-ui/core";
 import { Input } from "@material-ui/core";
-import { ProjectClass, UserClass } from "../../classes";
+import { TimeSheetClass, UserClass } from "../../classes";
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -41,129 +35,82 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const filterObjectsChart = (arrayObjects, filter) => {
-	let newArray = [];
-
-	arrayObjects.map((value) => {
-		let newObject = {};
-
-		for (var prop in value) {
-			if (!(filter.includes(prop) || prop == "xTarget")) {
-				newObject = Object.assign(newObject, { [prop]: 0 });
-			} else {
-				newObject = Object.assign(newObject, { [prop]: value[prop] });
-			}
-		}
-
-		newArray.push(newObject);
-	});
-
-	return newArray;
-};
-
-const chartDataType = [
-	{
-		xTarget: "Janeiro",
-		["4 - Projeto1"]: 30,
-		["5 - Projeto2"]: 40,
-	},
-	{
-		xTarget: "Fevereiro",
-		["4 - Projeto1"]: 30,
-		["5 - Projeto2"]: 40,
-	},
-	{
-		xTarget: "Março",
-		["4 - Projeto1"]: 30,
-		["5 - Projeto2"]: 40,
-	},
-	{
-		xTarget: "Abril",
-		["4 - Projeto1"]: 30,
-		["5 - Projeto2"]: 40,
-	},
-	{
-		xTarget: "Maio",
-		["4 - Projeto1"]: 30,
-		["5 - Projeto2"]: 40,
-	},
-	{
-		xTarget: "Junho",
-		["4 - Projeto1"]: 30,
-		["5 - Projeto2"]: 40,
-	},
-];
-
-const chartDataUser = [
-	{
-		user: "Felipe",
-		melhoria1: 30,
-		melhoria2: 40,
-		projeto1: 30,
-		chamado1: 10,
-		projeto2: 60,
-		projeto3: 10,
-		total: 156,
-	},
-	{
-		user: "Vinicius",
-		melhoria1: 30,
-		melhoria2: 40,
-		projeto1: 30,
-		chamado1: 10,
-		total: 176,
-	},
-	{
-		user: "Tiago",
-		melhoria1: 30,
-		melhoria2: 40,
-		chamado1: 10,
-		projeto2: 60,
-		projeto3: 10,
-		total: 168,
-	},
-	{
-		user: "Nathan",
-		melhoria1: 30,
-		melhoria2: 40,
-		projeto1: 30,
-		chamado1: 10,
-		projeto2: 60,
-		total: 176,
-	},
-	{
-		user: "Rafael",
-		melhoria1: 30,
-		projeto1: 30,
-		chamado1: 10,
-		projeto2: 60,
-		projeto3: 10,
-		total: 168,
-	},
-	{
-		user: "Paulo",
-		melhoria1: 30,
-		melhoria2: 40,
-		total: 176,
-	},
-];
-
-export default function Timemanager({ users, projects, handleConfirmDialogOpen, handleConfirmDialogClose }) {
+export default function Timemanager({ users, appointmentsData, appointmentObjects, dtEnd, dtStart }) {
 	const { enqueueSnackbar } = useSnackbar();
 	const classes = useStyles();
 	const [loading, setLoading] = useState(false);
-
-	const [baseDataChartType, setBaseDataChartType] = useState(chartDataType);
-	const [baseDataChartUser, setBaseDataChartUser] = useState(chartDataUser);
-
-	const [dataChartType, setDataChartType] = useState(chartDataType);
-	const [dataChartUser, setDataChartUser] = useState(chartDataUser);
-
 	const [selectType, setSelectType] = useState([]);
 	const [selectUser, setSelectUser] = useState([]);
 
-	const handleChangeDate = (e) => {
-		//buscar dados somente quando ouver alteração de dados
+	const [dataChartType, setDataChartType] = useState(appointmentsData);
+	const [dataChartUser, setDataChartUser] = useState(appointmentsData);
+	const [baseDataChartType, setBaseDataChartType] = useState(appointmentsData);
+	const [baseDataChartUser, setBaseDataChartUser] = useState(appointmentsData);
+
+	const [baseAppointmentObjects, setBaseAppointmentObjects] = useState(appointmentObjects);
+
+	const [datesType, setDatesTypes] = useState({ dtStartType: dtStart, dtEndType: dtEnd });
+	const [datesUser, setDatesUser] = useState({ dtStartUser: dtStart, dtEndUser: dtEnd });
+
+	const handleChangeDate = async (e) => {
+		if (e.target.name.includes("Type")) {
+			setDatesTypes({ ...datesType, [e.target.name]: e.target.value });
+		} else {
+			setDatesUser({ ...datesUser, [e.target.name]: e.target.value });
+		}
+	};
+
+	const handleBlurDate = async (e) => {
+		try {
+			if (e.target.name.includes("Type")) {
+				var res = await fetch(`/api/timesheet/appointments/filter`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ timeStart: { $gte: datesType.dtStartType }, timeEnd: { $lte: datesType.dtEndType } }),
+				});
+
+				if (res.status !== 200) throw "Erro ao buscar os apontamentos!";
+
+				const { appointments, appointmentsObjects } = await res.json();
+
+				var newObjects = baseAppointmentObjects;
+
+				appointmentsObjects.map((value) => !newObjects.filter((valueFilter) => valueFilter._id == value._id) && newObjects.push(value));
+				setBaseAppointmentObjects(newObjects);
+
+				if (Array.from(appointments).length > 0) {
+					setBaseDataChartType(appointments);
+					setDataChartType(appointments);
+				} else {
+					setBaseDataChartType([]);
+					setDataChartType([]);
+				}
+			} else {
+				var res = await fetch(`/api/timesheet/appointments/filter`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ timeStart: { $gte: datesUser.dtStartUser }, timeEnd: { $lte: datesUser.dtEndUser } }),
+				});
+
+				if (res.status !== 200) throw "Erro ao buscar os apontamentos!";
+
+				const { appointments, appointmentsObjects } = await res.json();
+
+				appointmentsObjects.map((value) => !newObjects.filter((valueFilter) => valueFilter._id == value._id) && newObjects.push(value));
+				setBaseAppointmentObjects(newObjects);
+
+				if (Array.from(appointments).length > 0) {
+					setBaseDataChartUser(appointments);
+					setDataChartUser(appointments);
+				} else {
+					setBaseDataChartUser([]);
+					setDataChartUser([]);
+				}
+			}
+		} catch (e) {
+			enqueueSnackbar("Erro ao buscar os apontamentos", { variant: "error" });
+			console.log(e);
+		}
 	};
 
 	const handleSelect = (e) => {
@@ -171,27 +118,27 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 
 		switch (e.target.name) {
 			case "selectType":
-				if (selecteds.includes("Todos")) {
+				if (selecteds.includes("Todos") || selecteds.length == 0) {
 					setDataChartType(baseDataChartType);
 				} else {
-					setDataChartType(filterObjectsChart(baseDataChartType, selecteds));
+					setDataChartType(filterObjectsChart(baseDataChartType, selecteds, "byType"));
 				}
+
+				setSelectType(selecteds);
 				break;
 
 			case "selectUser":
-				if (selecteds.includes("Todos")) {
+				if (selecteds.includes("Todos") || selecteds.length == 0) {
 					setDataChartUser(baseDataChartUser);
 				} else {
 					setDataChartUser(filterObjectsChart(baseDataChartUser, selecteds));
 				}
-
+				setSelectUser(selecteds);
 				break;
 
 			default:
 				break;
 		}
-
-		setSelectType(selecteds);
 	};
 
 	return (
@@ -209,26 +156,30 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 									<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
 										<Grid item xs={12} md={6}>
 											<TextField
-												id="timeStart"
-												name="timeStart"
+												name="dtStartType"
 												type="date"
 												fullWidth
 												label="Início"
 												InputLabelProps={{
 													shrink: true,
 												}}
+												value={datesType.dtStartType}
+												onChange={handleChangeDate}
+												onBlur={handleBlurDate}
 											></TextField>
 										</Grid>
 										<Grid item xs={12} md={6}>
 											<TextField
-												id="timeStart"
-												name="timeStart"
+												name="dtEndType"
 												type="date"
 												fullWidth
 												label="Fim"
 												InputLabelProps={{
 													shrink: true,
 												}}
+												value={datesType.dtEndType}
+												onChange={handleChangeDate}
+												onBlur={handleBlurDate}
 											></TextField>
 										</Grid>
 									</Grid>
@@ -257,44 +208,23 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 													<MenuItem id="todos" key="todos" value="Todos">
 														Todos
 													</MenuItem>
-													{projects?.map((project) => (
-														<MenuItem id={project._id} key={project._id} value={`${project.projectNumber} - ${project.name}`}>
-															{`${project.projectNumber} - ${project.name}`}
+													{baseAppointmentObjects?.map((value) => (
+														<MenuItem id={value._id} key={value._id} value={`${value.number} - ${value.name}`}>
+															{`${value.number} - ${value.name}`}
 														</MenuItem>
 													))}
 												</Select>
 											</FormControl>
 										</Grid>
 										<Grid item xs={1}>
-											<Tooltip title={"Exportar Relatório"}>
-												<IconButton style={{ color: "grey" }}>
-													<FontAwesomeIcon icon={faFileExport} />
-												</IconButton>
-											</Tooltip>
+											<BtnExportExcel apiData={dataChartType} fileName={`HorasPorTipo_${new Date().toISOString()}`} />
 										</Grid>
 									</Grid>
 								</Grid>
 							</Grid>
 						</Grid>
 						<Grid item xs={12}>
-							<Chart data={dataChartType}>
-								<Palette scheme={chartPallete} />
-								<ValueScale name="xTarget" />
-
-								<ArgumentAxis />
-								<ValueAxis scaleName="xTarget" />
-
-								{projects?.map((project) => (
-									<BarSeries name={`${project.projectNumber} - ${project.name}`} valueField={`${project.projectNumber} - ${project.name}`} argumentField="xTarget" scaleName="xTarget" />
-								))}
-
-								<Stack stacks={[{ series: projects.map((value) => `${value.projectNumber} - ${value.name}`) }]} />
-
-								<EventTracker />
-								<TooltipChart />
-								<Animation />
-								<Legend />
-							</Chart>
+							<CustomChartType dataChart={dataChartType} baseAppointmentObjects={baseAppointmentObjects} />
 						</Grid>
 					</CardPanel>
 				</Grid>
@@ -306,26 +236,30 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 									<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
 										<Grid item xs={12} md={6}>
 											<TextField
-												id="timeStart"
-												name="timeStart"
+												name="dtStartUser"
 												type="date"
 												fullWidth
 												label="Início"
 												InputLabelProps={{
 													shrink: true,
 												}}
+												value={datesUser.dtStartUser}
+												onChange={handleChangeDate}
+												onBlur={handleBlurDate}
 											></TextField>
 										</Grid>
 										<Grid item xs={12} md={6}>
 											<TextField
-												id="timeStart"
-												name="timeStart"
+												name="dtEndUser"
 												type="date"
 												fullWidth
 												label="Fim"
 												InputLabelProps={{
 													shrink: true,
 												}}
+												value={datesUser.dtEndUser}
+												onChange={handleChangeDate}
+												onBlur={handleBlurDate}
 											></TextField>
 										</Grid>
 									</Grid>
@@ -355,7 +289,7 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 														Todos
 													</MenuItem>
 													{users?.map((user) => (
-														<MenuItem id={user._id} key={user.name} value={user.name}>
+														<MenuItem id={user._id} key={user._id} value={user.name}>
 															{user.name}
 														</MenuItem>
 													))}
@@ -363,11 +297,7 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 											</FormControl>
 										</Grid>
 										<Grid item xs={1}>
-											<Tooltip title={"Exportar Relatório"}>
-												<IconButton style={{ color: "grey" }}>
-													<FontAwesomeIcon icon={faFileExport} />
-												</IconButton>
-											</Tooltip>
+											<BtnExportExcel apiData={convertToAppointmentUser(dataChartUser)} fileName={`HorasPorUsuario_${new Date().toISOString()}`} />
 										</Grid>
 									</Grid>
 								</Grid>
@@ -375,27 +305,7 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 						</Grid>
 
 						<Grid item xs={12}>
-							<Chart data={dataChartUser}>
-								<Palette scheme={chartPallete} />
-								<ValueScale name="user" />
-
-								<ArgumentAxis />
-								<ValueAxis scaleName="user" />
-
-								<BarSeries name="Melhoria 1" valueField="melhoria1" argumentField="user" scaleName="user" />
-								<BarSeries name="Melhoria 2" valueField="melhoria2" argumentField="user" scaleName="user" />
-								<BarSeries name="Projeto 1" valueField="projeto1" argumentField="user" scaleName="user" />
-								<BarSeries name="Chamado 1" valueField="chamado1" argumentField="user" scaleName="user" />
-								<BarSeries name="Projeto 2" valueField="projeto2" argumentField="user" scaleName="user" />
-								<BarSeries name="Projeto 3" valueField="projeto3" argumentField="user" scaleName="user" />
-
-								<Stack stacks={[{ series: ["Melhoria 1", "Melhoria 2", "Projeto 1", "Chamado 1", "Projeto 2", "Projeto 3"] }]} />
-
-								<EventTracker />
-								<TooltipChart />
-								<Animation />
-								<Legend />
-							</Chart>
+							<CustomChartUser dataChart={dataChartUser} baseAppointmentObjects={users} />
 						</Grid>
 					</CardPanel>
 				</Grid>
@@ -405,9 +315,17 @@ export default function Timemanager({ users, projects, handleConfirmDialogOpen, 
 }
 
 export async function getServerSideProps(context) {
-	// const date = Date.now();
-	const projects = await new ProjectClass().getByFilter({});
+	var timesheetClass = new TimeSheetClass();
+	var dtStart = new Date();
+	var dtEnd = new Date();
+	dtStart.setDate(dtStart.getDate() - 20);
+
+	const appointmentsData = await timesheetClass.getAppoitments({ timeStart: { $gte: dtStart }, timeEnd: { $lte: dtEnd } });
+	const appointmentObjects = await timesheetClass.getAppoitmentObjects({ timeStart: { $gte: dtStart }, timeEnd: { $lte: dtEnd } });
 	const users = await new UserClass().getByFilter({});
 
-	return { props: { projects, users } };
+	dtStart = moment(dtStart).format("YYYY-MM-DD");
+	dtEnd = moment(dtEnd).format("YYYY-MM-DD");
+
+	return { props: { appointmentsData, appointmentObjects, users, dtEnd, dtStart } };
 }

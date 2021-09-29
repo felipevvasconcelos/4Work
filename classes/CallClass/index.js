@@ -12,7 +12,7 @@ export default class CallClass {
 
 	async get(id) {
 		await dbConnect();
-		return jsonify(await Call.findById(id).populate("userCreate", "name").populate("userModified", "name").populate("typeCall", "name"));
+		return jsonify(await Call.findById(id).populate("userCreate", "name").populate("userModified", "name").populate("typeCall", "name").populate("treatments.userCreate", "name"));
 	}
 
 	async getByFilter(filter, fields) {
@@ -45,13 +45,24 @@ export default class CallClass {
 					status: data.status,
 					project: data.project,
 					deadline: data.deadline,
-					user: data.user
+					user: data.user,
 				},
 			})
 				.populate("user", "name")
 				.populate("project", "name")
 				.populate("status", "name")
 				.populate("typeCall", "name")
+		);
+	}
+
+	async updateTreatments(id, data) {
+		await dbConnect();
+		return jsonify(
+			await Call.findByIdAndUpdate(id, {
+				$set: {
+					treatments: data,
+				},
+			})
 		);
 	}
 
