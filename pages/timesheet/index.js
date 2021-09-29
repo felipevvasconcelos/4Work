@@ -1,14 +1,13 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
 import Head from "next/head";
 import { useSnackbar } from "notistack";
-import { StatusClass } from "../../classes";
+import { StatusClass, TimeSheetClass } from "../../classes";
 import { chartPallete } from "../../styles/pallete";
-
-import { getSession } from 'next-auth/client'
+import { getSession } from "next-auth/client";
 
 //COMPONENTES
-import { CardPanel, Layout, Loading, siteTittle, AppointmentCompleteDialog } from "../../components";
-import { Grid, IconButton, makeStyles, Tooltip, RadioGroup, Radio, MenuItem, Select, InputLabel, FormControl, FormControlLabel, TextField } from "@material-ui/core";
+import { CardPanel, Layout, Loading, siteTittle, AppointmentCompleteDialog, CustomChartType, filterObjectsChart, BtnExportExcel, convertToAppointmentType } from "../../components";
+import { Grid, IconButton, makeStyles, Tooltip, RadioGroup, Radio, MenuItem, Select, InputLabel, FormControl, FormControlLabel, TextField, Chip, Input } from "@material-ui/core";
 
 //ICONES
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,13 +15,10 @@ import { faFileExport } from "@fortawesome/free-solid-svg-icons";
 
 //DEVEXPRESS
 import { EditingState, IntegratedEditing, ViewState } from "@devexpress/dx-react-scheduler";
-import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator } from "@devexpress/dx-react-scheduler-material-ui";
-import { Chart, ArgumentAxis, ValueAxis, BarSeries, LineSeries, Legend, Tooltip as TooltipChart } from "@devexpress/dx-react-chart-material-ui";
-import { Animation, EventTracker, Palette, Stack, ValueScale } from "@devexpress/dx-react-chart";
+import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator, AppointmentForm } from "@devexpress/dx-react-scheduler-material-ui";
 import { AlarmAdd } from "@material-ui/icons";
 import { useSession } from "next-auth/client";
-import { TimesheetContextProvider } from '../../Context/TImesheetContext';
-import TimesheetClass from '../../classes/TimeSheetClass';
+import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -116,47 +112,87 @@ const appointmentComponent = ({ children, style, ...restProps }) => (
 	</Appointments.Appointment>
 );
 
-export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirmDialogClose, GridTimesheet }) {
+export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirmDialogClose, GridTimesheet, appointmentsData, appointmentObjects, dtEnd, dtStart }) {
 	const { enqueueSnackbar } = useSnackbar();
 	const classes = useStyles();
 	const [session] = useSession();
 	const [loading, setLoading] = useState(false);
 	const [viewName, setViewName] = useState("Month");
-	const [radioChart, setRadioChart] = useState("month");
 	const [appoitmentDialog, setAppoitmentDialog] = React.useState(false);
 	const [schedulerData, setSchedulerData] = useState([]);
-	const [state, setState] = useState();
-	const timesheetForm = useRef(null);
 
-	useEffect(() =>{
+	const [selectType, setSelectType] = useState([]);
+	const [datesType, setDatesTypes] = useState({ dtStartType: dtStart, dtEndType: dtEnd });
+	const [dataChartType, setDataChartType] = useState(appointmentsData);
+	const [baseDataChartType, setBaseDataChartType] = useState(appointmentsData);
+	const [baseAppointmentObjects, setBaseAppointmentObjects] = useState(appointmentObjects);
+
+	useEffect(() => {
 		GridTimesheet.map((timesheet) => {
 			var state = GridTimesheet;
-			console.log(state);
-			console.log(timesheet[timesheet.type].name || timesheet[timesheet.type].title);
+			// console.log(state);
+			// console.log(timesheet[timesheet.type].name || timesheet[timesheet.type].title);
 			state.push({
 				endDate: timesheet.timeEnd,
 				id: timesheet._id,
 				startDate: timesheet.timeStart,
-				title: timesheet[timesheet.type].name || timesheet[timesheet.type].title
-			})
+				title: timesheet[timesheet.type].name || timesheet[timesheet.type].title,
+			});
 			setSchedulerData(state);
-		})
-	},[])
+		});
+	}, []);
 
-	const handleAppoitment = () => {
-		setAppoitmentDialog(!appoitmentDialog);
+	const handleChangeDate = async (e) => setDatesTypes({ ...datesType, [e.target.name]: e.target.value });
+	const handleAppoitment = () => setAppoitmentDialog(!appoitmentDialog);
+	const handleViewSwitcher = (e) => setViewName(e.target.value);
+
+	const handleBlurDate = async (e) => {
+		try {
+			var res = await fetch(`/api/timesheet/appointments/filter`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ timeStart: { $gte: datesType.dtStartType }, timeEnd: { $lte: datesType.dtEndType } }),
+			});
+
+			if (res.status !== 200) throw "Erro ao buscar os apontamentos!";
+
+			const { appointments, appointmentsObjects } = await res.json();
+
+			var newObjects = baseAppointmentObjects;
+			appointmentsObjects.map((value) => !newObjects.filter((valueFilter) => valueFilter._id == value._id) && newObjects.push(value));
+			setBaseAppointmentObjects(newObjects);
+
+			if (Array.from(appointments).length > 0) {
+				setBaseDataChartType(appointments);
+				setDataChartType(appointments);
+			} else {
+				setBaseDataChartType([]);
+				setDataChartType([]);
+			}
+		} catch (e) {
+			enqueueSnackbar("Erro ao buscar os apontamentos", { variant: "error" });
+			console.log(e);
+		}
 	};
 
-	const handleViewSwitcher = (e) => {
-		setViewName(e.target.value);
-	};
-	const handleRadioChart = (e) => {
-		setRadioChart(e.target.value);
-	};
+	const handleSelect = (e) => {
+		var selecteds = e.target.value;
 
-	const handleOnChange = (event) => {
-		setState({...state, [event.target.name]: event.target.value});
-	}
+		switch (e.target.name) {
+			case "selectType":
+				if (selecteds.includes("Todos") || selecteds.length == 0) {
+					setDataChartType(baseDataChartType);
+				} else {
+					setDataChartType(filterObjectsChart(baseDataChartType, selecteds, "byType"));
+				}
+
+				setSelectType(selecteds);
+				break;
+
+			default:
+				break;
+		}
+	};
 
 	const handleEditScheduler = ({ added, changed, deleted }) => {
 		let data = schedulerData;
@@ -195,7 +231,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 							</Tooltip>
 						</Grid>
 						<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
-							<ViewState defaultCurrentDate={Date.now()}  currentViewName={viewName} />
+							<ViewState defaultCurrentDate={Date.now()} currentViewName={viewName} />
 							<EditingState onCommitChanges={handleEditScheduler} />
 							<IntegratedEditing />
 							<Toolbar />
@@ -208,7 +244,6 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 							<DateNavigator />
 							<Appointments appointmentComponent={appointmentComponent} />
 							<AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
-
 							<DragDropProvider />
 						</Scheduler>
 					</CardPanel>
@@ -222,26 +257,30 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 										<Grid container spacing={1} direction="row" justify="flex-start" alignItems="flex-end" xs={12} style={{ marginBottom: "4px" }}>
 											<Grid item xs={12} md={6}>
 												<TextField
-													id="timeStart"
-													name="timeStart"
+													name="dtStartType"
 													type="date"
 													fullWidth
 													label="Início"
 													InputLabelProps={{
 														shrink: true,
 													}}
+													value={datesType.dtStartType}
+													onChange={handleChangeDate}
+													onBlur={handleBlurDate}
 												></TextField>
 											</Grid>
 											<Grid item xs={12} md={6}>
 												<TextField
-													id="timeEnd"
-													name="timeEnd"
+													name="dtEndType"
 													type="date"
 													fullWidth
 													label="Fim"
 													InputLabelProps={{
 														shrink: true,
 													}}
+													value={datesType.dtEndType}
+													onChange={handleChangeDate}
+													onBlur={handleBlurDate}
 												></TextField>
 											</Grid>
 										</Grid>
@@ -249,21 +288,37 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 									<Grid item xs={12} md={6}>
 										<Grid container spacing={1} direction="row" justify="flex-end" alignItems="flex-end" xs={12}>
 											<Grid item xs={10} md={8}>
-												<FormControl fullWidth margin="normal">
-													<InputLabel id="demo-simple-select-helper-label">Filtro Tipo</InputLabel>
-													<Select labelId="demo-simple-select-label" id="demo-simple-select">
-														<MenuItem value={10}>Todos</MenuItem>
-														<MenuItem value={10}>Projeto tal</MenuItem>
-														<MenuItem value={20}>Melhoria x</MenuItem>
+												<FormControl fullWidth className={classes.formControl}>
+													<InputLabel id="demo-mutiple-chip-label">Origem</InputLabel>
+													<Select
+														labelId="demo-mutiple-chip-label"
+														id="demo-mutiple-chip"
+														name="selectType"
+														multiple
+														value={selectType}
+														onChange={handleSelect}
+														input={<Input id="select-multiple-chip" />}
+														renderValue={(selected) => (
+															<div className={classes.chips}>
+																{selected.map((value) => (
+																	<Chip key={value} label={value} color="primary" className={classes.chip} />
+																))}
+															</div>
+														)}
+													>
+														<MenuItem id="todos" key="todos" value="Todos">
+															Todos
+														</MenuItem>
+														{baseAppointmentObjects?.map((value) => (
+															<MenuItem id={value._id} key={value._id} value={`${value.number} - ${value.name}`}>
+																{`${value.number} - ${value.name}`}
+															</MenuItem>
+														))}
 													</Select>
 												</FormControl>
 											</Grid>
 											<Grid item xs={1}>
-												<Tooltip title={"Exportar Relatório"}>
-													<IconButton style={{ color: "grey" }}>
-														<FontAwesomeIcon icon={faFileExport} />
-													</IconButton>
-												</Tooltip>
+												<BtnExportExcel apiData={convertToAppointmentType(dataChartType)} fileName={`HorasPorTipo_${new Date().toISOString()}`} />
 											</Grid>
 										</Grid>
 									</Grid>
@@ -271,29 +326,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 							</Grid>
 
 							<Grid item xs={12} style={{ marginTop: "15px" }}>
-								<Chart data={chartData}>
-									<Palette scheme={chartPallete} />
-									<ValueScale name="month" />
-
-									<ArgumentAxis />
-									<ValueAxis scaleName="month" />
-
-									<BarSeries name="Melhoria 1" valueField="melhoria1" argumentField="month" scaleName="month" />
-									<BarSeries name="Melhoria 2" valueField="melhoria2" argumentField="month" scaleName="month" />
-									<BarSeries name="Projeto 1" valueField="projeto1" argumentField="month" scaleName="month" />
-									<BarSeries name="Chamado 1" valueField="chamado1" argumentField="month" scaleName="month" />
-									<BarSeries name="Projeto 2" valueField="projeto2" argumentField="month" scaleName="month" />
-									<BarSeries name="Projeto 3" valueField="projeto3" argumentField="month" scaleName="month" />
-
-									<LineSeries name="Meta Mês" valueField="total" argumentField="month" scaleName="month" color="green" />
-
-									<Stack stacks={[{ series: ["Melhoria 1", "Melhoria 2", "Projeto 1", "Chamado 1", "Projeto 2", "Projeto 3"] }]} />
-
-									<EventTracker />
-									<TooltipChart />
-									<Animation />
-									<Legend />
-								</Chart>
+								<CustomChartType dataChart={dataChartType} baseAppointmentObjects={baseAppointmentObjects} />
 							</Grid>
 						</Grid>
 					</CardPanel>
@@ -305,12 +338,24 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 }
 
 export async function getServerSideProps(context) {
-	const data = await new StatusClass().getAll();
-	const timesheetClass = new TimesheetClass();
+	//START CHART
+	const timesheetClass = new TimeSheetClass();
+	var dtStart = new Date();
+	var dtEnd = new Date();
+	dtStart.setDate(dtStart.getDate() - 20);
 
+	const appointmentsData = await timesheetClass.getAppoitments({ timeStart: { $gte: dtStart }, timeEnd: { $lte: dtEnd } });
+	const appointmentObjects = await timesheetClass.getAppoitmentObjects({ timeStart: { $gte: dtStart }, timeEnd: { $lte: dtEnd } });
+
+	dtStart = moment(dtStart).format("YYYY-MM-DD");
+	dtEnd = moment(dtEnd).format("YYYY-MM-DD");
+
+	//END CHART
+
+	const data = await new StatusClass().getAll();
 	const session = await getSession(context);
-	
+
 	const GridTimesheet = await timesheetClass.getByFilter({ user: session.user._id });
 
-	return { props: { data, GridTimesheet } };
+	return { props: { appointmentsData, appointmentObjects, dtEnd, dtStart, data, GridTimesheet } };
 }

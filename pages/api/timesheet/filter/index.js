@@ -1,6 +1,6 @@
 import nc from "next-connect";
-import { all } from "../../../middlewares";
-import TimeSheetClass from "../../../classes/TimeSheetClass";
+import { all } from "../../../../middlewares";
+import TimeSheetClass from "../../../../classes/TimeSheetClass";
 
 const timesheetClass = new TimeSheetClass();
 const handler = nc().use(all);

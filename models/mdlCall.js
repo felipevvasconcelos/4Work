@@ -1,4 +1,5 @@
 "use strict";
+import { ObjectId } from "bson";
 import mongoose from "mongoose";
 var autoIncrement = require("mongoose-auto-number");
 
@@ -11,10 +12,27 @@ const CallModel = new mongoose.Schema({
 	dateCreate: { type: Date, default: Date.now },
 	dateModified: { type: Date, default: Date.now },
 	deadline: { type: Date, required: true, default: Date.now },
-	user: { 
-		type: mongoose.Schema.Types.ObjectId, 
-		required: true, 
-		ref: "User" 
+	treatments: [
+		{
+			description: { type: String, required: true, trim: true },
+			dateCreate: { type: Date, default: Date.now },
+			dateModified: { type: Date, default: Date.now },
+			userCreate: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+				required: true,
+			},
+			userModified: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+				required: true,
+			},
+		},
+	],
+	user: {
+		type: mongoose.Schema.Types.ObjectId,
+		required: true,
+		ref: "User",
 	},
 	userCreate: {
 		type: mongoose.Schema.Types.ObjectId,
