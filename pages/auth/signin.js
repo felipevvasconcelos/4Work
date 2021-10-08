@@ -94,20 +94,17 @@ export default function SignIn({ providers, csrfToken, error }) {
 
 	if (error) enqueueSnackbar("Credenciais Inválidas", { variant: "error" });
 
-	console.log(providers);
-
 	return (
 		<Grid container component="main">
 			<Container maxWidth="xs" className={classes.paper}>
 				<Image alt="Logo" src="/images/logo.png" width={350} height={100} />
 
 				<div className={classes.section1}>
-					<form className={classes.form} action="/api/auth/callback/credentials" method="POST">
+					<form className={classes.form} action="/api/auth/signin/email" method="POST">
 						<input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-						<TextField required variant="outlined" margin="normal" fullWidth label="E-mail" name="username" type="email" autoComplete="email" autoFocus />
-						<TextField required variant="outlined" margin="normal" fullWidth name="password" label="Senha" type="password" autoComplete="current-password" />
+						<TextField required variant="outlined" margin="normal" fullWidth label="E-mail" name="email" type="email" id="email" autoComplete="email" autoFocus />
 						<FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Lembrar-me" />
-						<Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+						<Button startIcon={<FontAwesomeIcon icon={faEnvelope} />} type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
 							Entrar
 						</Button>
 					</form>
@@ -117,9 +114,7 @@ export default function SignIn({ providers, csrfToken, error }) {
 
 				<Grid container justify="center" className={classes.section2}>
 					{Object.values(providers).map((provider) => {
-						if (provider.name === "Credenciais") {
-							return;
-						}
+						if (provider.name === "Credenciais" || provider.name === "Email") return;
 
 						var colorButton = "";
 						var icon = "";
