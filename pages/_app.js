@@ -4,17 +4,17 @@ import Head from "next/head";
 import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import theme from "../src/theme";
-import { Provider } from "next-auth/client";
+import { Provider } from "next-auth/dist/client";
 import { Slide } from "@material-ui/core";
 import { SnackbarProvider } from "notistack";
 import { ConfirmDialog } from "../components";
-import PermissionClass from '../classes/PermissionClass';
+import PermissionClass from "../classes/PermissionClass";
 //import '../styles/global.css';
 
-import { AtuhenticationContextProvider } from '../Context/AuthenticationContextAPI';
-import { PermissionViewContextProvider } from '../Context/PermissionViewContext';
-import { ControllerNotifyContextProvider } from '../Context/ControllerNotifyContext';
-import { TimesheetContextProvider } from '../Context/TImesheetContext';
+import { AtuhenticationContextProvider } from "../Context/AuthenticationContextAPI";
+import { PermissionViewContextProvider } from "../Context/PermissionViewContext";
+import { ControllerNotifyContextProvider } from "../Context/ControllerNotifyContext";
+import { TimesheetContextProvider } from "../Context/TImesheetContext";
 
 export default function MyApp(props) {
 	const { Component, pageProps, ScreenPermissions } = props;
@@ -70,7 +70,6 @@ export default function MyApp(props) {
 				</PermissionViewContextProvider>
 			</AtuhenticationContextProvider>
 		</ControllerNotifyContextProvider>
-
 	);
 }
 

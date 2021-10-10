@@ -1,39 +1,47 @@
 import NextAuth from "next-auth";
 import Providers from "next-auth/providers";
 import { UserClass, PermissionClass } from "../../../classes";
-import jwt from "next-auth/jwt";
-import md5 from "md5";
+import { createTransport } from "nodemailer";
+import { emailLogin, titleEmailLogin } from "../../../src/templates";
 
-const hash = process.env.MD5HASH;
+const userClass = new UserClass();
+const permissionClass = new PermissionClass();
 
 export default NextAuth({
 	providers: [
-		Providers.Credentials({
-			name: "Credenciais",
-			credentials: {
-				username: { label: "E-mail", type: "text", placeholder: "" },
-				password: { label: "Senha", type: "password" },
-			},
+		// Providers.Credentials({
+		// 	name: "Credenciais",
+		// 	credentials: {
+		// 		username: { label: "E-mail", type: "text", placeholder: "" },
+		// 		password: { label: "Senha", type: "password" },
+		// 	},
 
-			async authorize(credentials) {
-				const user = await new UserClass().getByFilter({ email: credentials.username, password: md5(credentials.password + hash), active: true });
-				const permissionClass = new PermissionClass();
-				const screns = await permissionClass.getAll();
-				const data = {...user[0], screns}
-				if (user) {
-					return Promise.resolve(data);
-				} else {
-					return Promise.resolve(null);
-				}
-			},
-		}),
+		// 	async authorize(credentials) {
+		// 		const user = await userClass.getByFilter({ email: credentials.username, password: md5(credentials.password + hash), active: true });
+		// 		const permissionClass = new PermissionClass();
+		// 		const screns = await permissionClass.getAll();
+		// 		const data = { ...user[0], screns };
+		// 		if (user) {
+		// 			return Promise.resolve(data);
+		// 		} else {
+		// 			return Promise.resolve(null);
+		// 		}
+		// 	},
+		// }),
 		Providers.Email({
 			server: process.env.EMAIL_SERVER,
 			from: process.env.EMAIL_FROM,
-		}),
-		Providers.Facebook({
-			clientId: process.env.FACEBOOK_ID,
-			clientSecret: process.env.FACEBOOK_SECRET,
+			async sendVerificationRequest({ identifier: email, url, provider: { server, from } }) {
+				const { host } = new URL(url);
+				const transport = createTransport(server);
+				await transport.sendMail({
+					to: email,
+					from,
+					subject: `Entrar no ${host}`,
+					text: titleEmailLogin({ url, host }),
+					html: emailLogin({ url, host, email }),
+				});
+			},
 		}),
 		Providers.Google({
 			clientId: process.env.GOOGLE_ID,
@@ -42,22 +50,17 @@ export default NextAuth({
 		//Microsoft
 		Providers.AzureADB2C({
 			name: "Azure Microsoft",
-			clientId: process.env.AZURE_CLIENT_ID,
-			clientSecret: process.env.AZURE_CLIENT_SECRET,
-			scope: "offline_access User.Read",
-			tenantId: process.env.AZURE_TENANT_ID,
+			tenantName: process.env.AZURE_AD_B2C_TENANT_NAME,
+			clientId: process.env.AZURE_AD_B2C_CLIENT_ID,
+			clientSecret: process.env.AZURE_AD_B2C_CLIENT_SECRET,
+			primaryUserFlow: process.env.AZURE_AD_B2C_PRIMARY_USER_FLOW,
+			scope: `offline_access openid User.Read`,
 		}),
-		//OAuth0
-		// Providers.Auth0({
-		// 	name: "Auth0",
-		// 	clientId: process.env.AUTH0_CLIENT_ID,
-		// 	clientSecret: process.env.AUTH0_CLIENT_SECRET,
-		// 	domain: process.env.AUTH0_DOMAIN,
-		// }),
 	],
 	pages: {
 		signIn: "/auth/signin",
 		error: "/auth/signin?error=invalidLogin",
+		verifyRequest: "/auth/verify-request",
 		// newUser: '/login' // If set, new users will be directed here on first sign in
 	},
 	database: process.env.CONNECTION_STRING,
@@ -67,16 +70,27 @@ export default NextAuth({
 		secret: process.env.JWT_SECRET,
 		encryption: true,
 	},
+	debug: true,
 	callbacks: {
-		async signIn(user, account, profile) {
+		async signIn(user, account, profile, isNewUser) {
 			//Valida e-mail que esta tentando logar
-			const res = await fetch(`${process.env.NEXTAUTH_URL}/api/login`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email: profile.username, password: profile.password }),
-			});
+			let email = "";
 
-			if (!res.ok) {
+			switch (account.provider) {
+				case "google":
+					email = profile.email;
+					break;
+				case "azure-ad-b2c":
+					email = profile.mail;
+					break;
+				default:
+					email = profile.email;
+					break;
+			}
+
+			const dbUser = await userClass.getByFilter({ email: email, active: true });
+
+			if (Array.from(dbUser).length <= 0) {
 				return false;
 			}
 		},
@@ -84,19 +98,39 @@ export default NextAuth({
 			session.accessToken = token.accessToken;
 			return session;
 		},
-		jwt: async (token, user, account, profile, isNewUser) => {
+		async redirect({ url, baseUrl }) {
+			return baseUrl;
+		},
+		async jwt(token, user, account, profile, isNewUser) {
 			if (user) {
+				let email = "";
+				switch (account.provider) {
+					case "google":
+						email = profile.email;
+						break;
+					case "azure-ad-b2c":
+						email = profile.mail;
+						break;
+					default:
+						email = profile.email;
+						break;
+				}
+
+				const dbUser = await userClass.getByFilter({ email: email, active: true });
+				const screns = await permissionClass.getAll();
+				user = { ...dbUser[0], screns };
+
 				token.user = {
 					_id: user._id,
 					name: user.name,
 					username: user.email,
 					profile: user.profile,
-					screenPermission: user.screns
+					screenPermission: user.screns,
 				};
 			}
 			return Promise.resolve(token);
 		},
-		session: async (session, user, sessionToken) => {
+		async session(session, user, sessionToken) {
 			session.user = user.user;
 			return Promise.resolve(session);
 		},
