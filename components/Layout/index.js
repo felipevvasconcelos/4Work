@@ -17,7 +17,7 @@ import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import FolderSpecialIcon from "@material-ui/icons/FolderSpecial";
 import LocationCityIcon from "@material-ui/icons/LocationCity";
 import ListTask from "../TaskList/taskList";
-import { signIn, signOut, useSession } from "next-auth/client";
+import { signIn, signOut, useSession } from "next-auth/dist/client";
 import { useRouter } from "next/router";
 import { AccessAlarm, AddAlarm, AlarmOff, AvTimer, Build, BusinessCenter, CallSplit, Cast, Copyright, Dashboard, DeviceHub, ExpandLess, ExpandMore, LockOpen, Notifications, Settings, Style, SupervisedUserCircle, Timeline, WebAsset } from "@material-ui/icons";
 import DeviceHubIcon from "@material-ui/icons/DeviceHub";

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useSnackbar } from "notistack";
 import { Button, Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, TextField, Tooltip, Typography } from "@material-ui/core";
-import { csrfToken, getSession, providers, signIn } from "next-auth/client";
+import { csrfToken, getSession, providers, signIn } from "next-auth/dist/client";
 import { makeStyles } from "@material-ui/core/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faApple, faFacebook, faGoogle, faWindows } from "@fortawesome/free-brands-svg-icons";
