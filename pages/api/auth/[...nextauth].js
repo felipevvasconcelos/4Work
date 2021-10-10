@@ -72,7 +72,6 @@ export default NextAuth({
 	debug: true,
 	callbacks: {
 		async signIn(user, account, profile, isNewUser) {
-			//Valida e-mail que esta tentando logar
 			let email = "";
 
 			switch (account.provider) {
