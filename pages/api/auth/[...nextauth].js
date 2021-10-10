@@ -61,7 +61,6 @@ export default NextAuth({
 		signIn: "/auth/signin",
 		error: "/auth/signin?error=invalidLogin",
 		verifyRequest: "/auth/verify-request",
-		// newUser: '/login' // If set, new users will be directed here on first sign in
 	},
 	database: process.env.CONNECTION_STRING,
 	site: process.env.NEXTAUTH_URL,
