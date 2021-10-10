@@ -21,7 +21,7 @@ import CallClass from "../../classes/CallClass";
 import ProjectClass from "../../classes/ProjectClass";
 import StatusClass from "../../classes/StatusClass";
 import TypeCallClass from "../../classes/TypeCallClass";
-import { useSession } from "next-auth/client";
+import { useSession } from "next-auth/dist/client";
 import dayjs from "dayjs";
 import UserClass from "../../classes/UserClass";
 import moment from "moment";

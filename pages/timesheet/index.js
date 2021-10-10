@@ -3,7 +3,7 @@ import Head from "next/head";
 import { useSnackbar } from "notistack";
 import { StatusClass, TimeSheetClass } from "../../classes";
 import { chartPallete } from "../../styles/pallete";
-import { getSession } from "next-auth/client";
+import { getSession, useSession } from "next-auth/dist/client";
 
 //COMPONENTES
 import { CardPanel, Layout, Loading, siteTittle, AppointmentCompleteDialog, CustomChartType, filterObjectsChart, BtnExportExcel, convertToAppointmentType } from "../../components";
@@ -17,7 +17,6 @@ import { faFileExport } from "@fortawesome/free-solid-svg-icons";
 import { EditingState, IntegratedEditing, ViewState } from "@devexpress/dx-react-scheduler";
 import { Scheduler, WeekView, Appointments, Toolbar, AppointmentTooltip, MonthView, DayView, DragDropProvider, DateNavigator, AppointmentForm } from "@devexpress/dx-react-scheduler-material-ui";
 import { AlarmAdd } from "@material-ui/icons";
-import { useSession } from "next-auth/client";
 import moment from "moment";
 
 const useStyles = makeStyles((theme) => ({

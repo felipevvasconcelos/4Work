@@ -17,7 +17,7 @@ import { Save, ViewList } from "@material-ui/icons";
 import ImprovementClass from '../../classes/ImprovementClass'
 import ProjectClass from '../../classes/ProjectClass'
 import StatusClass from '../../classes/StatusClass'
-import { useSession } from "next-auth/client";
+import { useSession } from "next-auth/dist/client";
 import { useSnackbar } from "notistack";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import UserClass from '../../classes/UserClass';

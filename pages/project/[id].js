@@ -7,7 +7,7 @@ import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { RootRef, ListSubheader, Paper, List, ListItemSecondaryAction, Typography, ListItem, FormControl, ListItemText, MenuItem, Button, Grid, Container, makeStyles, Stepper, Step, StepLabel, StepContent, TextField, Select, InputLabel, ListItemAvatar, Avatar } from "@material-ui/core";
 import { ProjectClass, CompanyClass, StatusClass, UserClass } from "../../classes";
 import { CardPanel, Layout, Loading, siteTittle, TextFieldMask } from "../../components";
-import { useSession } from "next-auth/client";
+import { useSession } from "next-auth/dist/client";
 import moment from "moment";
 import dayjs from "dayjs";
 import { AtuhenticationContext } from "../../Context/AuthenticationContextAPI";
