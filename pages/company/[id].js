@@ -12,6 +12,7 @@ import { Switch } from "@material-ui/core";
 import { Avatar } from "@material-ui/core";
 import { AtuhenticationContext } from "../../Context/AuthenticationContextAPI";
 import { PermissionViewContext } from "../../Context/PermissionViewContext";
+import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
 const validacnpj = /^[0-9]{14}$/;
 
@@ -56,7 +57,7 @@ export default function CompanyById({ data }) {
 	useEffect(() => {
 		const permissionsScren = filterPermissionByScreen("60bc30b6f582fe96a40b729f");
 		if (!Authentication(permissionsScren, permission?.name)) {
-			return router.push("/");
+			return route.push("/");
 		}
 	}, []);
 

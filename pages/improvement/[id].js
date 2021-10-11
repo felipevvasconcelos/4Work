@@ -14,16 +14,16 @@ import { SpeedDial, SpeedDialAction } from "@material-ui/lab";
 import MenuIcon from "@material-ui/icons/Menu";
 import ListIcon from "@material-ui/icons/List";
 import { Save, ViewList } from "@material-ui/icons";
-import ImprovementClass from '../../classes/ImprovementClass'
-import ProjectClass from '../../classes/ProjectClass'
-import StatusClass from '../../classes/StatusClass'
+import ImprovementClass from "../../classes/ImprovementClass";
+import ProjectClass from "../../classes/ProjectClass";
+import StatusClass from "../../classes/StatusClass";
 import { useSession } from "next-auth/dist/client";
 import { useSnackbar } from "notistack";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import UserClass from '../../classes/UserClass';
+import UserClass from "../../classes/UserClass";
 import { Person } from "@material-ui/icons";
 
-import { RootRef, ListSubheader, Paper, List, ListItemSecondaryAction, Typography, ListItem, FormControl, ListItemText, Stepper, Step, StepLabel, StepContent,ListItemAvatar, Avatar } from "@material-ui/core";
+import { RootRef, ListSubheader, Paper, List, ListItemSecondaryAction, Typography, ListItem, FormControl, ListItemText, Stepper, Step, StepLabel, StepContent, ListItemAvatar, Avatar } from "@material-ui/core";
 
 function formaterHour(value) {
 	var strValue = value.toString();
@@ -67,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 export default function ImprovementById({ Improvement, projects, status, users }) {
-
 	const route = useRouter();
 	const classes = useStyles();
 	const { enqueueSnackbar } = useSnackbar();
@@ -81,27 +80,30 @@ export default function ImprovementById({ Improvement, projects, status, users }
 	const [session] = useSession();
 	const [stateAllUsers, setStateAllUsers] = React.useState(users);
 
-	useEffect(() =>{
-		let data = {...state, 
+	useEffect(() => {
+		let data = {
+			...state,
 			userModified: {
 				_id: session?.user._id,
-				name: session?.user.name
+				name: session?.user.name,
 			},
 			dateCreate: Date.now(),
 			dateStart: Date.now(),
-			dateModified: Date.now()
+			dateModified: Date.now(),
 		};
-		if(!state._id){
-			data = {...data, userCreate: {
-				_id: session?.user._id,
-				name: session?.user.name
-			}}
-		}
-		else{
-			data = {...data, project: Improvement.project._id, status: Improvement.status._id, dateEnd: Date.now(), dateModified: Date.now()}
+		if (!state._id) {
+			data = {
+				...data,
+				userCreate: {
+					_id: session?.user._id,
+					name: session?.user.name,
+				},
+			};
+		} else {
+			data = { ...data, project: Improvement.project._id, status: Improvement.status._id, dateEnd: Date.now(), dateModified: Date.now() };
 		}
 		setState(data);
-	},[session])
+	}, [session]);
 
 	const handleSelectChange = (event) => {
 		setAge(event.target.value);
@@ -136,14 +138,14 @@ export default function ImprovementById({ Improvement, projects, status, users }
 			} else {
 				const newList = state.users.filter((_, idx) => idx !== source.index);
 				newList.splice(destination.index, 0, state.users[source.index]);
-				setState({...state, users: newList});
+				setState({ ...state, users: newList });
 			}
 		} else {
 			if (source.droppableId === "allUsers") {
 				setStateAllUsers(stateAllUsers.filter((_, idx) => idx !== source.index));
-				setState({...state, users: [...state.users, Object.assign({ hours: "", sumPricebyHours: "" }, stateAllUsers[source.index])]})
+				setState({ ...state, users: [...state.users, Object.assign({ hours: "", sumPricebyHours: "" }, stateAllUsers[source.index])] });
 			} else {
-				setState({...state, users: state.users.filter((_, idx) => idx !== source.index)})
+				setState({ ...state, users: state.users.filter((_, idx) => idx !== source.index) });
 				setStateAllUsers([...stateAllUsers, state.users[source.index]]);
 			}
 		}
@@ -154,66 +156,60 @@ export default function ImprovementById({ Improvement, projects, status, users }
 	const handleSubmit = async (event) => {
 		event.preventDefault(event);
 
-		if(!ImprovementForm.current.checkValidity()){
+		if (!ImprovementForm.current.checkValidity()) {
 			enqueueSnackbar("Preencha todos os campos obrigatórios nesta etapa", { variant: "error" });
 			return;
 		}
 
-		if(!state.description){
+		if (!state.description) {
 			enqueueSnackbar("Prencha a Descrição ou Salve ela!", { variant: "error" });
 			return;
 		}
 		setLoading(true);
 
-		try{
+		try {
 			const configFetch = (method) => {
-				return({
+				return {
 					method,
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(state)
-				})
-			}
-			console.log(state)
-			var res = await fetch(
-				`/api/improvement${route.query.id !== "new" ? "/" + route.query.id : ""}`, 
-				configFetch(route.query.id === "new" ? "POST" : "PUT")
-			);
-			if(res.status === 200){
+					body: JSON.stringify(state),
+				};
+			};
+			console.log(state);
+			var res = await fetch(`/api/improvement${route.query.id !== "new" ? "/" + route.query.id : ""}`, configFetch(route.query.id === "new" ? "POST" : "PUT"));
+			if (res.status === 200) {
 				enqueueSnackbar("Chamada Realizada!", { variant: "success" });
-				route.push("/improvement")
-			}
-			else{
+				route.push("/improvement");
+			} else {
 				console.log(await res.json());
 				enqueueSnackbar("Erro salvar o chamado, contate um administrador do sistema", { variant: "error" });
 			}
-		}
-		catch(error){
+		} catch (error) {
 			console.log(error);
 			enqueueSnackbar(error, { variant: "error" });
-		}
-		finally{
+		} finally {
 			setLoading(false);
 		}
 	};
 
-	useEffect(() =>{
-		if(state.users.length !== 0){
+	useEffect(() => {
+		if (state.users.length !== 0) {
 			let AvailableUsers = users;
 			let IncludeUsersArray = [];
-			state.users.map(_id => {
+			state.users.map((_id) => {
 				stateAllUsers.map((User, index) => {
-					if(User._id === _id){
+					if (User._id === _id) {
 						IncludeUsersArray.push(User);
 						AvailableUsers.splice(index, 1);
 					}
-				})
-			})
-			setState({...state, users: IncludeUsersArray})
+				});
+			});
+			setState({ ...state, users: IncludeUsersArray });
 			setStateAllUsers(AvailableUsers);
 			console.log(IncludeUsersArray, "Includes");
 			console.log(state, "Includes");
 		}
-	},[])
+	}, []);
 
 	return (
 		<Layout>
@@ -230,112 +226,40 @@ export default function ImprovementById({ Improvement, projects, status, users }
 									<h3 style={{ marginBottom: "-30px" }}>Informações Principais</h3>
 								</Grid>
 								<Grid item xs={12} md={6}>
-									<TextField 
-										id="tittleCall" 
-										margin="normal" 
-										required 
-										fullWidth 
-										label="Título Chamado" 
-										name="title"
-										value={state.title}
-										onChange={handleChange}
-									/>
+									<TextField id="tittleCall" margin="normal" required fullWidth label="Título Chamado" name="title" value={state.title} onChange={handleChange} />
 								</Grid>
 								<Grid item xs={12} md={3} container alignContent="flex-end">
 									{/* Pegar da tabela de status */}
 									<FormControl fullWidth margin="normal">
 										<InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
-										<Select 
-											labelId="demo-simple-select-label" 
-											id="demo-simple-select" 
-											required 
-											name="status"
-											value={state.status}
-											onChange={handleChange}
-										>
-											{
-												status.map((stats) => (
-													<MenuItem value={stats._id}>{stats.name}</MenuItem>
-												))
-											}
+										<Select labelId="demo-simple-select-label" id="demo-simple-select" required name="status" value={state.status} onChange={handleChange}>
+											{status.map((stats) => (
+												<MenuItem value={stats._id}>{stats.name}</MenuItem>
+											))}
 										</Select>
 									</FormControl>
 								</Grid>
 								<Grid item xs={12} md={3} container alignContent="flex-end">
-									<TextField 
-										margin="normal"
-										fullWidth 
-										label="Número"
-										disabled 
-										value="1111"
-										name="improvementNumber"
-										value={state.improvementNumber}
-										onChange={handleChange}
-									/>
+									<TextField margin="normal" fullWidth label="Número" disabled value="1111" name="improvementNumber" value={state.improvementNumber} onChange={handleChange} />
 								</Grid>
 							</Grid>
 
 							<Grid container spacing={3} alignContent="flex-end">
 								<Grid item xs={12} md={3}>
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
-										<KeyboardDatePicker 
-											fullWidth 
-											id="date-picker-inline"
-											required 
-											disabled 
-											disableToolbar 
-											variant="inline" 
-											format="dd/MM/yyyy" 
-											margin="normal" 
-											label="Criado em" 
-											KeyboardButtonProps={{ "aria-label": "change date" }} 
-											name="dateCreate"
-											value={state.dateCreate} 
-											onChange={handleChange} 
-										/>
+										<KeyboardDatePicker fullWidth id="date-picker-inline" required disabled disableToolbar variant="inline" format="dd/MM/yyyy" margin="normal" label="Criado em" KeyboardButtonProps={{ "aria-label": "change date" }} name="dateCreate" value={state.dateCreate} onChange={handleChange} />
 									</MuiPickersUtilsProvider>
 								</Grid>
 								<Grid item xs={12} md={3}>
-									<TextField 
-										margin="normal"
-										fullWidth
-										label="Criado por"
-										required 
-										value={state.userCreate.name}
-										disabled
-										name="userCreate"
-									/>
+									<TextField margin="normal" fullWidth label="Criado por" required value={state.userCreate.name} disabled name="userCreate" />
 								</Grid>
 								<Grid item xs={12} md={3}>
 									<MuiPickersUtilsProvider utils={DateFnsUtils}>
-										<KeyboardDatePicker 
-											fullWidth 
-											id="date-picker-inline"
-											required 
-											disabled 
-											disableToolbar 
-											variant="inline" 
-											format="dd/MM/yyyy" 
-											margin="normal" 
-											label="Modificado em" 
-											KeyboardButtonProps={{ "aria-label": "change date" }} 
-											name="dateModified" 
-											value={state.dateModified} 
-											onChange={handleChange} 
-										/>
+										<KeyboardDatePicker fullWidth id="date-picker-inline" required disabled disableToolbar variant="inline" format="dd/MM/yyyy" margin="normal" label="Modificado em" KeyboardButtonProps={{ "aria-label": "change date" }} name="dateModified" value={state.dateModified} onChange={handleChange} />
 									</MuiPickersUtilsProvider>
 								</Grid>
 								<Grid item xs={12} md={3}>
-									<TextField 
-										margin="normal"
-										fullWidth 
-										label="Modificado por"
-										required 
-										disabled 
-										name="userModified" 
-										value={state.userModified.name} 
-										onChange={handleChange}  
-									/>
+									<TextField margin="normal" fullWidth label="Modificado por" required disabled name="userModified" value={state.userModified.name} onChange={handleChange} />
 								</Grid>
 							</Grid>
 
@@ -343,41 +267,21 @@ export default function ImprovementById({ Improvement, projects, status, users }
 								<Grid item xs={12} md={3} container alignContent="flex-end">
 									<FormControl fullWidth margin="normal">
 										<InputLabel id="demo-simple-select-helper-label">Projeto</InputLabel>
-										<Select 
-											labelId="demo-simple-select-label"
-											required 
-											id="demo-simple-select"
-											name="project"
-											value={state.project} 
-											onChange={handleChange}  
-										>
-											{
-												projects.map((project) => (
-													<MenuItem value={project._id}>{project.name}</MenuItem>
-												))
-											}
+										<Select labelId="demo-simple-select-label" required id="demo-simple-select" name="project" value={state.project} onChange={handleChange}>
+											{projects.map((project) => (
+												<MenuItem value={project._id}>{project.name}</MenuItem>
+											))}
 										</Select>
 									</FormControl>
 								</Grid>
 								<Grid item xs={12} md={3} container alignContent="flex-end">
-									<TextFieldMask 
-										required 
-										id="hoursInteraction"
-										name="hoursInteraction"
-										margin="normal"
-										fullWidth 
-										label="Horas Estimadas"
-										format={formaterHour}
-										name="hoursDevelopment"
-										value={state.hoursDevelopment} 
-										onChange={handleChange}
-									/>
+									<TextFieldMask required id="hoursInteraction" name="hoursInteraction" margin="normal" fullWidth label="Horas Estimadas" format={formaterHour} name="hoursDevelopment" value={state.hoursDevelopment} onChange={handleChange} />
 								</Grid>
 								<Grid item xs={12} style={{ minHeight: "200px" }}>
 									<Grid item xs={12}>
-										<h3 style={{ marginBottom: "-10px" }}>Pessoas</h3>
+										<h3 style={{ marginBottom: "10px" }}>Rescuros para Melhoria</h3>
 									</Grid>
-									
+
 									<Grid xs={12} md={12} className={classes.padding}>
 										<Grid container spacing={3} direction="row" justifyContent="space-between" xs={12}>
 											<DragDropContext onDragEnd={handleOnDragEnd}>
@@ -387,21 +291,20 @@ export default function ImprovementById({ Improvement, projects, status, users }
 															<RootRef rootRef={provided.innerRef}>
 																<Paper className={classes.paper} elevation={1}>
 																	<List subheader={<ListSubheader>Usuários</ListSubheader>} className={classes.list}>
-																		{
-																		stateAllUsers.map((u, index) => (
+																		{stateAllUsers.map((u, index) => (
 																			<Draggable key={u._id} draggableId={u._id} index={index}>
 																				{(provided) => (
 																					<ListItem className={classes.listItem} key={u._id} role={undefined} dense button ContainerComponent="li" ContainerProps={{ ref: provided.innerRef }} {...provided.draggableProps} {...provided.dragHandleProps}>
 																						<ListItemAvatar>
-																							{u.logo.image ? (
-																								<Avatar src={u.logo.image} />
+																							{u?.logo?.image ? (
+																								<Avatar src={u?.logo?.image} />
 																							) : (
 																								<Avatar>
 																									<Person />
 																								</Avatar>
 																							)}
 																						</ListItemAvatar>
-																						<ListItemText primary={u.name} secondary={u.position.name} />
+																						<ListItemText primary={u?.name} secondary={u?.position?.name} />
 																						<ListItemSecondaryAction></ListItemSecondaryAction>
 																					</ListItem>
 																				)}
@@ -453,19 +356,12 @@ export default function ImprovementById({ Improvement, projects, status, users }
 											</DragDropContext>
 										</Grid>
 									</Grid>
-
 								</Grid>
 								<Grid item xs={12} style={{ minHeight: "200px" }}>
 									<Grid item xs={12}>
 										<h3 style={{ marginBottom: "-10px" }}>Solicitação</h3>
 									</Grid>
-									<MUIRichTextEditor 
-										name="description"
-										onSave={handleChangeDescriptionForm} 
-										required
-										value={state.description}
-										label="Descreva sua solicitação aqui..."
-									/>
+									<MUIRichTextEditor name="description" onSave={handleChangeDescriptionForm} required value={state.description} label="Descreva sua solicitação aqui..." />
 								</Grid>
 							</Grid>
 							<Hidden smDown>
@@ -493,8 +389,8 @@ export default function ImprovementById({ Improvement, projects, status, users }
 	);
 }
 
-export async function getServerSideProps(context){
-	try{
+export async function getServerSideProps(context) {
+	try {
 		const improvementClass = new ImprovementClass();
 		const projectClass = new ProjectClass();
 		const statusClass = new StatusClass();
@@ -504,30 +400,35 @@ export async function getServerSideProps(context){
 		const status = await statusClass.getByFilter({ module: "Melhorias" });
 		const users = await userClass.getAll();
 
-		if(context.query.id !== "new"){
+		if (context.query.id !== "new") {
 			const data = await improvementClass.get(context.query.id);
-			return {props: { Improvement: data, projects, status, users }}
+			return { props: { Improvement: data, projects, status, users } };
+		} else {
+			return {
+				props: {
+					Improvement: {
+						_id: null,
+						title: "",
+						improvementNumber: 0,
+						description: "",
+						hoursDevelopment: "",
+						dateStart: Date.now(),
+						dateEnd: null,
+						dateCreate: Date.now(),
+						dateModified: Date.now(),
+						users: [],
+						userCreate: {},
+						userModified: "",
+						project: "",
+						status: "",
+					},
+					projects,
+					status,
+					users,
+				},
+			};
 		}
-		else{
-			return { props: { Improvement: {
-				_id: null,
-				title: "",
-				improvementNumber: 0,
-				description: "",
-				hoursDevelopment: "",
-				dateStart: Date.now(),
-				dateEnd: null,
-				dateCreate: Date.now(),
-				dateModified: Date.now(),
-				users: [],
-				userCreate: {},
-				userModified: "",
-				project: "",
-				status: ""
-			}, projects, status, users }} 
-		}
-	}
-	catch(error){
+	} catch (error) {
 		return { notFound: true };
 	}
 }

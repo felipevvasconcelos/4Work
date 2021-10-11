@@ -318,7 +318,7 @@ export async function getServerSideProps(context) {
 	var timesheetClass = new TimeSheetClass();
 	var dtStart = new Date();
 	var dtEnd = new Date();
-	dtStart.setDate(dtStart.getDate() - 20);
+	dtStart.setDate(dtStart.getDate() - 50);
 
 	const appointmentsData = await timesheetClass.getAppoitments({ timeStart: { $gte: dtStart }, timeEnd: { $lte: dtEnd } });
 	const appointmentObjects = await timesheetClass.getAppoitmentObjects({ timeStart: { $gte: dtStart }, timeEnd: { $lte: dtEnd } });
