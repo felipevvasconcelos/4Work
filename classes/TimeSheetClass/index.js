@@ -27,16 +27,14 @@ export default class TimeSheetClass {
 		return jsonify(
 			await TimeSheet.findByIdAndUpdate(data._id, {
 				$set: {
+					timeStart: data.timeStart,
 					description: data.description,
-					date: data.date,
-					user: data.user,
+					type: data.type,
 					project: data.project,
 					improvement: data.improvement,
 					call: data.call,
-					hourStart1: data.hourStart1,
-					hourEnd1: data.hourEnd1,
-					hourStart2: data.hourStart2,
-					hourEnd2: data.hourEnd2,
+					user: data.user,
+					timeEnd: data.timeEnd
 				},
 			})
 		);

@@ -23,7 +23,7 @@ handler.get(async (req, res) => {
 handler.put(async (req, res) => {
 	try {
 		const result = req.body;
-
+		console.log(result)
 		const resultUpdated = await timesheetClass.update(result);
 
 		if (resultUpdated) {

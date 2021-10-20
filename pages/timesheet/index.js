@@ -4,6 +4,7 @@ import { useSnackbar } from "notistack";
 import { StatusClass, TimeSheetClass } from "../../classes";
 import { chartPallete } from "../../styles/pallete";
 import { getSession, useSession } from "next-auth/dist/client";
+import { TimesheetContext } from '../../Context/TImesheetContext';
 
 //COMPONENTES
 import { CardPanel, Layout, Loading, siteTittle, AppointmentCompleteDialog, CustomChartType, filterObjectsChart, BtnExportExcel, convertToAppointmentType } from "../../components";
@@ -145,6 +146,32 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 	const handleAppoitment = () => setAppoitmentDialog(!appoitmentDialog);
 	const handleViewSwitcher = (e) => setViewName(e.target.value);
 
+	const { validateTimesheet } = useContext(TimesheetContext);
+
+	const handleGestingAppointment = async (element) => {
+		// console.log(element.id);
+		// const isValidUpdate = await validateTimesheet({
+		// 	timeStart: element?.startDate || null,
+		// 	timeEnd: element?.endDate || null,
+		// 	_id: element?.id || null
+		// });
+		// if(isValidUpdate.success){
+			console.log("Tentou Atualizar")
+			await fetch(`api/timesheet/${element.id}`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: {
+					_id: element.id,
+			 		timeStart: element.startDate,
+					timeEnd: element.endDate
+				}
+			})
+		// }
+		// else {
+		// 	enqueueSnackbar("Verifique o Apontamento de horas!", { variant: "error" });
+		// }
+	}
+
 	const handleBlurDate = async (e) => {
 		try {
 			var res = await fetch(`/api/timesheet/appointments/filter`, {
@@ -231,7 +258,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 						</Grid>
 						<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
 							<ViewState defaultCurrentDate={Date.now()} currentViewName={viewName} />
-							<EditingState onCommitChanges={handleEditScheduler} />
+							<EditingState onCommitChanges={handleEditScheduler} onEditingAppointmentChange={handleGestingAppointment} />
 							<IntegratedEditing />
 							<Toolbar />
 
