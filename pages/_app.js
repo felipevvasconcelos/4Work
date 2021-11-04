@@ -43,8 +43,8 @@ export default function MyApp(props) {
 	}, []);
 
 	return (
-		<ControllerNotifyContextProvider>
-			<AtuhenticationContextProvider>
+		<AtuhenticationContextProvider>
+			<ControllerNotifyContextProvider>
 				<PermissionViewContextProvider>
 					<TimesheetContextProvider>
 						<React.Fragment>
@@ -68,8 +68,8 @@ export default function MyApp(props) {
 						</React.Fragment>
 					</TimesheetContextProvider>
 				</PermissionViewContextProvider>
-			</AtuhenticationContextProvider>
-		</ControllerNotifyContextProvider>
+			</ControllerNotifyContextProvider>
+		</AtuhenticationContextProvider>
 	);
 }
 
