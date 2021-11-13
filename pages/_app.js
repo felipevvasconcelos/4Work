@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import Head from "next/head";
 import { ThemeProvider } from "@material-ui/core/styles";
@@ -13,7 +13,7 @@ import PermissionClass from "../classes/PermissionClass";
 
 import { AtuhenticationContextProvider } from "../Context/AuthenticationContextAPI";
 import { PermissionViewContextProvider } from "../Context/PermissionViewContext";
-import { ControllerNotifyContextProvider } from "../Context/ControllerNotifyContext";
+import { ControllerNotifyContextProvider, ControllerNotifyContext } from "../Context/ControllerNotifyContext";
 import { TimesheetContextProvider } from "../Context/TImesheetContext";
 
 export default function MyApp(props) {
@@ -25,6 +25,8 @@ export default function MyApp(props) {
 		fncDialog: function () {},
 		paramsFncDialog: {}, //OBJECT PARA RECEBER MAIS DE UM PARAMETRO SE NECESSÁRIO
 	});
+
+	const { SenderNotify } = useContext(ControllerNotifyContext);
 
 	const handleConfirmDialogOpen = (title, message, fncConfirm, paramsFnc) => {
 		setConfirmDialog({ openDialog: true, dialogTitle: title, dialogMessage: message, fncDialog: fncConfirm, paramsFncDialog: paramsFnc });

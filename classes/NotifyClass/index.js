@@ -6,16 +6,17 @@ export default class NotifyClass {
 
     async getMyNotificationsPending(id){
         await dbConnect();
-        return await jsonify(Notify.find({ filter: { ready: false, "users.user": id } }))
+        return await Notify.find({ ready: false, users: id });
     }
 
     async getNotify(id, count){
         await dbConnect();
-        return await jsonify(Notify.find({ filter: { ready: true, "users.user": id } }).limit(count))
+        const res = await Notify.find({ filter: { ready: true, users: id } }).limit(count)
+        return res;
     }
 
     async getNotifyById(id){
-        return await jsonify(Notify.find({ filter: { _id: id } }).limit(1))
+        return await Notify.find({ filter: { _id: id } }).limit(1)
     }
 
     async saveNotify(notifyData){

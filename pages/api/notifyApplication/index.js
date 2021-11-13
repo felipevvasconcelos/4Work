@@ -26,11 +26,11 @@ handler.get(async (req, res) => {
 
 handler.post(async (req, res) => {
     try {
-        res.status(201).json({ success: false, error })
         const body = req.body;
         const notify = new NotifyClass();
 
         const not = await notify.saveNotify(body);
+
 
         if (not) {
 			res.status(200).json(not);
@@ -39,7 +39,7 @@ handler.post(async (req, res) => {
 		}
     }
     catch (error){
-        res.status(201).json({ success: false, error })
+        res.status(201).json({ success: false, error: error.message })
     }
 });
 

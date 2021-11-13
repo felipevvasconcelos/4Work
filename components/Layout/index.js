@@ -250,6 +250,24 @@ export default function Layout(props) {
 					</Link>
 				</ListItem>
 			</Hidden>
+			<button
+				onClick={ async () => {
+					const resnotify = await fetch(`/api/notifyApplication`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+						title: "Notificação Teste",
+						description: "Essa notificação é um teste",
+						users: "610960dfd75dcfe2800fce37",
+						type: "Projeto",
+						ready: false,
+						date: Date.now()
+						})
+					});
+					const responseteste = await resnotify.json();
+					SenderNotify(responseteste._id, []);
+				}}
+			>Notificação</button>
 			{/* <List> */}
 			{/* <Link href="/dashboard">
 					<ListItem disabled button onClick={() => handleLoading("/dashboard")}>

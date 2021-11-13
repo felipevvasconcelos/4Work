@@ -4,20 +4,24 @@ import NotifyClass from '../../../classes/NotifyClass'
 
 const handler = nc().use(all);
 
-handler.get(async (req, res) => {
+handler.post(async (req, res) => {
     try{
-        const { id } = req.query;
+        const { id } = req.body;
         const notify = new NotifyClass();
 
-        const notifications = await notify.getNotifyById(id);
+        var notifications = await notify.getMyNotificationsPending(id);
+        if(notifications.length < 5){
+            notifications.push(...(await notify.getNotify(id, notifications.length - 5)));
+        }
         if(notifications){
+            
             res.status(200).json(notifications);
 		} else {
 			res.status(404).end();
 		}
     }
     catch (error){
-        res.status(500).json({ success: false })
+        res.status(500).json({ success: false, error: error.message })
     }
 })
 

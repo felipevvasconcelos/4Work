@@ -258,7 +258,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 						</Grid>
 						<Scheduler data={schedulerData} locale="pt-BR" onAppointmentFormOpening>
 							<ViewState defaultCurrentDate={Date.now()} currentViewName={viewName} />
-							<EditingState onCommitChanges={handleEditScheduler} onEditingAppointmentChange={handleGestingAppointment} />
+							<EditingState onCommitChanges={handleEditScheduler} />
 							<IntegratedEditing />
 							<Toolbar />
 

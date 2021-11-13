@@ -11,6 +11,7 @@ export function ControllerNotifyContextProvider({children}){
   const { userData } = useContext(AtuhenticationContext);
 
   const [notifications, setNotifications] = useState([]);
+  const [loading, setloading] = useState(false);
 
   const socket = io("http://localhost:3333", {
     transports: ["websocket", "polling"]
@@ -22,31 +23,20 @@ export function ControllerNotifyContextProvider({children}){
 
 
   useEffect(() => {
-    getNotifications();
-  }, []);
+    if(userData && !loading){
+      getNotifications();
+    }
+  }, [userData]);
 
   const getNotifications = async () => {
-    // const notify = await fetch("/api/notifyApplication", {
-    //   method: "GET",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ id: userData._id }),
-    // });
-
-    // setNotifications(notify);
-    const resnotify = await fetch(`/api/notifyApplication`, {
+    const notify = await fetch("/api/notifyApplication/filter", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: "Notificação Teste",
-        description: "Essa notificação é um teste",
-        users: "610960dfd75dcfe2800fce37",
-        type: "Projeto",
-        ready: false,
-        date: Date.now()
-      })
+      body: JSON.stringify({ id: userData._id }),
     });
-    //console.log(resnotify);
-    console.log(await resnotify.json())
+
+    setNotifications(await notify.json());
+    setloading(true);
   }
 
   function SenderNotify(_id, users){
@@ -57,23 +47,22 @@ export function ControllerNotifyContextProvider({children}){
   }
 
   socket.on("NotifySend", async (_id) => {
-    const notify = await fetch(`/api/notifyApplication/${_id}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
-
-    setNotifications({ ...notifications, notify });
+    // const notify = await fetch(`/api/notifyApplication/${_id}`, {
+    //   method: "GET",
+    //   headers: { "Content-Type": "application/json" }
+    // });
+    console.log("New notify: " + _id);
+    // setNotifications({ ...notifications, ...(await notify.json()) });
   });
 
   useEffect(() => {
     console.log(notifications);
-
   }, [notifications])
 
   return(
     <ControllerNotifyContext.Provider
       value={{
-        // SenderNotify
+        SenderNotify
       }}
     >
       {children}
