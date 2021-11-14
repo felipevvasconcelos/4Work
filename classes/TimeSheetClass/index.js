@@ -26,16 +26,7 @@ export default class TimeSheetClass {
 		await dbConnect();
 		return jsonify(
 			await TimeSheet.findByIdAndUpdate(data._id, {
-				$set: {
-					timeStart: data.timeStart,
-					description: data.description,
-					type: data.type,
-					project: data.project,
-					improvement: data.improvement,
-					call: data.call,
-					user: data.user,
-					timeEnd: data.timeEnd
-				},
+				$set: data,
 			})
 		);
 	}

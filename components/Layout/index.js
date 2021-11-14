@@ -28,6 +28,7 @@ import { PermissionViewContext } from "../../Context/PermissionViewContext";
 import { Authentication } from "../../middlewares/AuthenticationRoutes";
 
 import { ControllerNotifyContext } from "../../Context/ControllerNotifyContext";
+import { TimesheetContext } from "../../Context/TImesheetContext";
 
 // //ISSO AQUI SERVE PARA GERAR AS PAGINAS ESTATICAS
 // //FAZENDO ASSIM UMA REQUISIÇÃO INSTATANEA
@@ -163,6 +164,8 @@ export default function Layout(props) {
 	const [appoitmentDialogVisible, setAppoitmentDialogVisible] = React.useState(false);
 	const [notifications, setNotifications] = React.useState(false);
 
+	const { openTimesheet } = useContext(TimesheetContext);
+
 	const handleLoading = (e) => {
 		e != router.pathname && setLoadingComponent(!loadingComponent);
 	};
@@ -250,7 +253,7 @@ export default function Layout(props) {
 					</Link>
 				</ListItem>
 			</Hidden>
-			<button
+			{/* <button
 				onClick={ async () => {
 					const resnotify = await fetch(`/api/notifyApplication`, {
 						method: "POST",
@@ -267,7 +270,7 @@ export default function Layout(props) {
 					const responseteste = await resnotify.json();
 					SenderNotify(responseteste._id, []);
 				}}
-			>Notificação</button>
+			>Notificação</button> */}
 			{/* <List> */}
 			{/* <Link href="/dashboard">
 					<ListItem disabled button onClick={() => handleLoading("/dashboard")}>
@@ -414,19 +417,22 @@ export default function Layout(props) {
 									</IconButton>
 								</Tooltip>
 
-								{appoitmentDialogVisible ? (
-									<Tooltip title={"Iniciar Apontamento"}>
-										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
-											<AddAlarm />
-										</IconButton>
-									</Tooltip>
-								) : (
-									<Tooltip title={"Pausar Apontamento"}>
-										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
-											<AlarmOff />
-										</IconButton>
-									</Tooltip>
-								)}
+								{
+									openTimesheet ? (
+										<Tooltip title={"Pausar Apontamento"}>
+											<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+												<AlarmOff />
+											</IconButton>
+										</Tooltip>
+									) : 
+									(
+										<Tooltip title={"Iniciar Apontamento"}>
+											<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+												<AddAlarm />
+											</IconButton>
+										</Tooltip>
+									)
+								}
 
 								<IconButton onClick={handleDrawerTasksToggle} style={{ color: "white" }}>
 									<AccountCircle />
@@ -441,19 +447,19 @@ export default function Layout(props) {
 									</IconButton>
 								</Tooltip>
 
-								{appoitmentDialogVisible ? (
-									<Tooltip title={"Iniciar Apontamento"}>
-										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
-											<AddAlarm />
-										</IconButton>
-									</Tooltip>
-								) : (
+								{/* {openTimesheet ? (
 									<Tooltip title={"Pausar Apontamento"}>
 										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
 											<AlarmOff />
 										</IconButton>
 									</Tooltip>
-								)}
+								) : (
+									<Tooltip title={"Iniciar Apontamento"}>
+										<IconButton onClick={handleAppoitment} style={{ color: "white" }}>
+											<AddAlarm />
+										</IconButton>
+									</Tooltip>
+								)} */}
 
 								<IconButton onClick={handleDrawerTasksMobileToggle} style={{ color: "white" }}>
 									<AccountCircle />

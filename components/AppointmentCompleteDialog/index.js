@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { FormControlLabel, Switch, Collapse, Select, Slide, TextField, MenuItem, Grid, InputLabel, Dialog, DialogTitle, DialogContent, Button, FormControl, makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
-import { Close, Save } from "@material-ui/icons";
+import { Close, Edit, Save } from "@material-ui/icons";
 import { useSnackbar } from "notistack";
 import { ObjectId } from "mongoose";
 import { TimesheetContext } from '../../Context/TImesheetContext';
 import { AtuhenticationContext } from '../../Context/AuthenticationContextAPI';
+import dayjs from "dayjs";
 
 const useStyles = makeStyles({
 	btn: {
@@ -23,12 +24,13 @@ const appointment = {
 	user: "",
 };
 
-export default function AppointmentCompleteDialog({ open, session, closeFunction }) {
+export default function AppointmentCompleteDialog({ open, session, closeFunction, onEdit }) {
 	const classes = useStyles();
 	const { enqueueSnackbar } = useSnackbar();
 
 	const [collpase, setCollpase] = useState(false);
 	const [appointmentState, setAppointmentState] = useState({...appointment, user: session.user._id});
+	const [appointmentType, setAppointmentType] = useState("");
 
 	const [selectsData, setSelectsData] = useState([]);
 	const appointmentForm = useRef(null);
@@ -58,6 +60,17 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 			})
 		}
 	}
+
+	useEffect(() =>{
+		if(onEdit){
+			setAppointmentState({appointmentState, ...onEdit})
+			setCollpase(true);
+		}
+	},[onEdit])
+
+	useEffect(() =>{
+		setAppointmentType(appointmentState[appointmentState.type]);
+	},[selectsData])
 
 	async function handleSelectonChange(type){
 		if(QuerrySelects[type]){
@@ -136,17 +149,28 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 				throw validate.message;
 			}
 
-			const res = await fetch("/api/timesheet", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(appointmentState),
-			});
-			console.log(await res.json())
+			if(onEdit){
+				var res = await fetch(`/api/timesheet/${appointmentState.id}`, {
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(appointmentState),
+				});
+			}
+			else{
+				var res = await fetch("/api/timesheet", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(appointmentState),
+				});
+			}
+
 			if(res.status == 200){
 				enqueueSnackbar("Horas cadastradas!", { variant: "success" });
 			}
-			// method !== "save" && handleCancel();
-			// handleClearFields();
+
+			onEdit && handleCancel();
+			method === "SaveAndClose" && handleCancel();
+			handleClearFields();
 		} catch (e) {
 			enqueueSnackbar(e, { variant: "error" });
 		}
@@ -154,6 +178,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 
 	const handleClearFields = () => {
 		setAppointmentState(appointment);
+		setCollpase(false);
 	}
 
 	return (
@@ -181,7 +206,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 										type="datetime-local"
 										fullWidth
 										label="Início"
-										value={appointmentState.timeStart}
+										value={appointmentState.timeStart ? dayjs(appointmentState.timeStart).format('YYYY-MM-DDTHH:hh:mm') : null}
 										onChange={handleChangeAppointment}
 										InputLabelProps={{
 											shrink: true,
@@ -197,7 +222,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 										type="datetime-local"
 										fullWidth
 										label="Fim"
-										value={appointmentState.timeEnd}
+										value={appointmentState.timeEnd ? dayjs(appointmentState.timeEnd).format('YYYY-MM-DDTHH:hh:mm') : null}
 										onChange={handleChangeAppointment}
 										InputLabelProps={{
 											shrink: true,
@@ -241,7 +266,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 									<Select 
 										id={appointmentState.type} 
 										name={appointmentState.type} 
-										value={appointmentState[appointment.type]} 
+										value={ appointmentState[appointmentState.type]?._id || appointmentState[appointmentState.type] } 
 										fullWidth 
 										onChange={handleChangeAppointment}
 										required

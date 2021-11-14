@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 import { useSnackbar } from "notistack";
 import { FormControlLabel, Switch, Collapse, Select, Slide, TextField, MenuItem, Grid, InputLabel, Dialog, DialogTitle, DialogContent, Button, FormControl, makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import { TimesheetContext } from "../../Context/TImesheetContext";
+import dayjs from "dayjs";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
 	return <Slide direction="left" ref={ref} {...props} />;
@@ -35,7 +36,7 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 
 	const [checkboxImediate, setCheckboxImediate] = useState(false);
 
-	const { openTimesheet } = useContext(TimesheetContext);
+	const { openTimesheet, timesheet } = useContext(TimesheetContext);
 
 	const [appointmentState, setAppointmentState] = useState(appointment);
 	const [collpase, setCollpase] = useState(false);
@@ -89,6 +90,10 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 		}
 	}, [appointmentState.type]);
 
+	useEffect(() =>{
+		setAppointmentState({...timesheet, timeStart: null});
+	},[openTimesheet])
+
 	useEffect(() => {
 		switch (appointmentState.type) {
 			case "project":
@@ -112,6 +117,19 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 	}, [session]);
 
 	const handleChangeAppointment = (e) => {
+
+		if(e.target.name === 'timeStart'){
+			if(appointmentState?.timeStart){
+				let hours = appointmentState.timeStart.split(':');
+				const dateAppointment = dayjs().hour(hours[0]).minute(hours[1]).unix();
+				
+				setAppointmentState({...appointmentState,  timeStart: dateAppointment });
+			}
+			else{
+				setAppointmentState({...appointmentState, timeStart: dayjs().unix() });
+			}
+		}
+
 		setAppointmentState({ ...appointmentState, [e.target.name]: e.target.value });
 
 		if (e.target.name === "type") {
@@ -128,6 +146,7 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 	};
 	async function handleSubmit(e) {
 		e.preventDefault(e);
+
 		try {
 			if (!timesheetForm.current.checkValidity()) {
 				enqueueSnackbar("Preencha todos os campos!", { variant: "error" });
@@ -151,15 +170,29 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 					break;
 			}
 
+			let res;
+			
 			if (openTimesheet) {
-				throw "Timesheet em andamento!";
-			}
+				let dateAppointment;
+				if(appointmentState.timeStart){
+					let hours = appointmentState.timeStart.split(':');
+					dateAppointment = dayjs().hour(hours[0]).minute(hours[1]).unix();
+				}
 
-			const res = await fetch("/api/timesheet", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(appointmentState),
-			});
+				const dataupdate = ({...appointmentState, timeEnd: appointmentState.timeStart ? dateAppointment : dayjs(), timeStart: timesheet.timeStart})
+				res = await fetch(`api/timesheet/${appointmentState._id}`, {
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(dataupdate)
+				})
+			}
+			else{
+				res = await fetch("/api/timesheet", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(appointmentState),
+				});
+			}
 
 			console.log(await res.json());
 
@@ -197,7 +230,7 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 										<TextField
 											id="timeStart"
 											name="timeStart"
-											value={appointmentState.timeStart}
+											// value={appointmentState.timeStart}
 											onChange={handleChangeAppointment}
 											type="time"
 											fullWidth

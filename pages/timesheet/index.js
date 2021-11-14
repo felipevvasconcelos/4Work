@@ -126,6 +126,8 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 	const [dataChartType, setDataChartType] = useState(appointmentsData);
 	const [baseDataChartType, setBaseDataChartType] = useState(appointmentsData);
 	const [baseAppointmentObjects, setBaseAppointmentObjects] = useState(appointmentObjects);
+	const [editAppotinmentState, setEditAppotinmentState] = useState({});
+	const [modalEditAppotiment, setModalEditAppotiment] = useState(false);
 
 	useEffect(() => {
 		GridTimesheet.map((timesheet) => {
@@ -144,6 +146,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 
 	const handleChangeDate = async (e) => setDatesTypes({ ...datesType, [e.target.name]: e.target.value });
 	const handleAppoitment = () => setAppoitmentDialog(!appoitmentDialog);
+	const handleAppoitmentEdit = () => setModalEditAppotiment(!modalEditAppotiment);
 	const handleViewSwitcher = (e) => setViewName(e.target.value);
 
 	const { validateTimesheet } = useContext(TimesheetContext);
@@ -160,16 +163,23 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 			await fetch(`api/timesheet/${element.id}`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
-				body: {
+				body: JSON.stringify({
 					_id: element.id,
 			 		timeStart: element.startDate,
 					timeEnd: element.endDate
-				}
+				})
 			})
 		// }
 		// else {
 		// 	enqueueSnackbar("Verifique o Apontamento de horas!", { variant: "error" });
 		// }
+	}
+
+	const hanldeDeletedAppotinment = async (element) => {
+		await fetch(`api/timesheet/${element.id}`, {
+			method: "DELETE",
+			headers: { "Content-Type": "application/json" }
+		})
 	}
 
 	const handleBlurDate = async (e) => {
@@ -229,11 +239,20 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 		}
 
 		if (changed) {
-			data = data.map((appointment) => (changed[appointment.id] ? { ...appointment, ...changed[appointment.id] } : appointment));
+			data = data.map((appointment) => {
+				changed[appointment.id] && handleGestingAppointment({
+					...changed[appointment.id],
+					id: appointment.id
+				});
+				return changed[appointment.id] ? { ...appointment, ...changed[appointment.id] } : appointment
+			})
 		}
 
 		if (deleted !== undefined) {
-			data = data.filter((appointment) => appointment.id !== deleted);
+			data = data.filter((appointment) => {
+				appointment.id === deleted && hanldeDeletedAppotinment({ id: appointment.id });
+				return appointment.id !== deleted
+			})
 		}
 
 		setSchedulerData(data);
@@ -270,6 +289,13 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 							<DateNavigator />
 							<Appointments appointmentComponent={appointmentComponent} />
 							<AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
+							<AppointmentForm readOnly visible={false} onAppointmentDataChange={(appointment) => {
+								console.log(GridTimesheet);
+									GridTimesheet.map((timesheet) => {
+										timesheet._id === appointment.id && setEditAppotinmentState(timesheet)
+									})
+									handleAppoitmentEdit();
+								}} />
 							<DragDropProvider />
 						</Scheduler>
 					</CardPanel>
@@ -359,6 +385,7 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 				</Grid>
 			</Grid>
 			<AppointmentCompleteDialog open={appoitmentDialog} session={session} closeFunction={handleAppoitment}></AppointmentCompleteDialog>
+			<AppointmentCompleteDialog open={modalEditAppotiment} session={session} onEdit={editAppotinmentState} closeFunction={handleAppoitmentEdit}></AppointmentCompleteDialog>
 		</Layout>
 	);
 }

@@ -8,24 +8,30 @@ export const TimesheetContext = createContext({});
 export function TimesheetContextProvider({children}){
   const { userData } = useContext(AtuhenticationContext);
   const [ openTimesheet, setOpenTimesheet ] = useState(false);
+  const [ timesheet, setTimesheet ] = useState({});
 
   async function TimesheetIsOpen(){
 
-    const data = { filter: { user: userData._id, timeEnd: null } }
+    const data = { user: userData._id, timeEnd: null }
 
     const timesheet = await fetch('/api/timesheet/filter', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     })
-    
-    await timesheet.json() && setOpenTimesheet(true);
-    console.log(openTimesheet);
+    const response = await timesheet.json();
+
+    if(response.length > 0){
+      setTimesheet(response[0]);
+      setOpenTimesheet(true);
+    }
   }
 
   useEffect(() =>{
-    TimesheetIsOpen()
-  },[])
+    if(userData?._id){
+      TimesheetIsOpen()
+    }
+  },[openTimesheet, userData])
 
   const validateTimesheet = async (timesheet) => {
 
@@ -52,7 +58,8 @@ export function TimesheetContextProvider({children}){
     <TimesheetContext.Provider
       value={{
         openTimesheet,
-        validateTimesheet
+        validateTimesheet,
+        timesheet
       }}
     >
       {children}
