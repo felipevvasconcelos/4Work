@@ -24,7 +24,7 @@ const appointment = {
 	user: "",
 };
 
-export default function AppointmentCompleteDialog({ open, session, closeFunction, onEdit }) {
+export default function AppointmentCompleteDialog({ open, session, closeFunction, onEdit, saveStateAppointment }) {
 	const classes = useStyles();
 	const { enqueueSnackbar } = useSnackbar();
 
@@ -66,6 +66,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 			setAppointmentState({appointmentState, ...onEdit})
 			setCollpase(true);
 		}
+		console.log(onEdit, "teste");
 	},[onEdit])
 
 	useEffect(() =>{
@@ -121,6 +122,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 	};
 
 	async function handleSubmit(e, method) {
+		console.log("Submit");
 		e.preventDefault(e);
 		setAppointmentState({...appointmentState, user: userData._id});
 		try {
@@ -148,7 +150,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 			if(!validate.success){
 				throw validate.message;
 			}
-
+			console.log(onEdit);
 			if(onEdit){
 				var res = await fetch(`/api/timesheet/${appointmentState.id}`, {
 					method: "PUT",
@@ -157,6 +159,7 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 				});
 			}
 			else{
+				console.log("INSERIR");
 				var res = await fetch("/api/timesheet", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -167,6 +170,8 @@ export default function AppointmentCompleteDialog({ open, session, closeFunction
 			if(res.status == 200){
 				enqueueSnackbar("Horas cadastradas!", { variant: "success" });
 			}
+
+			saveStateAppointment();
 
 			onEdit && handleCancel();
 			method === "SaveAndClose" && handleCancel();

@@ -151,6 +151,32 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 
 	const { validateTimesheet } = useContext(TimesheetContext);
 
+	const handleCahngeStateAppointment = async () => {
+		const data = { user: session.user._id }
+
+		const timesheet = await fetch('/api/timesheet/filter', {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data)
+		});
+
+		let response = await timesheet.json();
+		var state = response;
+			// console.log(state);
+			// console.log(timesheet[timesheet.type].name || timesheet[timesheet.type].title);
+			response.map((timesheet) => {
+				state.push({
+					endDate: timesheet.timeEnd,
+					id: timesheet._id,
+					startDate: timesheet.timeStart,
+					title: timesheet[timesheet.type].name || timesheet[timesheet.type].title,
+				});
+			})
+			
+		setSchedulerData(response);
+
+	}
+
 	const handleGestingAppointment = async (element) => {
 		// console.log(element.id);
 		// const isValidUpdate = await validateTimesheet({
@@ -290,12 +316,18 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 							<Appointments appointmentComponent={appointmentComponent} />
 							<AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
 							<AppointmentForm readOnly visible={false} onAppointmentDataChange={(appointment) => {
-								console.log(GridTimesheet);
-									GridTimesheet.map((timesheet) => {
-										timesheet._id === appointment.id && setEditAppotinmentState(timesheet)
-									})
-									handleAppoitmentEdit();
-								}} />
+									if(appointment?.id){
+										GridTimesheet.map((timesheet) => {
+											timesheet._id === appointment.id && setEditAppotinmentState(timesheet)
+										})
+										handleAppoitmentEdit();
+									}
+									else{
+										handleAppoitment();
+									}
+									
+								}} 
+							/>
 							<DragDropProvider />
 						</Scheduler>
 					</CardPanel>
@@ -384,8 +416,8 @@ export default function Timesheet({ data, handleConfirmDialogOpen, handleConfirm
 					</CardPanel>
 				</Grid>
 			</Grid>
-			<AppointmentCompleteDialog open={appoitmentDialog} session={session} closeFunction={handleAppoitment}></AppointmentCompleteDialog>
-			<AppointmentCompleteDialog open={modalEditAppotiment} session={session} onEdit={editAppotinmentState} closeFunction={handleAppoitmentEdit}></AppointmentCompleteDialog>
+			<AppointmentCompleteDialog open={appoitmentDialog} session={session} saveStateAppointment={handleCahngeStateAppointment} closeFunction={handleAppoitment}></AppointmentCompleteDialog>
+			<AppointmentCompleteDialog open={modalEditAppotiment} session={session} saveStateAppointment={handleCahngeStateAppointment} onEdit={editAppotinmentState} closeFunction={handleAppoitmentEdit}></AppointmentCompleteDialog>
 		</Layout>
 	);
 }

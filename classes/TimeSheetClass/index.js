@@ -27,7 +27,7 @@ export default class TimeSheetClass {
 		return jsonify(
 			await TimeSheet.findByIdAndUpdate(data._id, {
 				$set: data,
-			})
+			}).populate("project", "name").populate("call", "title").populate("improvement", "title")
 		);
 	}
 

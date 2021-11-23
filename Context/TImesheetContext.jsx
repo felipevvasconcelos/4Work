@@ -59,7 +59,8 @@ export function TimesheetContextProvider({children}){
       value={{
         openTimesheet,
         validateTimesheet,
-        timesheet
+        timesheet,
+        TimesheetIsOpen
       }}
     >
       {children}

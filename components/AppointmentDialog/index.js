@@ -36,7 +36,7 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 
 	const [checkboxImediate, setCheckboxImediate] = useState(false);
 
-	const { openTimesheet, timesheet } = useContext(TimesheetContext);
+	const { openTimesheet, timesheet, TimesheetIsOpen } = useContext(TimesheetContext);
 
 	const [appointmentState, setAppointmentState] = useState(appointment);
 	const [collpase, setCollpase] = useState(false);
@@ -198,6 +198,7 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 
 			if (res.status == 200) {
 				enqueueSnackbar("Horas cadastradas!", { variant: "success" });
+				TimesheetIsOpen();
 			}
 		} catch (e) {
 			enqueueSnackbar(e.message, { variant: "error" });
@@ -234,7 +235,7 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 											onChange={handleChangeAppointment}
 											type="time"
 											fullWidth
-											label="Início"
+											label={ openTimesheet ? "Final" : "Início"}
 											InputLabelProps={{
 												shrink: true,
 											}}
@@ -281,7 +282,7 @@ export default function AppointmentDialog({ open, session, closeFunction }) {
 							Cancelar
 						</Button>
 						<Button type="submit" className={classes.btn} variant="contained" color="primary" onClick={handleSubmit}>
-							Iniciar
+							{ openTimesheet ? "Fechar" : "Iniciar"}
 						</Button>
 					</Grid>
 				</form>
